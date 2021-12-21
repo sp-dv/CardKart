@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 
 namespace CardKartShared.GameState
 {
@@ -16,7 +17,18 @@ namespace CardKartShared.GameState
         public T Listen()
         {
             ResetEvent.WaitOne();
-            return Payload;
+            var rt = Payload;
+            ResetEvent.Reset();
+            return rt;
+        }
+
+        public T Listen(Func<T, bool> filter)
+        {
+            while (true)
+            {
+                var rt = Listen();
+                if (filter(rt)) { return rt; }
+            }
         }
     }
 }

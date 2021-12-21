@@ -28,7 +28,12 @@ namespace CardKartShared.Network
 
         HandshakeMessage,
 
+        StartGameMessage,
+        GameChoiceMessage,
+
         GenericResponse,
+
+        JoinQueueRequest,
     }
 
     public class ByteEncoder

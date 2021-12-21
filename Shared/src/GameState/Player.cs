@@ -8,8 +8,9 @@ namespace CardKartShared.GameState
 {
     public class Player : GameObject
     {
-        public Pile Hand { get; } = new Pile();
-        public Pile Deck { get; } = new Pile();
+        public Pile Hand { get; } = new Pile(PileLocation.Hand);
+        public Pile Deck { get; } = new Pile(PileLocation.Deck);
+        public Pile Battlefield { get; } = new Pile(PileLocation.Battlefield);
 
         public Card Draw()
         {
@@ -19,7 +20,6 @@ namespace CardKartShared.GameState
             Hand.Add(drawnCard);
 
             return drawnCard;
-
         }
     }
 }

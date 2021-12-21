@@ -3,6 +3,7 @@ using CardKartShared.Network.Messages;
 using CardKartShared.Util;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
 namespace CardKartServer
 {
@@ -12,20 +13,56 @@ namespace CardKartServer
 
         public void AddConnection(Connection clientConnection)
         {
-            var client = new Client();
-            client.Connection = clientConnection;
-
+            var client = new Client(clientConnection);
             if (client.Handshake())
             {
                 ConnectedClients.Add(client);
                 Logging.Log(LogLevel.Info, "Client verified.");
+                client.StartListening();
+            }
+        }
+
+        public void RemoveClient(Client client)
+        {
+            ConnectedClients.Remove(client);
+        }
+
+        public void HandleMessage(Client client, RawMessage rawMessage)
+        {
+            switch (rawMessage.MessageType)
+            {
+                case MessageTypes.JoinQueueRequest:
+                    {
+                        var joinQueueRequest = new JoinQueueRequest();
+                        joinQueueRequest.Decode(rawMessage);
+
+                        CardKartServer.GameCoordinator.JoinQueue(client);
+
+                        var response = new GenericResponseMessage();
+                        response.Code = GenericResponseMessage.Codes.OK;
+                        client.Connection.SendMessage(response.Encode());
+                    } break;
+
+                case MessageTypes.GameChoiceMessage:
+                    {
+                        CardKartServer.GameCoordinator.HandleMessage(client, rawMessage);
+                    } break;
             }
         }
     }
 
     internal class Client
     {
-        public Connection Connection;
+        public Connection Connection { get; }
+
+        public Client(Connection connection)
+        {
+            Connection = connection;
+            Connection.Closed += () =>
+            {
+                CardKartServer.ClientHandler.RemoveClient(this);
+            };
+        }
 
         public bool Handshake()
         {
@@ -62,6 +99,18 @@ namespace CardKartServer
                     $"{handshakeMessage.MagicNumber + 1}").Encode());
 
             return true;
+        }
+
+        public void StartListening()
+        {
+            new Thread(() =>
+            {
+                while (true)
+                {
+                    var rawMessage = Connection.ReceiveMessage();
+                    CardKartServer.ClientHandler.HandleMessage(this, rawMessage);
+                }
+            }).Start();
         }
 
     }

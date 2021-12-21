@@ -1,5 +1,4 @@
 ﻿using CardKartClient.GUI;
-using CardKartShared.Network.Messages;
 using CardKartShared.Util;
 
 namespace CardKartClient
@@ -8,6 +7,7 @@ namespace CardKartClient
     {
         public static GUIController GUI;
         public static Brainframe Controller;
+        public static ServerConnection Server;
 
         static void Main(string[] args)
         {
@@ -16,12 +16,8 @@ namespace CardKartClient
                 Logging.AddConsoleLogger();
             }
 
-            var connection = Constants.DebugServer.Connect();
-            connection.SendMessage(new HandshakeMessage(Constants.Version, 16).Encode());
-            var responseRaw = connection.ReceiveMessage();
-            var response = new GenericResponseMessage();
-            response.Decode(responseRaw);
-            int i = 4;
+            Server = new ServerConnection();
+            Server.Connect();
 
             GUI = new GUIController();
 

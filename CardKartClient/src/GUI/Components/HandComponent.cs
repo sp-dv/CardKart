@@ -16,6 +16,7 @@ namespace CardKartClient.GUI.Components
 
         private Pile Hand;
         private List<CardComponent> CardComponents = new List<CardComponent>();
+        private object CardComponentsLock = new object();
 
         public delegate void CardClickedHandler(CardComponent cardComponent);
         public event CardClickedHandler CardClicked;
@@ -33,30 +34,36 @@ namespace CardKartClient.GUI.Components
 
         private void Layout()
         {
-            var cards = Hand.ToArray();
-
-            CardComponents.Clear();
-
-            for (int i = 0; i < cards.Length; i++)
+            lock (CardComponentsLock)
             {
-                var card = cards[i];
-                var cardComponent = new CardComponent(card);
-                CardComponents.Add(cardComponent);
+                var cards = Hand.ToArray();
 
-                cardComponent.X = X + i * cardComponent.Width;
-                cardComponent.Y = Y + PaddingY;
+                CardComponents.Clear();
+
+                for (int i = 0; i < cards.Length; i++)
+                {
+                    var card = cards[i];
+                    var cardComponent = new CardComponent(card);
+                    CardComponents.Add(cardComponent);
+
+                    cardComponent.X = X + i * cardComponent.Width;
+                    cardComponent.Y = Y + PaddingY;
+                }
             }
         }
 
         public override void Draw(DrawAdapter drawAdapter)
         {
-            if (CardComponents == null) { return; }
-
-            drawAdapter.FillRectange(X, Y, X + Width, Y + Height, Color.SaddleBrown);
-
-            foreach (var cardComponent in CardComponents)
+            lock (CardComponentsLock)
             {
-                cardComponent.Draw(drawAdapter);
+                if (CardComponents == null) { return; }
+
+                drawAdapter.FillRectange(X, Y, X + Width, Y + Height, Color.SaddleBrown);
+
+                foreach (var cardComponent in CardComponents)
+                {
+                    cardComponent.Draw(drawAdapter);
+                }
             }
         }
 

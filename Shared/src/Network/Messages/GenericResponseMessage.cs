@@ -3,7 +3,7 @@
     public class GenericResponseMessage : Message
     {
         public Codes Code;
-        public string Info;
+        public string Info = "";
 
         public GenericResponseMessage()
         {

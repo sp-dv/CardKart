@@ -8,29 +8,49 @@ namespace CardKartShared.GameState
 {
     public class GameState
     {
-        private uint IDCounter = 1;
+        private int IDCounter = 1;
         private List<GameObject> GameObjects = new List<GameObject>();
         private List<Card> Cards = new List<Card>();
 
-        public Player PlayerA { get; private set; }
-        public Player PlayerB { get; private set; }
+        public Player Player1 { get; private set; }
+        public Player Player2 { get; private set; }
+        public Player ActivePlayer { get; private set; }
+        public Player InactivePlayer { get; private set; }
 
         public GameState()
         {
-            PlayerA = new Player();
-            AddGameObject(PlayerA);
+            // And ID of 0 is invalid so just make lookups return null.
+            GameObjects.Add(null);
 
-            PlayerB = new Player();
-            AddGameObject(PlayerB);
+            Player1 = new Player();
+            AddGameObject(Player1);
+
+            Player2 = new Player();
+            AddGameObject(Player2);
+
+            ActivePlayer = Player1;
+            InactivePlayer = Player2;
         }
 
         public void LoadDecks(Deck deckPlayerA, Deck deckPlayerB)
         {
-            PlayerA.Deck.Add(
-                deckPlayerA.CardTemplates.Select(template => CreateCard(template)));
+            Player1.Deck.Add(
+                deckPlayerA.CardTemplates.Select(template => CreateCard(template)).ToArray());
 
-            PlayerB.Deck.Add(
-                deckPlayerB.CardTemplates.Select(template => CreateCard(template)));
+            Player2.Deck.Add(
+                deckPlayerB.CardTemplates.Select(template => CreateCard(template)).ToArray());
+        }
+
+        public GameObject GetByID(int gameID)
+        {
+            return GameObjects[gameID];
+        }
+
+        public void SwapActivePlayer()
+        {
+            var swap = ActivePlayer;
+            ActivePlayer = InactivePlayer;
+            InactivePlayer = swap;
         }
 
         private Card CreateCard(CardTemplates template)

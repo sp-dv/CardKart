@@ -23,6 +23,12 @@ namespace CardKartShared.GameState
         public delegate void PileChangedHandler();
         public event PileChangedHandler PileChanged;
 
+        public Pile(PileLocation location)
+        {
+            Location = location;
+        }
+
+
         /// <summary>
         /// Also removes the card from the pile (if any) the Card is
         /// already in; so no need to do it manually.
@@ -38,12 +44,27 @@ namespace CardKartShared.GameState
                 removeFrom.PileChanged?.Invoke();
             }
 
+            cardToAdd.Pile = this;
             Cards.Add(cardToAdd);
             PileChanged?.Invoke();
         }
 
         public void Add(IEnumerable<Card> cardsToAdd)
         {
+            foreach (var cardToAdd in cardsToAdd)
+            {
+                if (cardToAdd.Pile == this) { return; }
+
+                if (cardToAdd.Pile != null)
+                {
+                    var removeFrom = cardToAdd.Pile;
+                    removeFrom.Cards.Remove(cardToAdd);
+                    removeFrom.PileChanged?.Invoke();
+                }
+
+                cardToAdd.Pile = this;
+            }
+
             Cards.AddRange(cardsToAdd);
             PileChanged?.Invoke();
         }
@@ -61,8 +82,14 @@ namespace CardKartShared.GameState
 
     public enum PileLocation
     {
+        None,
+
         Hand,
         Battlefield,
+        Graveyard,
+        Deck,
+        Stack,
+        Banished,
 
     }
 }

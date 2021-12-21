@@ -1,4 +1,5 @@
 ﻿using CardKartShared.GameState;
+using CardKartShared.Util;
 using SGL;
 using System.Drawing;
 
@@ -17,13 +18,29 @@ namespace CardKartClient.GUI.Components
         private float DefenceInsetY;
         private float DefenceInsetX;
 
+        private Texture PortraitTexture;
+        private Color PaletteColor;
+
         public Card Card;
+
+
 
         public CardComponent(Card card)
         {
             Card = card;
 
             SetScale(1);
+
+            Layout();
+        }
+
+        private void Layout()
+        {
+            if (Card != null)
+            {
+                PortraitTexture = Textures.Portraits(Card.Template);
+                PaletteColor = Constants.PaletteColors(Card.Colour);
+            }
         }
 
         public void SetScale(float scale)
@@ -58,14 +75,14 @@ namespace CardKartClient.GUI.Components
                 X + Width,
                 Y + Height,
                 Textures.Frame1_Monster,
-                Color.PaleVioletRed);
+                PaletteColor);
 
             drawAdapter.DrawSprite(
                 X + ImageInsetX,
                 Y + ImageInsetY,
                 X + ImageInsetX + ImageWidth,
                 Y + ImageInsetY + ImageHeight,
-                Textures.Goblin1);
+                PortraitTexture);
 
             drawAdapter.DrawText(Card.Name, X + NameInsetX, Y + NameInsetY);
 
