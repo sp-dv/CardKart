@@ -25,7 +25,7 @@ namespace CardKartClient.GUI.Components
 
         private void Update()
         {
-            ManaBar.Update(Player.CurrentMana);
+            ManaBar.Update(Player.CurrentMana, Player.MaxMana);
         }
 
         public void Layout()

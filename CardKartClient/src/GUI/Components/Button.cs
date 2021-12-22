@@ -22,10 +22,9 @@ namespace CardKartClient.GUI.Components
             drawAdapter.DrawText(Text, X + 0.02f, Y + Height/2 + 0.02f);
         }
 
-        protected override bool HandleClickInternal(GLCoordinate location)
+        protected override void HandleClickInternal(GLCoordinate location)
         {
             Clicked?.Invoke();
-            return true;
         }
     }
 }

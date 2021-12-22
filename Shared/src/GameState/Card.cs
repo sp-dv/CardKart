@@ -25,6 +25,8 @@ namespace CardKartShared.GameState
 
         public ActiveAbility[] ActiveAbilities;
 
+        public ManaSet CastingCost;
+
         public Card(CardTemplates template)
         {
             Template = template;
@@ -37,12 +39,14 @@ namespace CardKartShared.GameState
                         Name = "Angry Goblin";
                         Type = CardTypes.Monster;
                         Colour = ManaColour.Red;
+                        CastingCost = new ManaSet(
+                            ManaColour.Red);
 
                         Attack = 2;
                         Defence = 1;
 
                         ActiveAbilities = new ActiveAbility[] {
-                            new GenericCreatureCast()
+                            new GenericCreatureCast(),
                         };
                     } break;
 
@@ -51,6 +55,9 @@ namespace CardKartShared.GameState
                         Name = "Armored Zombie";
                         Type = CardTypes.Monster;
                         Colour= ManaColour.Black;
+                        CastingCost = new ManaSet(
+                            ManaColour.Black, 
+                            ManaColour.Black);
 
                         Attack = 1;
                         Defence = 4;
@@ -65,6 +72,15 @@ namespace CardKartShared.GameState
                         Name = "Zap";
                         Type = CardTypes.Instant;
                         Colour = ManaColour.Red;
+                        CastingCost = new ManaSet(
+                            ManaColour.Red,
+                            ManaColour.Colourless,
+                            ManaColour.Colourless
+                            );
+
+                        ActiveAbilities = new ActiveAbility[] {
+                            new ZapCast(),
+                        };
                     } break;
 
                 default:

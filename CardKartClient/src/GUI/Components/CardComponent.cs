@@ -2,6 +2,7 @@
 using CardKartShared.Util;
 using SGL;
 using System.Drawing;
+using System.Linq;
 
 namespace CardKartClient.GUI.Components
 {
@@ -20,10 +21,9 @@ namespace CardKartClient.GUI.Components
 
         private Texture PortraitTexture;
         private Color PaletteColor;
+        private Color[] ManaCostOrbColors;
 
         public Card Card;
-
-
 
         public CardComponent(Card card)
         {
@@ -40,6 +40,9 @@ namespace CardKartClient.GUI.Components
             {
                 PortraitTexture = Textures.Portraits(Card.Template);
                 PaletteColor = Constants.PaletteColor(Card.Colour);
+                ManaCostOrbColors = 
+                    Card.CastingCost.ToColourArray()
+                    .Select(colour => Constants.PaletteColor(colour)).ToArray();
             }
         }
 
@@ -69,13 +72,6 @@ namespace CardKartClient.GUI.Components
 
         protected override void DrawInternal(DrawAdapter drawAdapter)
         {
-            drawAdapter.DrawSprite(
-                X,
-                Y,
-                X + Width,
-                Y + Height,
-                Textures.Frame1_Monster,
-                PaletteColor);
 
             drawAdapter.DrawSprite(
                 X + ImageInsetX,
@@ -83,6 +79,14 @@ namespace CardKartClient.GUI.Components
                 X + ImageInsetX + ImageWidth,
                 Y + ImageInsetY + ImageHeight,
                 PortraitTexture);
+            
+            drawAdapter.DrawSprite(
+                X,
+                Y,
+                X + Width,
+                Y + Height,
+                Textures.Frame1_Monster,
+                PaletteColor);
 
             drawAdapter.DrawText(Card.Name, X + NameInsetX, Y + NameInsetY);
 
@@ -97,6 +101,28 @@ namespace CardKartClient.GUI.Components
                     Card.Defence.ToString(), 
                     X + DefenceInsetX, 
                     Y + DefenceInsetY);
+            }
+
+            var orbX0 = X + Width / 2 + 0.011f + (ManaCostOrbColors.Length * -0.011f);
+            var orbY = Y + 0.207f;
+            var radius = 0.01f;
+
+            for (int i = 0; i < ManaCostOrbColors.Length; i++)
+            {
+                var color = ManaCostOrbColors[i];
+                var orbX = orbX0 + (i * 0.023f);
+
+                drawAdapter.FillCircle(
+                    orbX, 
+                    orbY, 
+                    radius, 
+                    color);
+
+                drawAdapter.DrawCircle(
+                    orbX,
+                    orbY,
+                    radius,
+                    Color.Black);
             }
         }
     }

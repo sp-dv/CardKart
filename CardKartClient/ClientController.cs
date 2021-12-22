@@ -1,9 +1,10 @@
 ﻿using CardKartShared.GameState;
 using CardKartShared.Util;
+using System;
 
 namespace CardKartClient
 {
-    internal class Brainframe
+    internal class ClientController
     {
         public GameController ActiveGame;
 
@@ -43,6 +44,11 @@ namespace CardKartClient
                 null);
             CardKartClient.GUI.ToGame(ActiveGame);
             ActiveGame.Start();
+        }
+
+        public void HandleWindowClosed()
+        {
+            Environment.Exit(0);
         }
     }
 }

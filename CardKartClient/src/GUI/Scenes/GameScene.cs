@@ -12,6 +12,7 @@ namespace CardKartClient.GUI.Scenes
         public BattlefieldComponent HeroBattlefieldPanel;
         public PlayerPanel HeroPanel;
         public BattlefieldComponent VillainBattlefieldPanel;
+        public PlayerPanel VillainPanel;
         public ChooserPanel ChooserPanel;
 
         public GameScene(GameController gameController)
@@ -36,12 +37,16 @@ namespace CardKartClient.GUI.Scenes
             HeroBattlefieldPanel = new BattlefieldComponent(hero.Battlefield);
             HeroBattlefieldPanel.X = -0.3f;
             HeroBattlefieldPanel.Y = -0.2f;
+            HeroBattlefieldPanel.TokenClicked +=
+                token => GameObjectClicked(token);
             Components.Add(HeroBattlefieldPanel);
 
 
             VillainBattlefieldPanel = new BattlefieldComponent(villain.Battlefield);
             VillainBattlefieldPanel.X = -0.3f;
             VillainBattlefieldPanel.Y = 0.4f;
+            VillainBattlefieldPanel.TokenClicked += 
+                token => GameObjectClicked(token);
             Components.Add(VillainBattlefieldPanel);
 
             ChooserPanel = new ChooserPanel(gameController.ChoiceHelper);
@@ -56,6 +61,13 @@ namespace CardKartClient.GUI.Scenes
             HeroPanel.Y = -0.8f;
             HeroPanel.Layout();
             Components.Add(HeroPanel);
+
+            VillainPanel = new PlayerPanel(villain);
+            VillainPanel.X = -0.9f;
+            VillainPanel.Y = 0.6f;
+            VillainPanel.Layout();
+            Components.Add(VillainPanel);
+
         }
 
         private void GameObjectClicked(GameObject gameObject)

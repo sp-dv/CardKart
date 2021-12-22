@@ -37,6 +37,13 @@ namespace CardKartClient.GUI.Components
         protected override void DrawInternal(DrawAdapter drawAdapter)
         {
             drawAdapter.DrawSprite(
+                X + 0.05f,
+                Y + 0.05f,
+                X + 0.15f,
+                Y + 0.18f,
+                PortraitTexture);
+
+            drawAdapter.DrawSprite(
                 X, 
                 Y, 
                 X + Width, 
@@ -44,15 +51,11 @@ namespace CardKartClient.GUI.Components
                 Textures.Token1, 
                 PaletteColor);
 
-            drawAdapter.DrawSprite(
-                X + 0.03f,
-                Y + 0.06f,
-                X + 0.17f,
-                Y + 0.16f,
-                PortraitTexture);
-
-            drawAdapter.DrawText(Card.Attack.ToString(), X + 0.065f, Y + 0.05f);
-            drawAdapter.DrawText(Card.Defence.ToString(), X + 0.125f, Y + 0.05f);
+            if (Card.Token != null)
+            {
+                drawAdapter.DrawText(Card.Token.Attack.ToString(), X + 0.065f, Y + 0.05f);
+                drawAdapter.DrawText(Card.Token.Defence.ToString(), X + 0.125f, Y + 0.05f);
+            }
         }
     }
 }

@@ -32,10 +32,10 @@ namespace CardKartShared.GameState
             InactivePlayer = Player2;
         }
 
-        public void LoadDecks(Deck deckPlayerA, Deck deckPlayerB)
+        public void LoadDecks(Deck deckPlayer1, Deck deckPlayer2)
         {
             Player1.Deck.Add(
-                deckPlayerA.CardTemplates.Select(template => CreateCard(template)).ToArray());
+                deckPlayer1.CardTemplates.Select(template => CreateCard(template)).ToArray());
             foreach (var card in Player1.Deck)
             {
                 card.Owner = Player1;
@@ -43,7 +43,7 @@ namespace CardKartShared.GameState
 
 
             Player2.Deck.Add(
-                deckPlayerB.CardTemplates.Select(template => CreateCard(template)).ToArray());
+                deckPlayer2.CardTemplates.Select(template => CreateCard(template)).ToArray());
             foreach (var card in Player2.Deck)
             {
                 card.Owner = Player2;
@@ -62,6 +62,61 @@ namespace CardKartShared.GameState
             InactivePlayer = swap;
         }
 
+        #region Triggering 
+
+        public void DrawCards(Player player, int cardCount)
+        {
+            for (int i = 0; i < cardCount; i++)
+            {
+                if (player.Deck.Count == 0) { return; }
+                var drawnCard = player.Deck[player.Deck.Count - 1];
+                player.Hand.Add(drawnCard);
+            }
+        }
+
+        public void UseActiveAbility(AbilityCastingContext context)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ResetMana(Player player)
+        {
+            player.CurrentMana.CopyValues(player.MaxMana);
+            player.NotifyOfChange();
+        }
+
+        public void GainMana(Player player, ManaColour colour)
+        {
+            player.MaxMana.IncrementColour(colour);
+        }
+
+        public void SpendMana(Player player, ManaSet spentMana)
+        {
+            player.CurrentMana.Subtract(spentMana);
+            player.NotifyOfChange();
+        }
+
+        public void MoveCard(Card card, Pile pile)
+        {
+            card.Token = null;
+
+            if (pile.Location == PileLocation.Battlefield)
+            {
+                CreateToken(card);
+            }
+
+            pile.Add(card);
+        }
+
+        public void DealDamage(Card source, Card target, int amount)
+        {
+            if (amount <= 0) { return; }
+
+            target.Token.Damage += amount;
+        }
+
+        #endregion
+
         private Card CreateCard(CardTemplates template)
         {
             var card = new Card(template);
@@ -69,6 +124,14 @@ namespace CardKartShared.GameState
             Cards.Add(card);
 
             return card;
+        }
+
+        private void CreateToken(Card card)
+        {
+            var token = new Token();
+            token.TokenOf = card;
+            card.Token = token;
+            AddGameObject(token);
         }
 
         private void AddGameObject(GameObject newObject)

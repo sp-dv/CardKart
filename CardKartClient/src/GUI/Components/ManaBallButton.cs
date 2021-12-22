@@ -34,7 +34,11 @@ namespace CardKartClient.GUI.Components
             
             if (Text != null)
             {
-                drawAdapter.DrawText(Text, X + 0.022f, Y + 0.045f);
+                // Single digit
+                //drawAdapter.DrawText(Text, X + 0.022f, Y + 0.045f);
+
+                // X/Y format
+                drawAdapter.DrawText(Text, X + 0.012f, Y + 0.045f);
             }
         }
     }

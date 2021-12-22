@@ -13,27 +13,15 @@ namespace CardKartShared.GameState
         public Pile Battlefield { get; } = new Pile(PileLocation.Battlefield);
         public Pile Graveyard { get; } = new Pile(PileLocation.Graveyard);
 
-        public ManaSet CurrentMana { get; private set; } = new ManaSet();
+        public ManaSet CurrentMana { get; } = new ManaSet();
         public ManaSet MaxMana { get; } = new ManaSet();
 
         public delegate void PlayerChangedHandler();
         public event PlayerChangedHandler PlayerChanged;
 
-        public Card Draw()
+        public void NotifyOfChange()
         {
-            if (Deck.Count == 0) { return null; }
-
-            var drawnCard = Deck[Deck.Count - 1];
-            Hand.Add(drawnCard);
-
-            return drawnCard;
-        }
-
-        public void ResetMana()
-        {
-            CurrentMana = new ManaSet(MaxMana);
             PlayerChanged?.Invoke();
         }
-
     }
 }

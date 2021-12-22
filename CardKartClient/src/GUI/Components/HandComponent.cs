@@ -67,18 +67,15 @@ namespace CardKartClient.GUI.Components
             }
         }
 
-        protected override bool HandleClickInternal(GLCoordinate location)
+        protected override void HandleClickInternal(GLCoordinate location)
         {
             foreach (var cardComponent in CardComponents)
             {
                 if (cardComponent.ComponentRectangleContains(location))
                 {
                     CardClicked?.Invoke(cardComponent);
-                    return true;
                 }
             }
-
-            return false;
         }
     }
 }

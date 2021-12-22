@@ -6,7 +6,7 @@ namespace CardKartClient
     static class CardKartClient
     {
         public static GUIController GUI;
-        public static Brainframe Controller;
+        public static ClientController Controller;
         public static ServerConnection Server;
 
         static void Main(string[] args)
@@ -21,7 +21,7 @@ namespace CardKartClient
 
             GUI = new GUIController();
 
-            Controller = new Brainframe();
+            Controller = new ClientController();
             Controller.Startup();
         }
     }

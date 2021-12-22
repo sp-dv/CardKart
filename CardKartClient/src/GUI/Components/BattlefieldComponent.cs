@@ -14,8 +14,8 @@ namespace CardKartClient.GUI.Components
         private List<TokenComponent> TokenComponents = new List<TokenComponent>();
         private object TokenComponentsLock = new object();
 
-        public delegate void TokenClickedHandler(TokenComponent cardComponent);
-        public event TokenClickedHandler CardClicked;
+        public delegate void TokenClickedHandler(Token token);
+        public event TokenClickedHandler TokenClicked;
 
         public BattlefieldComponent(Pile battlefield)
         {
@@ -63,9 +63,19 @@ namespace CardKartClient.GUI.Components
             }
         }
 
-        protected override bool HandleClickInternal(GLCoordinate location)
+        protected override void HandleClickInternal(GLCoordinate location)
         {
-            return true;
+            lock (TokenComponentsLock)
+            {
+                foreach (var tokenComponent in TokenComponents)
+                {
+                    if (tokenComponent.HandleClick(location))
+                    {
+                        TokenClicked?.Invoke(tokenComponent.Card.Token);
+                        return;
+                    }
+                }
+            }
         }
     }
 }

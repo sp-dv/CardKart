@@ -31,12 +31,13 @@ namespace CardKartClient.GUI
             if (!Visible) { return false; }
             if (!ComponentRectangleContains(location)) { return false; }
 
-            return HandleClickInternal(location);
+            HandleClickInternal(location);
+            return true;
         }
 
-        protected virtual bool HandleClickInternal(GLCoordinate location)
+        protected virtual void HandleClickInternal(GLCoordinate location)
         {
-            return false;
+
         }
 
         public bool ComponentRectangleContains(GLCoordinate location)

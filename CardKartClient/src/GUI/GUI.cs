@@ -27,6 +27,8 @@ namespace CardKartClient.GUI
 
                 Window = new SGLWindow();
                 Window.Load += (_, __) => re.Set();
+                Window.Closed += (_, __) =>
+                    { CardKartClient.Controller.HandleWindowClosed(); };
                 Window.Run(100, 0);
             }).Start();
             re.Wait();
