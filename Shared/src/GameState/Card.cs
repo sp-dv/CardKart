@@ -7,7 +7,9 @@ namespace CardKartShared.GameState
     public class Card : GameObject
     {
         public string Name;
-        
+
+        public bool IsHero => Type == CardTypes.Hero;
+
         public int Attack;
         public int Defence;
 
@@ -16,7 +18,7 @@ namespace CardKartShared.GameState
         public ManaColour Colour;
 
         public Player Owner;
-        public Player Controller;
+        public Player Controller => Owner;
 
         public Pile Pile;
         public PileLocation Location => Pile.Location;
@@ -73,14 +75,22 @@ namespace CardKartShared.GameState
                         Type = CardTypes.Instant;
                         Colour = ManaColour.Red;
                         CastingCost = new ManaSet(
-                            ManaColour.Red,
-                            ManaColour.Colourless,
-                            ManaColour.Colourless
+                            ManaColour.Red
                             );
 
                         ActiveAbilities = new ActiveAbility[] {
                             new ZapCast(),
                         };
+                    } break;
+
+                case CardTemplates.HeroTest:
+                    {
+                        Name = "Heroxd";
+                        Type = CardTypes.Hero;
+                        Colour = ManaColour.White;
+                        CastingCost = new ManaSet();
+
+                        Defence = 27;
                     } break;
 
                 default:
@@ -125,6 +135,7 @@ namespace CardKartShared.GameState
         Instant,
         Channel,
         Relic,
+        Hero,
     }
 
     public enum CardTemplates
@@ -132,5 +143,7 @@ namespace CardKartShared.GameState
         AngryGoblin,
         ArmoredZombie,
         Zap,
+
+        HeroTest,
     }
 }

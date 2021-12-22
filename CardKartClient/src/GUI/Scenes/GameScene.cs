@@ -14,6 +14,9 @@ namespace CardKartClient.GUI.Scenes
         public BattlefieldComponent VillainBattlefieldPanel;
         public PlayerPanel VillainPanel;
         public ChooserPanel ChooserPanel;
+        public StackPanel StackPanel;
+        public CombatAnimator CombatAnimator;
+
 
         public GameScene(GameController gameController)
         {
@@ -23,7 +26,7 @@ namespace CardKartClient.GUI.Scenes
             var villain = GameController.Villain;
 
             HeroHandPanel = new HandComponent(hero.Hand);
-            HeroHandPanel.X = -0.4f;
+            HeroHandPanel.X = -0.2f;
             HeroHandPanel.Y = -0.9f;
             HeroHandPanel.CardClicked += (cardComponent) =>
             {
@@ -35,7 +38,7 @@ namespace CardKartClient.GUI.Scenes
             Components.Add(HeroHandPanel);
 
             HeroBattlefieldPanel = new BattlefieldComponent(hero.Battlefield);
-            HeroBattlefieldPanel.X = -0.3f;
+            HeroBattlefieldPanel.X = -0.2f;
             HeroBattlefieldPanel.Y = -0.2f;
             HeroBattlefieldPanel.TokenClicked +=
                 token => GameObjectClicked(token);
@@ -43,31 +46,41 @@ namespace CardKartClient.GUI.Scenes
 
 
             VillainBattlefieldPanel = new BattlefieldComponent(villain.Battlefield);
-            VillainBattlefieldPanel.X = -0.3f;
+            VillainBattlefieldPanel.X = -0.2f;
             VillainBattlefieldPanel.Y = 0.4f;
             VillainBattlefieldPanel.TokenClicked += 
                 token => GameObjectClicked(token);
             Components.Add(VillainBattlefieldPanel);
 
             ChooserPanel = new ChooserPanel(gameController.ChoiceHelper);
-            ChooserPanel.X = -0.9f;
+            ChooserPanel.X = -0.7f;
             ChooserPanel.Y = -0.15f;
             ChooserPanel.Layout();
             ChooserPanel.OptionClicked += OptionChoiceClicked;
             Components.Add(ChooserPanel);
 
             HeroPanel = new PlayerPanel(hero);
-            HeroPanel.X = -0.9f;
+            HeroPanel.X = -0.95f;
             HeroPanel.Y = -0.8f;
             HeroPanel.Layout();
             Components.Add(HeroPanel);
 
             VillainPanel = new PlayerPanel(villain);
-            VillainPanel.X = -0.9f;
+            VillainPanel.X = -0.95f;
             VillainPanel.Y = 0.6f;
             VillainPanel.Layout();
             Components.Add(VillainPanel);
 
+            StackPanel = new StackPanel(gameController.CastingStack);
+            StackPanel.X = -0.95f;
+            StackPanel.Y = -0.5f;
+            Components.Add(StackPanel);
+
+            CombatAnimator = new CombatAnimator(
+                HeroBattlefieldPanel,
+                VillainBattlefieldPanel,
+                gameController);
+            Components.Add(CombatAnimator);
         }
 
         private void GameObjectClicked(GameObject gameObject)

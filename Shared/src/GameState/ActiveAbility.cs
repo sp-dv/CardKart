@@ -62,7 +62,7 @@ namespace CardKartShared.GameState
                 }
                 
                 context.ChoiceHelper.Text = 
-                    $"Paying {cost.Colourless} with:\n{paymentString}";
+                    $"Paying with:\n{paymentString}";
                 context.ChoiceHelper.ShowCancel = true;
                 var choice = context.ChoiceHelper.ChooseColour(colour =>
                 {
@@ -216,7 +216,7 @@ namespace CardKartShared.GameState
         public override void EnactResolveChoices(AbilityCastingContext context)
         {
             var target = GetToken(context, "target");
-            context.GameState.DealDamage(Card, target.TokenOf, 2);
+            context.GameState.DealDamage(Card, target, 2);
         }
 
     }

@@ -34,6 +34,11 @@ namespace CardKartShared.GameState
 
         public void LoadDecks(Deck deckPlayer1, Deck deckPlayer2)
         {
+            var heroCard1 = CreateCard(CardTemplates.HeroTest);
+            heroCard1.Owner = Player1;
+            var heroToken1 = CreateToken(heroCard1);
+            Player1.HeroCard = heroCard1;
+
             Player1.Deck.Add(
                 deckPlayer1.CardTemplates.Select(template => CreateCard(template)).ToArray());
             foreach (var card in Player1.Deck)
@@ -41,6 +46,11 @@ namespace CardKartShared.GameState
                 card.Owner = Player1;
             }
 
+
+            var heroCard2 = CreateCard(CardTemplates.HeroTest);
+            heroCard2.Owner = Player2;
+            var heroToken2 = CreateToken(heroCard2);
+            Player2.HeroCard = heroCard2;
 
             Player2.Deck.Add(
                 deckPlayer2.CardTemplates.Select(template => CreateCard(template)).ToArray());
@@ -60,6 +70,13 @@ namespace CardKartShared.GameState
             var swap = ActivePlayer;
             ActivePlayer = InactivePlayer;
             InactivePlayer = swap;
+        }
+
+        public Player OtherPlayer(Player player)
+        {
+            if (player == Player1) { return Player2;}
+            if (player == Player2) { return Player1;}
+            throw new NotImplementedException();
         }
 
         #region Triggering 
@@ -108,11 +125,16 @@ namespace CardKartShared.GameState
             pile.Add(card);
         }
 
-        public void DealDamage(Card source, Card target, int amount)
+        public void DealDamage(Card source, Token target, int amount)
         {
             if (amount <= 0) { return; }
 
-            target.Token.Damage += amount;
+            target.Damage += amount;
+
+            if (target.TokenOf.IsHero)
+            {
+                target.TokenOf.Owner.NotifyOfChange();
+            }    
         }
 
         #endregion
@@ -126,12 +148,14 @@ namespace CardKartShared.GameState
             return card;
         }
 
-        private void CreateToken(Card card)
+        private Token CreateToken(Card card)
         {
             var token = new Token();
             token.TokenOf = card;
             card.Token = token;
             AddGameObject(token);
+
+            return token;
         }
 
         private void AddGameObject(GameObject newObject)

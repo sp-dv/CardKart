@@ -1,12 +1,9 @@
-﻿using CardKartClient.GUI;
-using CardKartShared.GameState;
+﻿using CardKartShared.GameState;
 using SGL;
-using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace CardKartClient.GUI.Components
 {
@@ -23,7 +20,7 @@ namespace CardKartClient.GUI.Components
 
         public HandComponent(Pile hand)
         {
-            Width = 0.7f;
+            Width = 1.1f;
             Height = 0.56f;
 
             Hand = hand;

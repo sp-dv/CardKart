@@ -19,7 +19,7 @@ namespace CardKartClient.GUI.Components
 
         public BattlefieldComponent(Pile battlefield)
         {
-            Width = 0.7f;
+            Width = 1.1f;
             Height = 0.56f;
 
             Battlefield = battlefield;
@@ -27,6 +27,29 @@ namespace CardKartClient.GUI.Components
 
             Layout();
 
+        }
+
+        public TokenComponent GetComponent(Token token)
+        {
+            lock (TokenComponentsLock)
+            {
+                foreach (TokenComponent component in TokenComponents)
+                {
+                    if (component.Card.Token == token) { return component; }
+                }
+            }
+            return null;
+        }
+
+        public void ResetHighlighting()
+        {
+            lock (TokenComponentsLock)
+            {
+                foreach (TokenComponent component in TokenComponents)
+                {
+                    component.HighlightColor = null;
+                }
+            }
         }
 
         private void Layout()

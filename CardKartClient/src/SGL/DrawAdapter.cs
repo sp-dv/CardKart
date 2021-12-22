@@ -61,9 +61,8 @@ namespace SGL
 
         public void DrawLine(float x0, float y0, float x1, float y1, Color c)
         {
-            GL.LineWidth(4);
             GL.Color4(c);
-            GL.Begin(BeginMode.Lines);
+            GL.Begin(PrimitiveType.Lines);
 
             GL.Vertex2(x0, y0);
             GL.Vertex2(x1, y1);
@@ -83,10 +82,9 @@ namespace SGL
             GL.End();
         }
 
-        public void DrawRectange(float x0, float y0, float x1, float y1, Color c, int width = 1)
+        public void DrawRectange(float x0, float y0, float x1, float y1, Color c)
         {
             GL.Color4(c);
-            GL.LineWidth(width);
 
             GL.Begin(PrimitiveType.LineLoop);
             GL.Vertex2(x0, y0);
@@ -100,7 +98,6 @@ namespace SGL
         {
             float x1;
             float y1;
-            float angle;
 
 
             GL.Begin(PrimitiveType.TriangleFan);
@@ -122,13 +119,10 @@ namespace SGL
         {
             float x1;
             float y1;
-            float angle;
 
 
             GL.Begin(PrimitiveType.LineLoop);
             GL.Color4(color);
-
-            //GL.Vertex2(x0, y0);
 
             for (int i = 0; i < CircleSins.Length; i++)
             {

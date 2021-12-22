@@ -9,12 +9,14 @@ namespace CardKartClient.GUI.Components
     internal class TextPanel : GuiComponent
     {
         public String Text;
-        public Color BackgroundColor;
+        public Color? BackgroundColor { get; set; }
 
         protected override void DrawInternal(DrawAdapter drawAdapter)
         {
-            drawAdapter.FillRectangle(X, Y, X + Width, Y + Height, BackgroundColor);
-
+            if (BackgroundColor.HasValue)
+            {
+                drawAdapter.FillRectangle(X, Y, X + Width, Y + Height, BackgroundColor.Value);
+            }
             if (Text != null)
             {
                 drawAdapter.DrawText(Text, X, Y);

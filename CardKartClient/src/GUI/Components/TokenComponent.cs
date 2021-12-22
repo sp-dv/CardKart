@@ -14,6 +14,7 @@ namespace CardKartClient.GUI.Components
 
         private Texture PortraitTexture;
         private Color PaletteColor;
+        public Color? HighlightColor;
 
         public TokenComponent(Card card)
         {
@@ -50,6 +51,11 @@ namespace CardKartClient.GUI.Components
                 Y + Height, 
                 Textures.Token1, 
                 PaletteColor);
+
+            if (HighlightColor.HasValue)
+            {
+                drawAdapter.DrawRectange(X, Y, X+Width,Y+Height, HighlightColor.Value);
+            }
 
             if (Card.Token != null)
             {

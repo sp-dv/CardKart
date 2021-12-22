@@ -1,6 +1,7 @@
 ﻿using CardKartShared.Network.Messages;
 using CardKartShared.Util;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
@@ -15,9 +16,15 @@ namespace CardKartShared.GameState
         public Player Villain { get; }
 
         public Player ActivePlayer => GameState.ActivePlayer;
+        public Player InactivePlayer => GameState.InactivePlayer;
 
         public GameChoiceSynchronizer GameChoiceSynchronizer { get; }
         public ChoiceHelper ChoiceHelper { get; } = new ChoiceHelper();
+
+        public CastingStack CastingStack { get; } = new CastingStack();
+
+        public delegate void RedrawAttackerAnimationsHandler(Token[] attackers, (Token, Token)[] defenders);
+        public event RedrawAttackerAnimationsHandler RedrawAttackerAnimations;
 
         public GameController(
             int gameID, 
@@ -54,7 +61,6 @@ namespace CardKartShared.GameState
         private void GameSetup()
         {
             ChoiceHelper.ResetGUIOptions();
-
             GameState.LoadDecks(
                 new Deck(new[] {
                     CardTemplates.AngryGoblin,
@@ -67,11 +73,6 @@ namespace CardKartShared.GameState
                     CardTemplates.AngryGoblin
                 }));
 
-            GameState.Player1.MaxMana.Red = 4;
-            GameState.Player1.MaxMana.Green = 4;
-            GameState.Player2.MaxMana.Red = 4;
-            GameState.Player2.MaxMana.Green = 4;
-
             GameState.ResetMana(GameState.Player1);
             GameState.ResetMana(GameState.Player2);
         }
@@ -80,17 +81,19 @@ namespace CardKartShared.GameState
         {
             while (true)
             {
-                DrawAndGainManaStep();
-
-                Priority(ActivePlayer);
+                DrawStep();
+                CastStep();
+                CombatStep();
+                CastStep();
 
                 GameState.SwapActivePlayer();
             }
         }
 
-        private void DrawAndGainManaStep()
+        private void DrawStep()
         {
-            GameState.DrawCards(ActivePlayer, 2);
+            GameState.DrawCards(ActivePlayer, 1);
+            EnforceGameRules();
 
             ManaColour colour;
             if (ActivePlayer == Hero)
@@ -103,15 +106,230 @@ namespace CardKartShared.GameState
             }
             else
             {
+                ChoiceHelper.ShowText("Opponent is choosing mana to gain.");
                 var choice = GameChoiceSynchronizer.ReceiveChoice();
+                ChoiceHelper.ResetGUIOptions();
+
                 colour = (ManaColour)choice.Singletons["_colour"];
             }
 
             GameState.GainMana(ActivePlayer, colour);
             GameState.ResetMana(ActivePlayer);
+            EnforceGameRules();
         }
 
-        private void Priority(Player castingPlayer)
+        private void CastStep()
+        {
+            while (true)
+            {
+                var castingPlayer = ActivePlayer;
+                while (true)
+                {
+                    var context = Priority(castingPlayer);
+                    if (context == null) { break; }
+
+                    var ability = context.Ability;
+                    var card = context.Card;
+
+                    ability.EnactCastChoices(context);
+
+                    CastingStack.Push(context);
+                    if (ability.MoveToStackOnCast)
+                    {
+                        GameState.MoveCard(card, card.Owner.Stack);
+                    }
+
+                    castingPlayer = GameState.OtherPlayer(castingPlayer);
+
+                    EnforceGameRules();
+                }
+
+                if (CastingStack.Count == 0) { break; }
+
+                while (CastingStack.Count > 0)
+                {
+                    var context = CastingStack.Pop();
+
+                    var card = context.Card;
+                    var ability = context.Ability;
+
+                    ability.MakeResolveChoices(context);
+                    ability.EnactResolveChoices(context);
+
+                    if (card.Type == CardTypes.Monster ||
+                        card.Type == CardTypes.Relic)
+                    {
+                        GameState.MoveCard(card, card.Owner.Battlefield);
+                    }
+                    else
+                    {
+                        GameState.MoveCard(card, card.Owner.Graveyard);
+                    }
+
+                    EnforceGameRules();
+                }
+            }
+        }
+
+        private void CombatStep()
+        {
+            List<Token> attackers;
+
+            if (ActivePlayer == Hero)
+            {
+                attackers = new List<Token>();
+                while (true)
+                {
+                    ChoiceHelper.Text = "Choose attackers";
+                    ChoiceHelper.ShowOk = true;
+                    var choice = ChoiceHelper.ChooseToken(
+                        token => token.TokenOf.Controller == Hero);
+
+                    if (choice == null) { break; }
+
+                    if (attackers.Contains(choice))
+                    {
+                        attackers.Remove(choice);
+                    }
+                    else
+                    {
+                        attackers.Add(choice);
+                    }
+
+                    RedrawAttackerAnimations(attackers.ToArray(), null);
+                }
+                var attackerIDs = attackers.Select(token => token.ID).ToArray();
+                var attackersChoice = new GameChoice();
+                attackersChoice.Arrays["_attackers"] = attackerIDs;
+                GameChoiceSynchronizer.SendChoice(attackersChoice);
+            }
+            else
+            {
+                ChoiceHelper.ShowText("Opponent is attacking.");
+                var attackersChoice = GameChoiceSynchronizer.ReceiveChoice();
+                ChoiceHelper.ResetGUIOptions();
+
+                var attackerIDs = attackersChoice.Arrays["_attackers"];
+                attackers = 
+                    attackerIDs.Select(id => GameState.GetByID(id) as Token).ToList();
+            }
+
+            RedrawAttackerAnimations(attackers.ToArray(), null);
+            EnforceGameRules();
+
+            if (attackers.Count == 0) { return; }
+
+            List<(Token, Token)> defenders;
+
+            if (ActivePlayer == Hero)
+            {
+                ChoiceHelper.ShowText("Opponent is blocking.");
+                var choice = GameChoiceSynchronizer.ReceiveChoice();
+                ChoiceHelper.ResetGUIOptions();
+
+                var blockerIDs = choice.Arrays["_blockers"];
+                var blockedIDs = choice.Arrays["_blockeds"];
+                if (blockerIDs.Length != blockedIDs.Length) { throw new NotImplementedException(); }
+
+                defenders = new List<(Token, Token)>();
+                for (int i = 0; i < blockerIDs.Length; i++)
+                {
+                    var blocker = GameState.GetByID(blockerIDs[i]) as Token;
+                    var blocked = GameState.GetByID(blockedIDs[i]) as Token;
+                    defenders.Add((blocker, blocked));
+                }
+            }
+            else
+            {
+                defenders = new List<(Token, Token)>();
+                while (true)
+                {
+                    ChoiceHelper.Text = "Choose a defender.";
+                    ChoiceHelper.ShowOk = true;
+                    var defender = ChoiceHelper.ChooseToken(
+                        token => token.TokenOf.Controller == Hero);
+
+                    if (defender == null) { break; }
+
+                    // Find the defender in the list
+                    int ix = -1;
+                    for (int i = 0; i < defenders.Count; i++)
+                    {
+                        if (defenders[i].Item1 == defender)
+                        {
+                            ix = i;
+                            break;
+                        }
+                    }
+
+                    if (ix != -1)
+                    {
+                        defenders.RemoveAt(ix);
+                        RedrawAttackerAnimations(
+                            attackers.ToArray(), 
+                            defenders.ToArray());
+                        continue;
+                    }
+
+                    ChoiceHelper.Text = "Choose a defender.";
+                    ChoiceHelper.ShowCancel = true;
+                    var blocked = ChoiceHelper.ChooseToken(
+                        token => token.TokenOf.Controller == Villain);
+
+                    if (blocked == null) { continue; }
+
+                    defenders.Add((defender, blocked));
+                    RedrawAttackerAnimations(
+                        attackers.ToArray(),
+                        defenders.ToArray());
+                }
+
+                var blockerIDs = 
+                    defenders.Select(pair => pair.Item1.ID).ToArray();
+                var blockedIDs =
+                    defenders.Select(pair => pair.Item2.ID).ToArray();
+
+                var choice = new GameChoice();
+                choice.Arrays["_blockers"] = blockerIDs;
+                choice.Arrays["_blockeds"] = blockedIDs;
+                GameChoiceSynchronizer.SendChoice(choice);
+            }
+
+            RedrawAttackerAnimations(attackers.ToArray(), defenders.ToArray());
+            EnforceGameRules();
+
+            var unblockedAttackers = attackers.ToList();
+
+            foreach (var pair in defenders)
+            {
+                var blocker = pair.Item1;
+                var blocked = pair.Item2;
+
+                if (unblockedAttackers.Contains(blocked))
+                {
+                    unblockedAttackers.Remove(blocked);
+                }
+
+                GameState.DealDamage(blocker.TokenOf, blocked, blocker.Attack);
+                GameState.DealDamage(blocked.TokenOf, blocker, blocked.Attack);
+            }
+
+            foreach (var unblocked in unblockedAttackers)
+            {
+                GameState.DealDamage(
+                    unblocked.TokenOf, 
+                    InactivePlayer.HeroCard.Token, 
+                    unblocked.Attack);
+            }
+
+            Thread.Sleep(1000);
+
+            EnforceGameRules();
+
+            RedrawAttackerAnimations(null, null);
+        }
+
+        private AbilityCastingContext Priority(Player castingPlayer)
         {
             AbilityCastingContext context = MakeContext();
             context.CastingPlayer = castingPlayer;
@@ -121,53 +339,46 @@ namespace CardKartShared.GameState
                 // Hack for early return without helper function.
                 new Action(() =>
                 {
-                    ChoiceHelper.Text = "Choose a card to cast";
-                    ChoiceHelper.ShowPass = true;
-                    var card = ChoiceHelper.ChooseCard(card =>
+                    while (true)
                     {
-                        var abilities = card.GetUsableAbilities(context);
-                        if (abilities.Length == 1) { return true; }
+                        ChoiceHelper.Text = "Choose a card to cast.";
+                        ChoiceHelper.ShowPass = true;
+                        var card = ChoiceHelper.ChooseCard(card =>
+                        {
+                            var abilities = card.GetUsableAbilities(context);
+                            if (abilities.Length == 1) { return true; }
 
-                        return false;
-                    });
+                            return false;
+                        });
+                        if (card == null) { return; }
 
-                    if (card == null) { return; }
-                    context.Card = card;
+                        var ability = card.GetUsableAbilities(context)[0];
+                        if (!ability.MakeCastChoices(context)) { continue; }
 
-                    var ability = card.GetUsableAbilities(context)[0];
-                    if (!ability.MakeCastChoices(context)) { return; }
-                    context.Ability = ability;
-
+                        context.Card = card;
+                        context.Ability = ability;
+                        return;
+                    }
                 })();
                 
                 GameChoiceSynchronizer.SendChoice(context.Choices);
             }
             else
             {
+                ChoiceHelper.ShowText("Opponent is casting.");
                 context.Choices = GameChoiceSynchronizer.ReceiveChoice();
+                ChoiceHelper.ResetGUIOptions();
             }
 
             var gameChoice = context.Choices;
 
             if (context.Card != null && context.Ability != null)
             {
-
-                var card = context.Card;
-                var ability = context.Ability;
-
-                ability.EnactCastChoices(context);
-
-                ability.EnactResolveChoices(context);
-
-                if (card.Type == CardTypes.Monster || 
-                    card.Type == CardTypes.Relic)
-                {
-                    GameState.MoveCard(card, card.Owner.Battlefield);
-                }
-                else
-                {
-                    GameState.MoveCard(card, card.Owner.Graveyard);
-                }
+                return context;
+            }
+            else
+            {
+                return null;
             }
         }
         
@@ -179,6 +390,25 @@ namespace CardKartShared.GameState
             context.GameState = GameState;
 
             return context;
+        }
+
+        private void EnforceGameRules()
+        {
+            var deadCards = new List<Card>();
+
+            foreach (var card in 
+                GameState.Player1.Battlefield.Concat(GameState.Player2.Battlefield))
+            {
+                if (card.Token.Defence <= 0)
+                {
+                    deadCards.Add(card);
+                }
+            }
+
+            foreach (var dying in deadCards)
+            {
+                GameState.MoveCard(dying, dying.Owner.Graveyard);
+            }
         }
     }
 
@@ -224,6 +454,33 @@ namespace CardKartShared.GameState
         Purple,
         Green,
         Colourless,
+    }
+
+    public class CastingStack
+    {
+        private Stack<AbilityCastingContext> Contexts { get; } = new Stack<AbilityCastingContext>();
+        public delegate void StackChangedHandler(Card[] cards);
+        public event StackChangedHandler StackChanged;
+
+        public int Count => Contexts.Count;
+
+        public void Push(AbilityCastingContext context)
+        {
+            Contexts.Push(context);
+            StackChanged?.Invoke(
+                Contexts.Select(context => context.Card).ToArray());
+
+        }
+
+        public AbilityCastingContext Pop()
+        {
+            var context = Contexts.Pop();
+
+            StackChanged?.Invoke(
+                Contexts.Select(context => context.Card).ToArray());
+            
+            return context;
+        }
     }
 
     public class ChoiceHelper
@@ -294,7 +551,7 @@ namespace CardKartShared.GameState
             RequestGUIUpdate?.Invoke();
             var choice = PlayerChoiceSaxophone.Listen(pcs =>
             {
-            if (!pcs.IsOptionChoice) { return false; }
+                if (!pcs.IsOptionChoice) { return false; }
 
                 if (pcs.OptionChoice == OptionChoice.Red) { return filter(ManaColour.Red); }
                 else if (pcs.OptionChoice == OptionChoice.Blue) { return filter(ManaColour.Blue); }
@@ -320,6 +577,12 @@ namespace CardKartShared.GameState
                 case OptionChoice.Colourless: { return ManaColour.Colourless; }
                 default: { return ManaColour.None; }
             }
+        }
+
+        public void ShowText(string text)
+        {
+            Text = text;
+            RequestGUIUpdate();
         }
 
         public void ResetGUIOptions()

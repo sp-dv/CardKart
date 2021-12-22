@@ -10,6 +10,7 @@ namespace CardKartClient.GUI.Components
         private Player Player;
 
         public ManaButtonBar ManaBar;
+        public TextPanel HealthPanel;
 
         public PlayerPanel(Player player)
         {
@@ -20,18 +21,25 @@ namespace CardKartClient.GUI.Components
 
             ManaBar = new ManaButtonBar();
 
+            HealthPanel = new TextPanel();
+            HealthPanel.BackgroundColor = Color.White;
+
             Player.PlayerChanged += Update;
         }
 
         private void Update()
         {
             ManaBar.Update(Player.CurrentMana, Player.MaxMana);
+            HealthPanel.Text = Player.HeroCard.Token.Defence.ToString();
         }
 
         public void Layout()
         {
             ManaBar.X = X + 0.01f;
             ManaBar.Y = Y + 0.015f;
+
+            HealthPanel.X = X;
+            HealthPanel.Y = Y;
 
             ManaBar.Layout();
         }
@@ -41,6 +49,7 @@ namespace CardKartClient.GUI.Components
             drawAdapter.FillRectangle(X, Y, X + Width, Y + Height, Color.LightGray);
 
             ManaBar.Draw(drawAdapter);
+            HealthPanel.Draw(drawAdapter);
         }
     }
 }
