@@ -11,17 +11,23 @@ namespace CardKartShared.Util
         public static bool IsDevVersion = true;
 
         public static Server CurrentServer => DebugServer;
-        public static readonly Server ProductionServer 
+        public static readonly Server ProductionServer
             = new Server(4444, "78.138.17.232");
-        public static readonly Server DebugServer 
+        public static readonly Server DebugServer
             = new Server(4444, "localhost");
 
-        public static Color PaletteColors(GameColour colour)
+        public static Color PaletteColor(ManaColour colour)
         {
             switch (colour)
             {
-                case GameColour.Red: { return Color.Firebrick; }
-                case GameColour.Black: { return Color.Gray; }
+                case ManaColour.Red: { return Color.Firebrick; }
+                case ManaColour.Black: { return Color.DarkSlateGray; }
+                case ManaColour.Blue: { return Color.Blue; }
+                case ManaColour.Purple: { return Color.Purple; }
+                case ManaColour.White: { return Color.White; }
+                case ManaColour.Green: { return Color.Green; }
+                case ManaColour.Colourless: { return Color.Gray; }
+
                 default: throw new Exception();
             }
         }

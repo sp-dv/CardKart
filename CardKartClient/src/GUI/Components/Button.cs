@@ -15,11 +15,11 @@ namespace CardKartClient.GUI.Components
         {
         }
 
-        public override void Draw(DrawAdapter drawAdapter)
+        protected override void DrawInternal(DrawAdapter drawAdapter)
         {
-            drawAdapter.FillRectange(X, Y, X + Width, Y + Height, Colour);
+            drawAdapter.FillRectangle(X, Y, X + Width, Y + Height, Colour);
             drawAdapter.DrawRectange(X, Y, X + Width,Y + Height, Colour);
-            drawAdapter.DrawText(Text, X, Y + Height/2);
+            drawAdapter.DrawText(Text, X + 0.02f, Y + Height/2 + 0.02f);
         }
 
         protected override bool HandleClickInternal(GLCoordinate location)

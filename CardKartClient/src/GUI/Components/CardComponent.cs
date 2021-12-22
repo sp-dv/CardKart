@@ -39,7 +39,7 @@ namespace CardKartClient.GUI.Components
             if (Card != null)
             {
                 PortraitTexture = Textures.Portraits(Card.Template);
-                PaletteColor = Constants.PaletteColors(Card.Colour);
+                PaletteColor = Constants.PaletteColor(Card.Colour);
             }
         }
 
@@ -67,7 +67,7 @@ namespace CardKartClient.GUI.Components
             DefenceInsetY = AttackInsetY;
         }
 
-        public override void Draw(DrawAdapter drawAdapter)
+        protected override void DrawInternal(DrawAdapter drawAdapter)
         {
             drawAdapter.DrawSprite(
                 X,

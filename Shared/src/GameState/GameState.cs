@@ -19,7 +19,7 @@ namespace CardKartShared.GameState
 
         public GameState()
         {
-            // And ID of 0 is invalid so just make lookups return null.
+            // An ID of 0 is invalid so just make lookups return null.
             GameObjects.Add(null);
 
             Player1 = new Player();
@@ -36,9 +36,18 @@ namespace CardKartShared.GameState
         {
             Player1.Deck.Add(
                 deckPlayerA.CardTemplates.Select(template => CreateCard(template)).ToArray());
+            foreach (var card in Player1.Deck)
+            {
+                card.Owner = Player1;
+            }
+
 
             Player2.Deck.Add(
                 deckPlayerB.CardTemplates.Select(template => CreateCard(template)).ToArray());
+            foreach (var card in Player2.Deck)
+            {
+                card.Owner = Player2;
+            }
         }
 
         public GameObject GetByID(int gameID)

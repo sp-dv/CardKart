@@ -1,5 +1,7 @@
 ﻿using CardKartShared.Network.Messages;
 using CardKartShared.Util;
+using System;
+using System.Linq;
 using System.Threading;
 
 namespace CardKartShared.GameState
@@ -7,24 +9,23 @@ namespace CardKartShared.GameState
     public class GameController
     {
         public int GameID { get; }
-        public GameState GameState { get; private set; }
+        public GameState GameState { get; }
 
-        public PublicSaxophone<GameObject> GameObjectSaxophone { get; } 
-            = new PublicSaxophone<GameObject>();
-
-        public Player Hero;
-        public Player Villain;
+        public Player Hero { get; }
+        public Player Villain { get; }
 
         public GameChoiceSynchronizer GameChoiceSynchronizer { get; }
+        public ChoiceHelper ChoiceHelper { get; } = new ChoiceHelper();
 
-        public GameController(int gameID, int heroIndex, GameChoiceSynchronizer gameChoiceSynchronizer)
+        public GameController(
+            int gameID, 
+            int heroIndex, 
+            GameChoiceSynchronizer gameChoiceSynchronizer)
         {
             GameChoiceSynchronizer = gameChoiceSynchronizer;
 
             GameID = gameID;
             GameState = new GameState();
-
-            Logging.Log(LogLevel.Debug, $"heroIndex: {heroIndex}.");
 
             if (heroIndex == 1)
             {
@@ -50,6 +51,8 @@ namespace CardKartShared.GameState
 
         private void GameSetup()
         {
+            ChoiceHelper.ResetGUI();
+
             GameState.LoadDecks(
                 new Deck(new[] {
                     CardTemplates.AngryGoblin,
@@ -66,27 +69,87 @@ namespace CardKartShared.GameState
             while (true)
             {
                 GameState.ActivePlayer.Draw();
-                Card card;
-                if (GameState.ActivePlayer == Hero)
+                GameState.ActivePlayer.MaxMana.Red++;
+                GameState.ActivePlayer.ResetMana();
+
+                Priority(GameState.ActivePlayer);
+
+                GameState.SwapActivePlayer();
+            }
+        }
+
+        private void Priority(Player castingPlayer)
+        {
+            AbilityCastingContext context = MakeContext(castingPlayer);
+            if (castingPlayer == Hero)
+            {
+                PriorityInner(context);
+                GameChoiceSynchronizer.SendChoice(context.Choices);
+            }
+            else
+            {
+                context.Choices = GameChoiceSynchronizer.ReceiveChoice();
+            }
+
+            var gameChoice = context.Choices;
+
+            if (gameChoice.Singletons.ContainsKey("_card") && 
+                gameChoice.Singletons.ContainsKey("_abilityIndex"))
+            {
+
+                var cardID = gameChoice.Singletons["_card"];
+                var card = (Card)GameState.GetByID(cardID);
+                var abilityIndex = gameChoice.Singletons["_abilityIndex"];
+                var ability = card.ActiveAbilities[abilityIndex];
+
+                ability.EnactCastChoices(context); // doesn't sync for now
+
+                ability.EnactResolveChoices(context);
+
+                if (card.Type == CardTypes.Monster || 
+                    card.Type == CardTypes.Relic)
                 {
-                    card = (Card)GameObjectSaxophone.Listen(obj =>
-                    {
-                        if (!(obj is Card)) { return false; }
-                        return true;
-                    });
-                    var gameChoice = new GameChoice();
-                    gameChoice.Choices["asd"] = card.ID;
-                    GameChoiceSynchronizer.SendChoice(gameChoice);
+                    card.Owner.Battlefield.Add(card);
                 }
                 else
                 {
-                    var gameChoice = GameChoiceSynchronizer.ReceiveChoice();
-                    var cardID = gameChoice.Choices["asd"];
-                    card = (Card)GameState.GetByID(cardID);
+                    card.Owner.Graveyard.Add(card);
                 }
-                GameState.ActivePlayer.Battlefield.Add(card);
-                GameState.SwapActivePlayer();
             }
+        }
+        
+        private void PriorityInner(AbilityCastingContext context)
+        {
+            ChoiceHelper.Text = "Choose a card to cast";
+            ChoiceHelper.ShowPass = true;
+            var card = ChoiceHelper.ChooseCardOrNull(card =>
+            {
+                var abilities = card.GetUsableAbilities(context);
+                if (abilities.Length == 1) { return true; }
+
+                return false;
+            });
+
+            if (card == null) { return; }
+
+            var ability = card.GetUsableAbilities(context)[0];
+
+            if (!ability.MakeCastChoices(context)) { return; }
+            
+            context.Choices.Singletons["_card"] = card.ID;
+            context.Choices.Singletons["_abilityIndex"] =
+                card.IndexOfActiveAbility(ability);
+        }
+
+        private AbilityCastingContext MakeContext(Player castingPlayer)
+        {
+            var context = new AbilityCastingContext();
+            context.CastingPlayer = castingPlayer;
+            context.ChoiceHelper = ChoiceHelper;
+            context.Choices = new GameChoice();
+            context.GameState = GameState;
+
+            return context;
         }
     }
 
@@ -94,5 +157,80 @@ namespace CardKartShared.GameState
     {
         void SendChoice(GameChoice choice);
         GameChoice ReceiveChoice();
+    }
+
+    public class PlayerChoiceStruct
+    {
+        public OptionChoice OptionChoice;
+        public GameObject GameObject;
+
+        public bool IsOptionChoice => OptionChoice != OptionChoice.None;
+
+        public PlayerChoiceStruct(GameObject gameObject)
+        {
+            GameObject = gameObject;
+            OptionChoice = OptionChoice.None;
+        }
+
+        public PlayerChoiceStruct(OptionChoice optionChoice)
+        {
+            OptionChoice = optionChoice;
+        }
+    }
+
+    public enum OptionChoice
+    {
+        None,
+
+        Pass,
+        Yes,
+        No,
+        Cancel,
+        Ok,
+
+    }
+
+    public class ChoiceHelper
+    {
+        public PublicSaxophone<PlayerChoiceStruct> PlayerChoiceSaxophone { get; }
+            = new PublicSaxophone<PlayerChoiceStruct>();
+
+        public string Text = "";
+        public bool ShowPass;
+
+        // Ugly hack to make UI updates accessible inside
+        // abilities...
+        public delegate void RequestGUIUpdateHandler();
+        public event RequestGUIUpdateHandler RequestGUIUpdate;
+
+        public ChoiceHelper()
+        {
+        }
+
+        public Card ChooseCardOrNull(Func<Card, bool> filter)
+        {
+            RequestGUIUpdate?.Invoke();
+            var choice = PlayerChoiceSaxophone.Listen(pcs =>
+            {
+                if (pcs.IsOptionChoice) { return true; }
+                if (pcs.GameObject is Card)
+                {
+                    return filter(pcs.GameObject as Card);
+                }
+                return false;
+            });
+            ResetGUI();
+
+            if (choice.IsOptionChoice) { return null; }
+            else { return choice.GameObject as Card; }
+        }
+
+        public void ResetGUI()
+        {
+            Text = "";
+            ShowPass = false;
+
+            RequestGUIUpdate?.Invoke();
+        }
     }
 }

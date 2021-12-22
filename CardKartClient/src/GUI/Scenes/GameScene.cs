@@ -10,7 +10,9 @@ namespace CardKartClient.GUI.Scenes
 
         public HandComponent HeroHandPanel;
         public BattlefieldComponent HeroBattlefieldPanel;
+        public PlayerPanel HeroPanel;
         public BattlefieldComponent VillainBattlefieldPanel;
+        public ChooserPanel ChooserPanel;
 
         public GameScene(GameController gameController)
         {
@@ -41,11 +43,29 @@ namespace CardKartClient.GUI.Scenes
             VillainBattlefieldPanel.X = -0.3f;
             VillainBattlefieldPanel.Y = 0.4f;
             Components.Add(VillainBattlefieldPanel);
+
+            ChooserPanel = new ChooserPanel(gameController.ChoiceHelper);
+            ChooserPanel.X = -0.9f;
+            ChooserPanel.Y = -0.15f;
+            ChooserPanel.Layout();
+            ChooserPanel.OptionClicked += OptionChoiceClicked;
+            Components.Add(ChooserPanel);
+
+            HeroPanel = new PlayerPanel(hero);
+            HeroPanel.X = -0.9f;
+            HeroPanel.Y = -0.8f;
+            HeroPanel.Layout();
+            Components.Add(HeroPanel);
         }
 
         private void GameObjectClicked(GameObject gameObject)
         {
-            GameController.GameObjectSaxophone.Play(gameObject);
+            GameController.ChoiceHelper.PlayerChoiceSaxophone.Play(new PlayerChoiceStruct(gameObject));
+        }
+
+        private void OptionChoiceClicked(OptionChoice optionChoice)
+        {
+            GameController.ChoiceHelper.PlayerChoiceSaxophone.Play(new PlayerChoiceStruct(optionChoice));
         }
     }
 }

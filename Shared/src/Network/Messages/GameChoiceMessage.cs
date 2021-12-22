@@ -17,7 +17,6 @@ namespace CardKartShared.Network.Messages
             GameID = decoder.DecodeInt();
 
             var jsonString = decoder.DecodeString();
-            Logging.Log(LogLevel.Debug, $"Decoded jsonString: {jsonString}");
             Choices = JsonConvert.DeserializeObject<GameChoice>(jsonString);
         }
 
@@ -26,7 +25,6 @@ namespace CardKartShared.Network.Messages
             var encoder = new ByteEncoder();
 
             var jsonString = JsonConvert.SerializeObject(Choices);
-            Logging.Log(LogLevel.Debug, $"Encoded jsonString: {jsonString}");
 
             encoder.EncodeInt(GameID);
             encoder.EncodeString(jsonString);
@@ -37,9 +35,9 @@ namespace CardKartShared.Network.Messages
 
     public class GameChoice
     {
-        public Dictionary<string, int> Choices { get; } 
+        public Dictionary<string, int> Singletons { get; } 
             = new Dictionary<string, int>();
-        public Dictionary<string, int[]> ArrayChoices { get; } 
+        public Dictionary<string, int[]> Arrays { get; } 
             = new Dictionary<string, int[]>();
     }
 }

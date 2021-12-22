@@ -48,13 +48,13 @@ namespace CardKartClient.GUI.Components
             }
         }
 
-        public override void Draw(DrawAdapter drawAdapter)
+        protected override void DrawInternal(DrawAdapter drawAdapter)
         {
             lock (TokenComponentsLock)
             {
                 if (TokenComponents == null) { return; }
 
-                drawAdapter.FillRectange(X, Y, X + Width, Y + Height, Color.SandyBrown);
+                drawAdapter.FillRectangle(X, Y, X + Width, Y + Height, Color.SandyBrown);
 
                 foreach (var tokenComponent in TokenComponents)
                 {

@@ -14,11 +14,22 @@ namespace CardKartClient.GUI
         public float Width { get; set; }
         public float Height { get; set; }
 
-        public abstract void Draw(DrawAdapter drawAdapter);
+        public bool Visible { get; set; } = true;
+
+        public void Draw(DrawAdapter drawAdapter)
+        {
+            if (Visible)
+            {
+                DrawInternal(drawAdapter);
+            }
+        }
+
+        protected abstract void DrawInternal(DrawAdapter drawAdapter);
 
         public bool HandleClick(GLCoordinate location)
         {
-            if (!InComponentRectangle(location)) { return false; }
+            if (!Visible) { return false; }
+            if (!ComponentRectangleContains(location)) { return false; }
 
             return HandleClickInternal(location);
         }
@@ -28,7 +39,7 @@ namespace CardKartClient.GUI
             return false;
         }
 
-        public bool InComponentRectangle(GLCoordinate location)
+        public bool ComponentRectangleContains(GLCoordinate location)
         {
             return location.InBounds(X, Y, X + Width, Y + Height);
         }

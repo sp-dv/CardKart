@@ -11,6 +11,13 @@ namespace CardKartShared.GameState
         public Pile Hand { get; } = new Pile(PileLocation.Hand);
         public Pile Deck { get; } = new Pile(PileLocation.Deck);
         public Pile Battlefield { get; } = new Pile(PileLocation.Battlefield);
+        public Pile Graveyard { get; } = new Pile(PileLocation.Graveyard);
+
+        public ManaSet CurrentMana { get; private set; } = new ManaSet();
+        public ManaSet MaxMana { get; } = new ManaSet();
+
+        public delegate void PlayerChangedHandler();
+        public event PlayerChangedHandler PlayerChanged;
 
         public Card Draw()
         {
@@ -21,5 +28,12 @@ namespace CardKartShared.GameState
 
             return drawnCard;
         }
+
+        public void ResetMana()
+        {
+            CurrentMana = new ManaSet(MaxMana);
+            PlayerChanged?.Invoke();
+        }
+
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using OpenTK.Graphics.OpenGL;
 using QuickFont;
@@ -13,6 +14,26 @@ namespace SGL
 
         public int ScreenWidth;
         public int ScreenHeight;
+
+        private static float[] CircleSins;
+        private static float[] CircleCoss;
+
+        static DrawAdapter()
+        {
+            var sins = new List<float>();
+            var coss = new List<float>();
+            // Add 0.09 because of some dumb floating math error. This
+            // ends up being the entire circle. Or maybe this is because
+            // we have to close the loop so it's the circle plus the first
+            // point twice. Who knows.
+            for (double angle = 0; angle <= Math.PI*2 + 0.09; angle += 0.1)
+            {
+                sins.Add((float)Math.Sin(angle));
+                coss.Add((float)Math.Cos(angle));
+            }
+            CircleSins = sins.ToArray();
+            CircleCoss = coss.ToArray();
+        }
 
         public DrawAdapter()
         {
@@ -50,7 +71,7 @@ namespace SGL
             GL.End();
         }
 
-        public void FillRectange(float x0, float y0, float x1, float y1, Color c)
+        public void FillRectangle(float x0, float y0, float x1, float y1, Color c)
         {
             GL.Color4(c);
 
@@ -75,49 +96,47 @@ namespace SGL
             GL.End();
         }
 
-        public void FillCircle(float radius, Color color)
+        public void FillCircle(float x0, float y0, float radius, Color color)
         {
-            float x1 = 0;
-            float y1 = 0;
-            float x2;
-            float y2;
+            float x1;
+            float y1;
             float angle;
 
 
-            GL.Begin(BeginMode.TriangleFan);
-            GL.Color3(color);
+            GL.Begin(PrimitiveType.TriangleFan);
+            GL.Color4(color);
 
-            GL.Vertex2(0, 0);
+            GL.Vertex2(x0, y0);
 
-            for (angle = 1.0f; angle < 361.0f; angle += 3f)
+            for (int i = 0; i < CircleSins.Length; i++)
             {
-                x2 = (float)Math.Sin(angle) * radius;
-                y2 = (float)Math.Cos(angle) * radius;
-                GL.Vertex2(x1 + x2, y1 + y2);
+                x1 = CircleSins[i] * radius;
+                y1 = CircleCoss[i] * radius;
+                GL.Vertex2(x0 + x1, y0 + y1);
             }
 
             GL.End();
         }
 
-        public void DrawCircle(float radius, Color color)
+        public void DrawCircle(float x0, float y0, float radius, Color color)
         {
-            float x0 = 0;
-            float y0 = 0;
-            int num_segments = 10;
+            float x1;
+            float y1;
+            float angle;
 
-            GL.Begin(BeginMode.LineLoop);
-            GL.Color3(color);
 
-            for (int i = 0; i < num_segments; i++)
+            GL.Begin(PrimitiveType.LineLoop);
+            GL.Color4(color);
+
+            //GL.Vertex2(x0, y0);
+
+            for (int i = 0; i < CircleSins.Length; i++)
             {
-                var theta = 2.0f * Math.PI * i / num_segments;
-
-                double x = radius * Math.Cos(theta);
-                double y = radius * Math.Sin(theta);
-
-                GL.Vertex2(x + x0, y + y0);
-
+                x1 = CircleSins[i] * radius;
+                y1 = CircleCoss[i] * radius;
+                GL.Vertex2(x0 + x1, y0 + y1);
             }
+
             GL.End();
         }
 
@@ -157,11 +176,11 @@ namespace SGL
 
         public void DrawBar(float x0, float y0, float x1, float y1, float pct, Color back, Color bar)
         {
-            FillRectange(x0, y0, x1, y1, back);
+            FillRectangle(x0, y0, x1, y1, back);
             pct = Math.Min(pct, 1);
             pct = Math.Max(pct, 0);
             var barWidth = (x1-x0) * pct;
-            FillRectange(x0, y0, x0 + barWidth, y1, bar);
+            FillRectangle(x0, y0, x0 + barWidth, y1, bar);
         }
 
         public void DrawText(string text, float X0, float Y0)

@@ -52,13 +52,13 @@ namespace CardKartClient.GUI.Components
             }
         }
 
-        public override void Draw(DrawAdapter drawAdapter)
+        protected override void DrawInternal(DrawAdapter drawAdapter)
         {
             lock (CardComponentsLock)
             {
                 if (CardComponents == null) { return; }
 
-                drawAdapter.FillRectange(X, Y, X + Width, Y + Height, Color.SaddleBrown);
+                drawAdapter.FillRectangle(X, Y, X + Width, Y + Height, Color.SaddleBrown);
 
                 foreach (var cardComponent in CardComponents)
                 {
@@ -71,7 +71,7 @@ namespace CardKartClient.GUI.Components
         {
             foreach (var cardComponent in CardComponents)
             {
-                if (cardComponent.InComponentRectangle(location))
+                if (cardComponent.ComponentRectangleContains(location))
                 {
                     CardClicked?.Invoke(cardComponent);
                     return true;
