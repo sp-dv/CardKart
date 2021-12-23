@@ -12,6 +12,10 @@ namespace CardKartClient.GUI.Scenes
 
         public MainMenuScene()
         {
+            SmartTextPanel debug = new SmartTextPanel();
+            debug.Text = "Long string of text to test shit out with. I sure hope this works. I sure hope future me has fixed text overflow xd.";
+            Components.Add(debug);
+
 
 #if true
             StartGameButton = new Button();

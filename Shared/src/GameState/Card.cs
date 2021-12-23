@@ -11,7 +11,7 @@ namespace CardKartShared.GameState
         public bool IsHero => Type == CardTypes.Hero;
 
         public int Attack;
-        public int Defence;
+        public int Health;
 
         public CardTypes Type;
         public CardTemplates Template;
@@ -27,8 +27,12 @@ namespace CardKartShared.GameState
 
         public Ability[] Abilities;
         public TriggeredAbility[] TriggeredAbilities;
+        public KeywordAbilityContainer KeywordAbilities = new KeywordAbilityContainer();
+        public Aura[] Auras;
 
         public ManaSet CastingCost;
+
+        public string BreadText { get; }
 
         public Card(CardTemplates template)
         {
@@ -46,11 +50,12 @@ namespace CardKartShared.GameState
                             ManaColour.Red);
 
                         Attack = 2;
-                        Defence = 1;
+                        Health = 1;
 
                         Abilities = new Ability[] {
                             new GenericCreatureCast(),
                         };
+                        KeywordAbilities[KeywordAbilityNames.Bloodlust] = true;
                     } break;
 
                 case CardTemplates.ArmoredZombie:
@@ -63,7 +68,7 @@ namespace CardKartShared.GameState
                             ManaColour.Black);
 
                         Attack = 1;
-                        Defence = 4;
+                        Health = 4;
 
                         Abilities = new Ability[] {
                             new GenericCreatureCast(),
@@ -78,6 +83,7 @@ namespace CardKartShared.GameState
                         CastingCost = new ManaSet(
                             ManaColour.Red
                             );
+                        BreadText = "Deal 2 damage to\ntarget creature.";
 
                         Abilities = new Ability[] {
                             new ZapCast(),
@@ -91,22 +97,53 @@ namespace CardKartShared.GameState
                         Colour = ManaColour.White;
                         CastingCost = new ManaSet();
 
-                        Defence = 27;
+                        Health = 27;
                     } break;
 
-                case CardTemplates.Testcard:
+                case CardTemplates.DepravedBloodhound:
                     {
-                        Name = "Testcard";
+                        Name = "Depraved Bloodhound";
                         Type = CardTypes.Creature;
-                        Colour = ManaColour.Blue;
-                        CastingCost = new ManaSet(ManaColour.Blue);
+                        Colour = ManaColour.Black;
+                        CastingCost = new ManaSet(ManaColour.Black, ManaColour.Black);
+                        //BreadText = "Whenever a player draws\na card deal 1 damage to\nthat player.";
 
-                        Attack = 1;
-                        Defence = 1;
+                        Attack = 2;
+                        Health = 3;
 
                         Abilities = new Ability[] {
                             new GenericCreatureCast(),
-                            new TestTriggeredAbility()
+                            new DepravedBloodhoundTrigger()
+                        };
+                    } break;
+
+                case CardTemplates.StandardBearer:
+                    {
+                        Name = "Standard Bearer";
+                        Type = CardTypes.Creature;
+                        Colour = ManaColour.White;
+                        CastingCost = new ManaSet(ManaColour.White);
+
+                        Attack = 1;
+                        Health = 1;
+
+                        Abilities = new Ability[] {
+                            new GenericCreatureCast(),
+                        };
+                        Auras = new Aura[] {
+                            new StandardBearerAura(),
+                        };
+                    } break;
+
+                case CardTemplates.Test:
+                    {
+                        Name = "Test";
+                        Type = CardTypes.Instant;
+                        Colour = ManaColour.Green;
+                        CastingCost = new ManaSet(ManaColour.Green);
+
+                        Abilities = new Ability[] {
+                            new TestCast(), 
                         };
                     } break;
 
@@ -128,6 +165,11 @@ namespace CardKartShared.GameState
             TriggeredAbilities = Abilities
                 .Where(ability => ability is TriggeredAbility)
                 .Select(triggeredAbility => triggeredAbility as TriggeredAbility).ToArray();
+            
+            if (Auras == null)
+            {
+                Auras = new Aura[0];
+            }
         }
 
         public Ability[] GetUsableAbilities(AbilityCastingContext context)
@@ -163,8 +205,10 @@ namespace CardKartShared.GameState
         AngryGoblin,
         ArmoredZombie,
         Zap,
+        DepravedBloodhound,
+        StandardBearer,
 
-        Testcard,
+        Test,
 
         HeroTest,
     }

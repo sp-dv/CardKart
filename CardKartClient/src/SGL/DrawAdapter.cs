@@ -188,5 +188,25 @@ namespace SGL
                 QFontAlignment.Left, 
                 RenderOptions);
         }
+
+        public void DrawTextSmart(
+            string text, 
+            float X0, 
+            float Y0, 
+            float width, 
+            float height,
+            QFont font,
+            QFontRenderOptions renderOptions)
+        {
+            var w = (X0 / 2 + 0.5f) * ScreenWidth;
+            var h = (Y0 / 2 + 0.5f) * ScreenHeight;
+
+            FontDrawing.Print(
+                font,
+                text,
+                new OpenTK.Vector3(w, h, 0),
+                QFontAlignment.Left,
+                renderOptions);
+        }
     }
 }

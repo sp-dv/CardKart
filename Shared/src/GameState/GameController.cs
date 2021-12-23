@@ -63,17 +63,18 @@ namespace CardKartShared.GameState
             ChoiceHelper.ResetGUIOptions();
             GameState.LoadDecks(
                 new Deck(new[] {
-
-                    CardTemplates.AngryGoblin,
-                    CardTemplates.Zap,
                     CardTemplates.ArmoredZombie,
-                    CardTemplates.Testcard,
+                    CardTemplates.Zap,
+                    CardTemplates.DepravedBloodhound,
+                    CardTemplates.AngryGoblin,
+                    CardTemplates.StandardBearer,
+                    CardTemplates.Test,
                 }),
                 new Deck(new[] {
-                    CardTemplates.Testcard,
-                    CardTemplates.ArmoredZombie,
                     CardTemplates.Zap,
-                    CardTemplates.AngryGoblin
+                    CardTemplates.DepravedBloodhound,
+                    CardTemplates.ArmoredZombie,
+                    CardTemplates.AngryGoblin,
                 }));
 
             GameState.ResetMana(GameState.Player1);
@@ -89,12 +90,21 @@ namespace CardKartShared.GameState
                 CombatStep();
                 CastStep();
 
+                GameState.SetTime(GameTime.EndOfTurn);
+                EnforceGameRules(true);
+
                 GameState.SwapActivePlayer();
             }
         }
 
         private void DrawStep()
         {
+            foreach (var card in ActivePlayer.Battlefield)
+            {
+                card.Token.Exhausted = false;
+                card.Token.SummoningSick = false;
+            }
+
             EnforceGameRules(true);
             GameState.DrawCards(ActivePlayer, 1);
             EnforceGameRules(true);
@@ -154,8 +164,9 @@ namespace CardKartShared.GameState
                 {
                     ChoiceHelper.Text = "Choose attackers";
                     ChoiceHelper.ShowOk = true;
-                    var choice = ChoiceHelper.ChooseToken(
-                        token => token.TokenOf.Controller == Hero);
+                    var choice = ChoiceHelper.ChooseToken(token => 
+                    token.TokenOf.Controller == Hero &&
+                    token.CanAttack);
 
                     if (choice == null) { break; }
 
@@ -218,8 +229,9 @@ namespace CardKartShared.GameState
                 {
                     ChoiceHelper.Text = "Choose a defender.";
                     ChoiceHelper.ShowOk = true;
-                    var defender = ChoiceHelper.ChooseToken(
-                        token => token.TokenOf.Controller == Hero);
+                    var defender = ChoiceHelper.ChooseToken(token => 
+                    token.TokenOf.Controller == Hero &&
+                    token.CanBlock);
 
                     if (defender == null) { break; }
 
@@ -246,7 +258,8 @@ namespace CardKartShared.GameState
                     ChoiceHelper.Text = "Choose a defender.";
                     ChoiceHelper.ShowCancel = true;
                     var blocked = ChoiceHelper.ChooseToken(
-                        token => token.TokenOf.Controller == Villain);
+                        token => token.TokenOf.Controller == Villain &&
+                        defender.CanBlockToken(token));
 
                     if (blocked == null) { continue; }
 
@@ -380,14 +393,17 @@ namespace CardKartShared.GameState
 
                 ability.EnactResolveChoices(context);
 
-                if (card.Type == CardTypes.Creature ||
-                    card.Type == CardTypes.Relic)
+                if (ability.MoveToStackOnCast)
                 {
-                    GameState.MoveCard(card, card.Owner.Battlefield);
-                }
-                else
-                {
-                    GameState.MoveCard(card, card.Owner.Graveyard);
+                    if (card.Type == CardTypes.Creature ||
+                        card.Type == CardTypes.Relic)
+                    {
+                        GameState.MoveCard(card, card.Owner.Battlefield);
+                    }
+                    else
+                    {
+                        GameState.MoveCard(card, card.Owner.Graveyard);
+                    }
                 }
 
                 EnforceGameRules(false);
@@ -406,12 +422,25 @@ namespace CardKartShared.GameState
 
         private void EnforceGameRules(bool resolveStack)
         {
+            foreach (var token in GameState.AllTokens)
+            {
+                token.AuraModifiers.Reset();
+            }
+
+            foreach (var token in GameState.AllTokens)
+            {
+                foreach (var aura in token.Auras)
+                {
+                    aura.ApplyAura(token, GameState);
+                }
+            }
+
             var deadCards = new List<Card>();
 
             foreach (var card in
                 GameState.Player1.Battlefield.Concat(GameState.Player2.Battlefield))
             {
-                if (card.Token.Defence <= 0)
+                if (card.Token.CurrentHealth <= 0)
                 {
                     deadCards.Add(card);
                 }
@@ -674,5 +703,10 @@ namespace CardKartShared.GameState
 
             RequestGUIUpdate?.Invoke();
         }
+    }
+
+    public enum GameTime
+    {
+        EndOfTurn,
     }
 }

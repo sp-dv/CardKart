@@ -30,7 +30,7 @@ namespace CardKartClient.GUI.Components
         private void Update()
         {
             ManaBar.Update(Player.CurrentMana, Player.MaxMana);
-            HealthPanel.Text = Player.HeroCard.Token.Defence.ToString();
+            HealthPanel.Text = Player.HeroCard.Token.CurrentHealth.ToString();
         }
 
         public void Layout()

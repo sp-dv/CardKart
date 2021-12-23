@@ -12,8 +12,9 @@ namespace CardKartClient.GUI
         public static Texture Token1;
         public static Texture Zap1;
         public static Texture Zombie1;
-
         public static Texture NoPortait;
+        public static Texture ZZZ;
+        public static Texture Hound1;
 
         public static void LoadTextures()
         {
@@ -23,8 +24,9 @@ namespace CardKartClient.GUI
             Token1 = TextureLoader.CreateTexture(Properties.Resources.token1);
             Zap1 = TextureLoader.CreateTexture(Properties.Resources.zap1);
             Zombie1 = TextureLoader.CreateTexture(Properties.Resources.zombie1);
-
             NoPortait = TextureLoader.CreateTexture(Properties.Resources.noportrait);
+            ZZZ = TextureLoader.CreateTexture(Properties.Resources.zzz);
+            Hound1 = TextureLoader.CreateTexture(Properties.Resources.hound1);
         }
 
         public static Texture Portraits(CardTemplates template)
@@ -34,6 +36,7 @@ namespace CardKartClient.GUI
                 case CardTemplates.AngryGoblin: { return Goblin1; }
                 case CardTemplates.ArmoredZombie: { return Zombie1; }
                 case CardTemplates.Zap: { return Zap1; }
+                case CardTemplates.DepravedBloodhound: { return Hound1; }
                 default: { return NoPortait; }
             }
         }

@@ -93,6 +93,16 @@ namespace CardKartClient.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap hound1 {
+            get {
+                object obj = ResourceManager.GetObject("hound1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap noportrait {
             get {
                 object obj = ResourceManager.GetObject("noportrait", resourceCulture);
@@ -126,6 +136,16 @@ namespace CardKartClient.Properties {
         internal static System.Drawing.Bitmap zombie1 {
             get {
                 object obj = ResourceManager.GetObject("zombie1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap zzz {
+            get {
+                object obj = ResourceManager.GetObject("zzz", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

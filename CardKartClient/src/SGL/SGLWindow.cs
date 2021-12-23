@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using CardKartClient.GUI;
+using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
@@ -13,8 +14,6 @@ namespace SGL
     {
         private Matrix4 ProjectionMatrix;
 
-        private QFontRenderOptions MainTextRenderOptions;
-        private QFont MainTextFont;
         private QFontDrawing FondDrawing;
 
         public Scene CurrentScene;
@@ -32,22 +31,6 @@ namespace SGL
             base.OnLoad(e);
 
             FondDrawing = new QFontDrawing();
-            var builderConfig = new QFontBuilderConfiguration(true)
-            {
-                ShadowConfig =
-                {
-                    blurRadius = 2,
-                    blurPasses = 1,
-                    Type = ShadowType.Blurred
-                },
-                TextGenerationRenderHint = TextGenerationRenderHint.ClearTypeGridFit,
-                Characters = CharacterSet.General
-            };
-            MainTextFont = new QFont("Fonts/times.ttf", 10, builderConfig);
-            MainTextRenderOptions = new QFontRenderOptions { 
-                DropShadowActive = true, 
-                Colour = Color.Black, 
-                WordSpacing = 0.5f };
 
             GL.ClearColor(Color4.CornflowerBlue);
 
@@ -77,8 +60,8 @@ namespace SGL
             {
                 var da = new DrawAdapter();
                 da.FontDrawing = FondDrawing;
-                da.DefaultFont = MainTextFont;
-                da.RenderOptions = MainTextRenderOptions;
+                da.DefaultFont = Fonts.MainFont10;
+                da.RenderOptions = Fonts.MainRenderOptions;
                 da.ScreenHeight = Height;
                 da.ScreenWidth = Width;
 

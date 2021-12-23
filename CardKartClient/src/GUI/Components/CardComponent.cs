@@ -89,6 +89,10 @@ namespace CardKartClient.GUI.Components
                 PaletteColor);
 
             drawAdapter.DrawText(Card.Name, X + NameInsetX, Y + NameInsetY);
+            if (Card.BreadText != null)
+            {
+                drawAdapter.DrawText(Card.BreadText, X + 0.012f, Y + 0.17f);
+            }
 
             if (Card.Type == CardTypes.Creature)
             {
@@ -98,7 +102,7 @@ namespace CardKartClient.GUI.Components
                     Y + AttackInsetY);
 
                 drawAdapter.DrawText(
-                    Card.Defence.ToString(), 
+                    Card.Health.ToString(), 
                     X + DefenceInsetX, 
                     Y + DefenceInsetY);
             }

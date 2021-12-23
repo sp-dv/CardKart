@@ -73,7 +73,19 @@ namespace CardKartShared.GameState
 
             return payment;
         }
-        
+        protected bool InstantsAreCastable(AbilityCastingContext context)
+        {
+            if (Card.Location != PileLocation.Hand) { return false; }
+            if (Card.Owner != context.CastingPlayer) { return false; }
+
+            return true;
+        }
+
+        protected bool ManaCostIsPayable(ManaSet cost, AbilityCastingContext context)
+        {
+            return context.CastingPlayer.CurrentMana.Covers(cost);
+
+        }
 
     }
 
@@ -135,9 +147,18 @@ namespace CardKartShared.GameState
             return GameState.GetByID(Choices.Singletons[key]) as Player;
         }
 
-    }
+        public void SetManaSet(string key, ManaSet set)
+        {
+            Choices.Arrays[key] = set.ToInts();
+        }
 
-    #region Reusable Abilities
+        public ManaSet GetManaSet(string key)
+        {
+            var set = new ManaSet();
+            set.FromInts(Choices.Arrays[key]);
+            return set;
+        }
+    }
 
     public class GenericCreatureCast : Ability
     {
@@ -180,8 +201,6 @@ namespace CardKartShared.GameState
         }
     }
 
-    #endregion
-
     public class ZapCast : Ability
     {
         public ZapCast()
@@ -190,11 +209,8 @@ namespace CardKartShared.GameState
 
         public override bool IsCastable(AbilityCastingContext context)
         {
-            if (Card.Location != PileLocation.Hand) { return false; }
-            if (Card.Owner != context.CastingPlayer) { return false; }
-            if (!context.CastingPlayer.CurrentMana.Covers(Card.CastingCost)) { return false; }
-
-            return true;
+            return InstantsAreCastable(context) && 
+                ManaCostIsPayable(Card.CastingCost, context);
         }
 
         public override bool MakeCastChoices(AbilityCastingContext context)
@@ -229,5 +245,52 @@ namespace CardKartShared.GameState
             context.GameState.DealDamage(Card, target, 2);
         }
 
+    }
+
+    public class TestCast : Ability
+    {
+        public TestCast()
+        {
+            MoveToStackOnCast = true;
+        }
+
+        public override bool IsCastable(AbilityCastingContext context)
+        {
+            return InstantsAreCastable(context) &&
+                ManaCostIsPayable(Card.CastingCost, context);
+        }
+
+        public override bool MakeCastChoices(AbilityCastingContext context)
+        {
+            var payment = PayMana(Card.CastingCost, context);
+            if (payment == null) { return false; }
+
+            context.ChoiceHelper.Text = "Choose a target for Test.";
+            context.ChoiceHelper.ShowCancel = true;
+            var target = context.ChoiceHelper.ChooseToken(token => true);
+            if (target == null) { return false; }
+
+            context.SetManaSet("manacost", payment);
+            context.SetToken("!target", target);
+            return true;
+        }
+
+        public override void EnactCastChoices(AbilityCastingContext context)
+        {
+            context.GameState.SpendMana(
+                context.CastingPlayer, 
+                context.GetManaSet("manacost"));
+        }
+
+
+        public override void MakeResolveChoices(AbilityCastingContext context)
+        {
+        }
+
+        public override void EnactResolveChoices(AbilityCastingContext context)
+        {
+            var target = context.GetToken("!target");
+            target.Auras.Add(new TestAura());
+        }
     }
 }

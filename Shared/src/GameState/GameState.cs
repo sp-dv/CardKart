@@ -17,6 +17,11 @@ namespace CardKartShared.GameState
         public Player ActivePlayer { get; private set; }
         public Player InactivePlayer { get; private set; }
 
+        public IEnumerable<Token> AllTokens =>
+            Player1.Battlefield
+            .Concat(Player2.Battlefield)
+            .Select(card => card.Token);
+
         public List<(Trigger, TriggeredAbility)> PendingTriggersPlayer1 { get; } =
             new List<(Trigger, TriggeredAbility)>();
 
@@ -117,6 +122,23 @@ namespace CardKartShared.GameState
 
             addTriggers(Player1, PendingTriggersPlayer1);
             addTriggers(Player2, PendingTriggersPlayer2);
+
+            foreach (var token in AllTokens)
+            {
+                var cancelledAuras = new List<Aura>();
+                foreach (var aura in token.Auras)
+                {
+                    if (aura.IsCancelledBy(trigger, token, this))
+                    {
+                        cancelledAuras.Add(aura);
+                    }    
+                }
+
+                foreach (var cancelledAura in cancelledAuras)
+                {
+                    token.Auras.Remove(cancelledAura);
+                }
+            }
         }
 
         public void DrawCards(Player player, int cardCount)
@@ -154,7 +176,8 @@ namespace CardKartShared.GameState
 
             if (pile.Location == PileLocation.Battlefield)
             {
-                CreateToken(card);
+                var token = CreateToken(card);
+                token.SummoningSick = true;
             }
 
             pile.Add(card);
@@ -164,12 +187,17 @@ namespace CardKartShared.GameState
         {
             if (amount <= 0) { return; }
 
-            target.Damage += amount;
+            target.DamageTaken += amount;
 
             if (target.TokenOf.IsHero)
             {
                 target.TokenOf.Owner.NotifyOfChange();
             }    
+        }
+
+        public void SetTime(GameTime time)
+        {
+            Trigger(new GameTimeTrigger(time, ActivePlayer));
         }
 
         #endregion
@@ -185,8 +213,7 @@ namespace CardKartShared.GameState
 
         private Token CreateToken(Card card)
         {
-            var token = new Token();
-            token.TokenOf = card;
+            var token = new Token(card);
             card.Token = token;
             AddGameObject(token);
 

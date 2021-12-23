@@ -16,13 +16,14 @@ namespace CardKartShared.Util
         public static readonly Server DebugServer
             = new Server(4444, "localhost");
 
+
         public static Color PaletteColor(ManaColour colour)
         {
             switch (colour)
             {
                 case ManaColour.Red: { return Color.Firebrick; }
                 case ManaColour.Black: { return Color.DarkSlateGray; }
-                case ManaColour.Blue: { return Color.Blue; }
+                case ManaColour.Blue: { return Color.Aqua; }
                 case ManaColour.Purple: { return Color.Purple; }
                 case ManaColour.White: { return Color.White; }
                 case ManaColour.Green: { return Color.Green; }

@@ -18,7 +18,7 @@ namespace CardKartShared.GameState
         }
     }
 
-    public class TestTriggeredAbility : TriggeredAbility
+    public class DepravedBloodhoundTrigger : TriggeredAbility
     {
         public override bool IsTriggeredBy(Trigger trigger)
         {
@@ -61,7 +61,7 @@ namespace CardKartShared.GameState
 
     }
 
-    public class Trigger
+    public interface Trigger
     {
         
     }
@@ -77,6 +77,18 @@ namespace CardKartShared.GameState
             Card = card;
             From = from;
             To = to;
+        }
+    }
+
+    public class GameTimeTrigger : Trigger
+    {
+        public GameTime Time { get; }
+        public Player ActivePlayer { get; }
+
+        public GameTimeTrigger(GameTime time, Player activePlayer)
+        {
+            Time = time;
+            ActivePlayer = activePlayer;
         }
     }
 

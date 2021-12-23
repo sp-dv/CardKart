@@ -59,8 +59,20 @@ namespace CardKartClient.GUI.Components
 
             if (Card.Token != null)
             {
-                drawAdapter.DrawText(Card.Token.Attack.ToString(), X + 0.065f, Y + 0.05f);
-                drawAdapter.DrawText(Card.Token.Defence.ToString(), X + 0.125f, Y + 0.05f);
+                var token = Card.Token;
+
+                drawAdapter.DrawText(token.Attack.ToString(), X + 0.065f, Y + 0.05f);
+                drawAdapter.DrawText(token.CurrentHealth.ToString(), X + 0.125f, Y + 0.05f);
+
+                if (token.Exhausted)
+                {
+                    drawAdapter.DrawSprite(
+                        X + Width/2, 
+                        Y + Height - 0.05f, 
+                        X + Width/2 + 0.05f, 
+                        Y + Height, 
+                        Textures.ZZZ);
+                }
             }
         }
     }
