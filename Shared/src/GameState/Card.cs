@@ -25,7 +25,8 @@ namespace CardKartShared.GameState
 
         public Token Token;
 
-        public ActiveAbility[] ActiveAbilities;
+        public Ability[] Abilities;
+        public TriggeredAbility[] TriggeredAbilities;
 
         public ManaSet CastingCost;
 
@@ -39,7 +40,7 @@ namespace CardKartShared.GameState
                 case CardTemplates.AngryGoblin:
                     {
                         Name = "Angry Goblin";
-                        Type = CardTypes.Monster;
+                        Type = CardTypes.Creature;
                         Colour = ManaColour.Red;
                         CastingCost = new ManaSet(
                             ManaColour.Red);
@@ -47,7 +48,7 @@ namespace CardKartShared.GameState
                         Attack = 2;
                         Defence = 1;
 
-                        ActiveAbilities = new ActiveAbility[] {
+                        Abilities = new Ability[] {
                             new GenericCreatureCast(),
                         };
                     } break;
@@ -55,7 +56,7 @@ namespace CardKartShared.GameState
                 case CardTemplates.ArmoredZombie:
                     {
                         Name = "Armored Zombie";
-                        Type = CardTypes.Monster;
+                        Type = CardTypes.Creature;
                         Colour= ManaColour.Black;
                         CastingCost = new ManaSet(
                             ManaColour.Black, 
@@ -64,7 +65,7 @@ namespace CardKartShared.GameState
                         Attack = 1;
                         Defence = 4;
 
-                        ActiveAbilities = new ActiveAbility[] {
+                        Abilities = new Ability[] {
                             new GenericCreatureCast(),
                         };
                     } break;
@@ -78,7 +79,7 @@ namespace CardKartShared.GameState
                             ManaColour.Red
                             );
 
-                        ActiveAbilities = new ActiveAbility[] {
+                        Abilities = new Ability[] {
                             new ZapCast(),
                         };
                     } break;
@@ -93,34 +94,53 @@ namespace CardKartShared.GameState
                         Defence = 27;
                     } break;
 
+                case CardTemplates.Testcard:
+                    {
+                        Name = "Testcard";
+                        Type = CardTypes.Creature;
+                        Colour = ManaColour.Blue;
+                        CastingCost = new ManaSet(ManaColour.Blue);
+
+                        Attack = 1;
+                        Defence = 1;
+
+                        Abilities = new Ability[] {
+                            new GenericCreatureCast(),
+                            new TestTriggeredAbility()
+                        };
+                    } break;
+
                 default:
                     {
                         throw new Exception("Bad card template...");
                     }
             }
 
-            if (ActiveAbilities == null)
+            if (Abilities == null)
             {
-                ActiveAbilities = new ActiveAbility[0];
+                Abilities = new Ability[0];
             }
-            foreach (var ability in ActiveAbilities)
+            foreach (var ability in Abilities)
             {
                 ability.Card = this;
             }
+
+            TriggeredAbilities = Abilities
+                .Where(ability => ability is TriggeredAbility)
+                .Select(triggeredAbility => triggeredAbility as TriggeredAbility).ToArray();
         }
 
-        public ActiveAbility[] GetUsableAbilities(
-            AbilityCastingContext context)
+        public Ability[] GetUsableAbilities(AbilityCastingContext context)
         {
-            return ActiveAbilities
-                .Where(ability => ability.Castable(context)).ToArray();
+            return Abilities
+                .Where(ability => ability.IsCastable(context)).ToArray();
         }
 
-        public int IndexOfActiveAbility(ActiveAbility ability)
+        public int IndexOfAbility(Ability ability)
         {
-            for (int i = 0; i < ActiveAbilities.Length; i++)
+            for (int i = 0; i < Abilities.Length; i++)
             {
-                if (ability == ActiveAbilities[i]) { return i; }
+                if (ability == Abilities[i]) { return i; }
             }
 
             throw new NotImplementedException();
@@ -131,7 +151,7 @@ namespace CardKartShared.GameState
     {
         None,
 
-        Monster,
+        Creature,
         Instant,
         Channel,
         Relic,
@@ -143,6 +163,8 @@ namespace CardKartShared.GameState
         AngryGoblin,
         ArmoredZombie,
         Zap,
+
+        Testcard,
 
         HeroTest,
     }

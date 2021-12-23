@@ -17,6 +17,12 @@ namespace CardKartShared.GameState
         public Player ActivePlayer { get; private set; }
         public Player InactivePlayer { get; private set; }
 
+        public List<(Trigger, TriggeredAbility)> PendingTriggersPlayer1 { get; } =
+            new List<(Trigger, TriggeredAbility)>();
+
+        public List<(Trigger, TriggeredAbility)> PendingTriggersPlayer2 { get; } =
+            new List<(Trigger, TriggeredAbility)>();
+
         public GameState()
         {
             // An ID of 0 is invalid so just make lookups return null.
@@ -81,19 +87,48 @@ namespace CardKartShared.GameState
 
         #region Triggering 
 
+        private void Trigger(Trigger trigger)
+        {
+            Action<Player, List<(Trigger, TriggeredAbility)>> addTriggers = 
+                (player, list) =>
+            {
+                foreach (var card in player.Graveyard)
+                {
+                    foreach (var triggeredAbility in card.TriggeredAbilities)
+                    {
+                        if (triggeredAbility.IsTriggeredBy(trigger))
+                        {
+                            list.Add((trigger, triggeredAbility));
+                        }
+                    }
+                }
+
+                foreach (var card in player.Battlefield)
+                {
+                    foreach (var triggeredAbility in card.Token.TriggeredAbilities)
+                    {
+                        if (triggeredAbility.IsTriggeredBy(trigger))
+                        {
+                            list.Add((trigger, triggeredAbility));
+                        }
+                    }
+                }
+            };
+
+            addTriggers(Player1, PendingTriggersPlayer1);
+            addTriggers(Player2, PendingTriggersPlayer2);
+        }
+
         public void DrawCards(Player player, int cardCount)
         {
+            Trigger(new DrawTrigger(player, cardCount));
+
             for (int i = 0; i < cardCount; i++)
             {
                 if (player.Deck.Count == 0) { return; }
                 var drawnCard = player.Deck[player.Deck.Count - 1];
                 player.Hand.Add(drawnCard);
             }
-        }
-
-        public void UseActiveAbility(AbilityCastingContext context)
-        {
-            throw new NotImplementedException();
         }
 
         public void ResetMana(Player player)

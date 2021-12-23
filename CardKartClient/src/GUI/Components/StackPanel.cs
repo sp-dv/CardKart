@@ -46,7 +46,7 @@ namespace CardKartClient.GUI.Components
             {
                 foreach (var cardComponent in CardComponents)
                 {
-                    cardComponent.Draw(drawAdapter);
+                    cardComponent?.Draw(drawAdapter);
                 }
             }
         }

@@ -12,5 +12,9 @@ namespace CardKartShared.GameState
 
         public int Attack => TokenOf.Attack;
         public int Defence => TokenOf.Defence - Damage;
+
+        public bool IsHero => TokenOf.IsHero;
+
+        public TriggeredAbility[] TriggeredAbilities => TokenOf.TriggeredAbilities;
     }
 }

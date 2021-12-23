@@ -1,18 +1,15 @@
 ﻿using CardKartShared.Network.Messages;
-using CardKartShared.Util;
-using System;
-using System.Linq;
 using System.Text;
 
 namespace CardKartShared.GameState
 {
-    public abstract class ActiveAbility
+    public abstract class Ability
     {
         public Card Card;
 
         public bool MoveToStackOnCast { get; protected set; }
 
-        public abstract bool Castable(AbilityCastingContext context);
+        public abstract bool IsCastable(AbilityCastingContext context);
 
         public abstract bool MakeCastChoices(AbilityCastingContext context);
         public abstract void EnactCastChoices(AbilityCastingContext context);
@@ -20,14 +17,11 @@ namespace CardKartShared.GameState
         public abstract void MakeResolveChoices(AbilityCastingContext context);
         public abstract void EnactResolveChoices(AbilityCastingContext context);
 
-
-        #region Common helper functions
-
         protected ManaSet PayMana(ManaSet cost, AbilityCastingContext context)
         {
-            if (cost.Colourless == 0) 
-            { 
-                return new ManaSet(cost); 
+            if (cost.Colourless == 0)
+            {
+                return new ManaSet(cost);
             }
 
             if (cost.Size == context.CastingPlayer.CurrentMana.Size)
@@ -60,8 +54,8 @@ namespace CardKartShared.GameState
                     stringBuilder.Length -= 2; // Trim the trailing ", ".
                     paymentString = stringBuilder.ToString();
                 }
-                
-                context.ChoiceHelper.Text = 
+
+                context.ChoiceHelper.Text =
                     $"Paying with:\n{paymentString}";
                 context.ChoiceHelper.ShowCancel = true;
                 var choice = context.ChoiceHelper.ChooseColour(colour =>
@@ -79,14 +73,8 @@ namespace CardKartShared.GameState
 
             return payment;
         }
+        
 
-        protected Token GetToken(AbilityCastingContext context, string key)
-        {
-            var tokenID = context.Choices.Singletons[key];
-            return context.GameState.GetByID(tokenID) as Token;
-        }
-
-        #endregion
     }
 
     public class AbilityCastingContext
@@ -116,27 +104,49 @@ namespace CardKartShared.GameState
         private bool HasCard =>
             Choices.Singletons.ContainsKey("_Card");
 
-        public ActiveAbility Ability
+        public Ability Ability
         {
-            get => !HasAbility ? null : Card.ActiveAbilities[Choices.Singletons["_Ability"]];
-            set => Choices.Singletons["_Ability"] = value.Card.IndexOfActiveAbility(value);
+            get => !HasAbility ? null : Card.Abilities[Choices.Singletons["_Ability"]];
+            set => Choices.Singletons["_Ability"] = value.Card.IndexOfAbility(value);
         }
         private bool HasAbility =>
             HasCard && Choices.Singletons.ContainsKey("_Ability");
 
         #endregion
+
+        
+        public void SetToken(string key, Token token)
+        {
+            Choices.Singletons[key] = token.ID;
+        }
+
+        public Token GetToken(string key)
+        {
+            return GameState.GetByID(Choices.Singletons[key]) as Token;
+        }
+
+        public void SetPlayer(string key, Player player)
+        {
+            Choices.Singletons[key] = player.ID;
+        }
+
+        public Player GetPlayer(string key)
+        {
+            return GameState.GetByID(Choices.Singletons[key]) as Player;
+        }
+
     }
 
     #region Reusable Abilities
 
-    public class GenericCreatureCast : ActiveAbility
+    public class GenericCreatureCast : Ability
     {
         public GenericCreatureCast()
         {
             MoveToStackOnCast = true;
         }
 
-        public override bool Castable(AbilityCastingContext context)
+        public override bool IsCastable(AbilityCastingContext context)
         {
             if (Card.Location != PileLocation.Hand) { return false; }
             if (Card.Owner != context.CastingPlayer) { return false; }
@@ -172,13 +182,13 @@ namespace CardKartShared.GameState
 
     #endregion
 
-    public class ZapCast : ActiveAbility
+    public class ZapCast : Ability
     {
         public ZapCast()
         {
         }
 
-        public override bool Castable(AbilityCastingContext context)
+        public override bool IsCastable(AbilityCastingContext context)
         {
             if (Card.Location != PileLocation.Hand) { return false; }
             if (Card.Owner != context.CastingPlayer) { return false; }
@@ -198,7 +208,7 @@ namespace CardKartShared.GameState
             if (target == null) { return false; }
 
             context.Choices.Arrays["manacost"] = payment.ToInts();
-            context.Choices.Singletons["target"] = target.ID;
+            context.SetToken("target", target);
             return true;
         }
 
@@ -215,7 +225,7 @@ namespace CardKartShared.GameState
 
         public override void EnactResolveChoices(AbilityCastingContext context)
         {
-            var target = GetToken(context, "target");
+            var target = context.GetToken("target");
             context.GameState.DealDamage(Card, target, 2);
         }
 

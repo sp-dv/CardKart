@@ -90,7 +90,7 @@ namespace CardKartClient.GUI.Components
 
             drawAdapter.DrawText(Card.Name, X + NameInsetX, Y + NameInsetY);
 
-            if (Card.Type == CardTypes.Monster)
+            if (Card.Type == CardTypes.Creature)
             {
                 drawAdapter.DrawText(
                     Card.Attack.ToString(), 

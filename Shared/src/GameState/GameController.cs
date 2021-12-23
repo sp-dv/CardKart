@@ -27,8 +27,8 @@ namespace CardKartShared.GameState
         public event RedrawAttackerAnimationsHandler RedrawAttackerAnimations;
 
         public GameController(
-            int gameID, 
-            int heroIndex, 
+            int gameID,
+            int heroIndex,
             GameChoiceSynchronizer gameChoiceSynchronizer)
         {
             GameChoiceSynchronizer = gameChoiceSynchronizer;
@@ -48,7 +48,7 @@ namespace CardKartShared.GameState
             }
 
         }
-        
+
         public void Start()
         {
             new Thread(() =>
@@ -63,11 +63,14 @@ namespace CardKartShared.GameState
             ChoiceHelper.ResetGUIOptions();
             GameState.LoadDecks(
                 new Deck(new[] {
+
                     CardTemplates.AngryGoblin,
                     CardTemplates.Zap,
                     CardTemplates.ArmoredZombie,
+                    CardTemplates.Testcard,
                 }),
                 new Deck(new[] {
+                    CardTemplates.Testcard,
                     CardTemplates.ArmoredZombie,
                     CardTemplates.Zap,
                     CardTemplates.AngryGoblin
@@ -92,8 +95,9 @@ namespace CardKartShared.GameState
 
         private void DrawStep()
         {
+            EnforceGameRules(true);
             GameState.DrawCards(ActivePlayer, 1);
-            EnforceGameRules();
+            EnforceGameRules(true);
 
             ManaColour colour;
             if (ActivePlayer == Hero)
@@ -115,7 +119,8 @@ namespace CardKartShared.GameState
 
             GameState.GainMana(ActivePlayer, colour);
             GameState.ResetMana(ActivePlayer);
-            EnforceGameRules();
+            
+            EnforceGameRules(true);
         }
 
         private void CastStep()
@@ -128,46 +133,13 @@ namespace CardKartShared.GameState
                     var context = Priority(castingPlayer);
                     if (context == null) { break; }
 
-                    var ability = context.Ability;
-                    var card = context.Card;
-
-                    ability.EnactCastChoices(context);
-
-                    CastingStack.Push(context);
-                    if (ability.MoveToStackOnCast)
-                    {
-                        GameState.MoveCard(card, card.Owner.Stack);
-                    }
+                    EnforceGameRules(false);
 
                     castingPlayer = GameState.OtherPlayer(castingPlayer);
-
-                    EnforceGameRules();
                 }
 
                 if (CastingStack.Count == 0) { break; }
-
-                while (CastingStack.Count > 0)
-                {
-                    var context = CastingStack.Pop();
-
-                    var card = context.Card;
-                    var ability = context.Ability;
-
-                    ability.MakeResolveChoices(context);
-                    ability.EnactResolveChoices(context);
-
-                    if (card.Type == CardTypes.Monster ||
-                        card.Type == CardTypes.Relic)
-                    {
-                        GameState.MoveCard(card, card.Owner.Battlefield);
-                    }
-                    else
-                    {
-                        GameState.MoveCard(card, card.Owner.Graveyard);
-                    }
-
-                    EnforceGameRules();
-                }
+                ResolveStack();
             }
         }
 
@@ -210,12 +182,12 @@ namespace CardKartShared.GameState
                 ChoiceHelper.ResetGUIOptions();
 
                 var attackerIDs = attackersChoice.Arrays["_attackers"];
-                attackers = 
+                attackers =
                     attackerIDs.Select(id => GameState.GetByID(id) as Token).ToList();
             }
 
             RedrawAttackerAnimations(attackers.ToArray(), null);
-            EnforceGameRules();
+            EnforceGameRules(true);
 
             if (attackers.Count == 0) { return; }
 
@@ -266,7 +238,7 @@ namespace CardKartShared.GameState
                     {
                         defenders.RemoveAt(ix);
                         RedrawAttackerAnimations(
-                            attackers.ToArray(), 
+                            attackers.ToArray(),
                             defenders.ToArray());
                         continue;
                     }
@@ -284,7 +256,7 @@ namespace CardKartShared.GameState
                         defenders.ToArray());
                 }
 
-                var blockerIDs = 
+                var blockerIDs =
                     defenders.Select(pair => pair.Item1.ID).ToArray();
                 var blockedIDs =
                     defenders.Select(pair => pair.Item2.ID).ToArray();
@@ -296,7 +268,7 @@ namespace CardKartShared.GameState
             }
 
             RedrawAttackerAnimations(attackers.ToArray(), defenders.ToArray());
-            EnforceGameRules();
+            EnforceGameRules(true);
 
             var unblockedAttackers = attackers.ToList();
 
@@ -317,14 +289,14 @@ namespace CardKartShared.GameState
             foreach (var unblocked in unblockedAttackers)
             {
                 GameState.DealDamage(
-                    unblocked.TokenOf, 
-                    InactivePlayer.HeroCard.Token, 
+                    unblocked.TokenOf,
+                    InactivePlayer.HeroCard.Token,
                     unblocked.Attack);
             }
 
             Thread.Sleep(1000);
 
-            EnforceGameRules();
+            EnforceGameRules(true);
 
             RedrawAttackerAnimations(null, null);
         }
@@ -360,7 +332,7 @@ namespace CardKartShared.GameState
                         return;
                     }
                 })();
-                
+
                 GameChoiceSynchronizer.SendChoice(context.Choices);
             }
             else
@@ -374,6 +346,17 @@ namespace CardKartShared.GameState
 
             if (context.Card != null && context.Ability != null)
             {
+                var ability = context.Ability;
+                var card = context.Card;
+
+                ability.EnactCastChoices(context);
+
+                CastingStack.Push(context);
+                if (ability.MoveToStackOnCast)
+                {
+                    GameState.MoveCard(card, card.Owner.Stack);
+                }
+
                 return context;
             }
             else
@@ -381,7 +364,36 @@ namespace CardKartShared.GameState
                 return null;
             }
         }
-        
+
+        private void ResolveStack()
+        {
+            while (CastingStack.Count > 0)
+            {
+                Thread.Sleep(1000);
+
+                var context = CastingStack.Pop();
+
+                var card = context.Card;
+                var ability = context.Ability;
+
+                ability.MakeResolveChoices(context);
+
+                ability.EnactResolveChoices(context);
+
+                if (card.Type == CardTypes.Creature ||
+                    card.Type == CardTypes.Relic)
+                {
+                    GameState.MoveCard(card, card.Owner.Battlefield);
+                }
+                else
+                {
+                    GameState.MoveCard(card, card.Owner.Graveyard);
+                }
+
+                EnforceGameRules(false);
+            }
+        }
+
         private AbilityCastingContext MakeContext()
         {
             var context = new AbilityCastingContext();
@@ -392,11 +404,11 @@ namespace CardKartShared.GameState
             return context;
         }
 
-        private void EnforceGameRules()
+        private void EnforceGameRules(bool resolveStack)
         {
             var deadCards = new List<Card>();
 
-            foreach (var card in 
+            foreach (var card in
                 GameState.Player1.Battlefield.Concat(GameState.Player2.Battlefield))
             {
                 if (card.Token.Defence <= 0)
@@ -408,6 +420,73 @@ namespace CardKartShared.GameState
             foreach (var dying in deadCards)
             {
                 GameState.MoveCard(dying, dying.Owner.Graveyard);
+            }
+
+
+            // todo Rework these to be contexts by loading shit at trigger.
+            var pendingActive =
+                GameState.Player1 == ActivePlayer ?
+                GameState.PendingTriggersPlayer1 :
+                GameState.PendingTriggersPlayer2;
+
+            var pendingInactive =
+                GameState.Player1 == InactivePlayer ?
+                GameState.PendingTriggersPlayer1 :
+                GameState.PendingTriggersPlayer2;
+
+            var pendingContexts = new List<AbilityCastingContext>();
+
+
+            foreach (var pending in pendingActive)
+            {
+                var trigger = pending.Item1;
+                var ability = pending.Item2;
+
+                var context = MakeContext();
+                context.CastingPlayer = ActivePlayer;
+                context.Card = ability.Card;
+                context.Ability = ability;
+                ability.SaveTriggerInfo(trigger, context);
+                pendingContexts.Add(context);
+            }
+            pendingActive.Clear();
+
+
+            foreach (var pending in pendingInactive)
+            {
+                var trigger = pending.Item1;
+                var ability = pending.Item2;
+
+                var context = MakeContext();
+                context.CastingPlayer = InactivePlayer;
+                context.Card = ability.Card;
+                context.Ability = ability;
+                ability.SaveTriggerInfo(trigger, context);
+                pendingContexts.Add(context);
+            }
+            pendingInactive.Clear();
+
+            foreach (var context in pendingContexts)
+            {
+                var ability = context.Ability;
+                var castingPlayer = context.CastingPlayer;
+
+                if (castingPlayer == Hero)
+                {
+                    ability.MakeCastChoices(context);
+                    GameChoiceSynchronizer.SendChoice(context.Choices);
+                }
+                else
+                {
+                    context.Choices = GameChoiceSynchronizer.ReceiveChoice();
+                }
+
+                CastingStack.Push(context);
+            }
+
+            if (resolveStack)
+            {
+                ResolveStack();
             }
         }
     }
