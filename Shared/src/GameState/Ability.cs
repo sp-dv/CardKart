@@ -10,13 +10,34 @@ namespace CardKartShared.GameState
 
         public bool MoveToStackOnCast { get; protected set; }
 
-        public abstract bool IsCastable(AbilityCastingContext context);
+        public virtual bool IsCastable(AbilityCastingContext context)
+        {
+            return false;
+        }
 
-        public abstract bool MakeCastChoices(AbilityCastingContext context);
-        public abstract void EnactCastChoices(AbilityCastingContext context);
+        public virtual bool MakeCastChoices(AbilityCastingContext context)
+        {
+            return false;
+        }
 
-        public abstract void MakeResolveChoicesCastingPlayer(AbilityCastingContext context);
-        public abstract void EnactResolveChoices(AbilityCastingContext context);
+        public virtual void EnactCastChoices(AbilityCastingContext context)
+        {
+        }
+
+        public virtual void MakeResolveChoicesCastingPlayer(
+            AbilityCastingContext context)
+        {
+        }
+
+        public virtual void MakeResolveChoicesNonCastingPlayer(
+            AbilityCastingContext context)
+        {
+        }
+
+        public virtual void EnactResolveChoices(AbilityCastingContext context)
+        {
+        }
+
 
         protected ManaSet PayMana(ManaSet cost, AbilityCastingContext context)
         {
@@ -187,11 +208,9 @@ namespace CardKartShared.GameState
 
         public override bool IsCastable(AbilityCastingContext context)
         {
-            if (Card.Location != PileLocation.Hand) { return false; }
-            if (Card.Owner != context.CastingPlayer) { return false; }
-            if (!context.CastingPlayer.CurrentMana.Covers(Card.CastingCost)) { return false; }
-
-            return true;
+            return InHandAndOwned(context) && 
+                ChannelsAreCastable(context) && 
+                ManaCostIsPayable(Card.CastingCost, context);
         }
 
         public override bool MakeCastChoices(AbilityCastingContext context)
@@ -199,23 +218,14 @@ namespace CardKartShared.GameState
             var payment = PayMana(Card.CastingCost, context);
             if (payment == null) { return false; }
 
-            context.Choices.Arrays["manacost"] = payment.ToInts();
+            context.SetManaSet("manacost", payment);
             return true;
         }
 
         public override void EnactCastChoices(AbilityCastingContext context)
         {
-            var payment = new ManaSet();
-            payment.FromInts(context.Choices.Arrays["manacost"]);
+            var payment = context.GetManaSet("manacost");
             context.GameState.SpendMana(context.CastingPlayer, payment);
-        }
-
-        public override void MakeResolveChoicesCastingPlayer(AbilityCastingContext context)
-        {
-        }
-
-        public override void EnactResolveChoices(AbilityCastingContext context)
-        {
         }
     }
 
@@ -241,25 +251,20 @@ namespace CardKartShared.GameState
             var target = context.ChoiceHelper.ChooseToken(token => true);
             if (target == null) { return false; }
 
-            context.Choices.Arrays["manacost"] = payment.ToInts();
-            context.SetToken("target", target);
+            context.SetManaSet("manacost", payment);
+            context.SetToken("!target", target);
             return true;
         }
 
         public override void EnactCastChoices(AbilityCastingContext context)
         {
-            var payment = new ManaSet();
-            payment.FromInts(context.Choices.Arrays["manacost"]);
+            var payment = context.GetManaSet("manacost");
             context.GameState.SpendMana(context.CastingPlayer, payment);
-        }
-
-        public override void MakeResolveChoicesCastingPlayer(AbilityCastingContext context)
-        {
         }
 
         public override void EnactResolveChoices(AbilityCastingContext context)
         {
-            var target = context.GetToken("target");
+            var target = context.GetToken("!target");
             context.GameState.DealDamage(Card, target, 2);
         }
 
@@ -300,11 +305,6 @@ namespace CardKartShared.GameState
                 context.GetManaSet("manacost"));
         }
 
-
-        public override void MakeResolveChoicesCastingPlayer(AbilityCastingContext context)
-        {
-        }
-
         public override void EnactResolveChoices(AbilityCastingContext context)
         {
             var target = context.GetToken("!target");
@@ -312,8 +312,13 @@ namespace CardKartShared.GameState
         }
     }
 
-    public class TestCast : Ability
+    public class SomeCantripCast : Ability
     {
+        public SomeCantripCast()
+        {
+            MoveToStackOnCast = true;
+        }
+
         public override bool IsCastable(AbilityCastingContext context)
         {
             return
@@ -353,6 +358,30 @@ namespace CardKartShared.GameState
         {
             var card = context.GetCard("target");
             context.GameState.MoveCard(card, card.Owner.Hand);
+        }
+    }
+
+    public class TestCast : Ability
+    {
+        public TestCast()
+        {
+            MoveToStackOnCast = true;
+        }
+
+        public override bool IsCastable(AbilityCastingContext context)
+        {
+            return InHandAndOwned(context) && 
+                ChannelsAreCastable(context) && 
+                ManaCostIsPayable(Card.CastingCost, context);
+        }
+
+        public override bool MakeCastChoices(AbilityCastingContext context)
+        {
+            var payment = PayMana(Card.CastingCost, context);
+            if (payment == null) { return false; }
+
+            context.SetManaSet("manacost", payment);
+            return true;
         }
     }
 }

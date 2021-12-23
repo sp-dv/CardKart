@@ -47,7 +47,7 @@ namespace CardKartClient.GUI.Components
 
         protected override void DrawInternal(DrawAdapter drawAdapter)
         {
-            drawAdapter.FillRectangle(X, Y, X + Width, Y + Height, Color.Silver);
+            drawAdapter.FillRectangle(X, Y, X + Width, Y + Height, Color.Khaki);
 
             if (CardComponents != null)
             {

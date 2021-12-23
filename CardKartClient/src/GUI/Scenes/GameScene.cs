@@ -54,6 +54,10 @@ namespace CardKartClient.GUI.Scenes
                 token => GameObjectClicked(token);
             Components.Add(VillainBattlefieldPanel);
 
+            StackPanel = new StackPanel(gameController.GameState.CastingStack);
+            StackPanel.X = -0.95f;
+            StackPanel.Y = -0.5f;
+            Components.Add(StackPanel);
 
             CardChoicePanel = new CardChoicePanel();
             CardChoicePanel.CardClicked += (cardComponent) =>
@@ -63,6 +67,8 @@ namespace CardKartClient.GUI.Scenes
                     GameObjectClicked(cardComponent.Card);
                 }
             };
+            CardChoicePanel.X = StackPanel.X;
+            CardChoicePanel.Y = StackPanel.Y;
             Components.Add(CardChoicePanel);
 
             ChooserPanel = new ChooserPanel(gameController.ChoiceHelper);
@@ -85,10 +91,6 @@ namespace CardKartClient.GUI.Scenes
             VillainPanel.Layout();
             Components.Add(VillainPanel);
 
-            StackPanel = new StackPanel(gameController.GameState.CastingStack);
-            StackPanel.X = -0.95f;
-            StackPanel.Y = -0.5f;
-            Components.Add(StackPanel);
 
 
             CombatAnimator = new CombatAnimator(

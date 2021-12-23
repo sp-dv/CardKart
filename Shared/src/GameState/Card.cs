@@ -147,6 +147,18 @@ namespace CardKartShared.GameState
                         };
                     } break;
 
+                case CardTemplates.SomeCantrip:
+                    {
+                        Name = "Test";
+                        Type = CardTypes.Channel;
+                        Colour = ManaColour.Blue;
+                        CastingCost = new ManaSet(ManaColour.Blue);
+
+                        Abilities = new Ability[] {
+                            new SomeCantripCast(),
+                        };
+                    } break;
+
                 case CardTemplates.Test:
                     {
                         Name = "Test";
@@ -220,8 +232,9 @@ namespace CardKartShared.GameState
         DepravedBloodhound,
         StandardBearer,
         Enlarge,
+        SomeCantrip,
 
-        Test,
+        Test, 
 
         HeroTest,
     }

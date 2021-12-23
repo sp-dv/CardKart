@@ -68,7 +68,7 @@ namespace CardKartShared.GameState
                     CardTemplates.AngryGoblin,
                     CardTemplates.StandardBearer,
                     CardTemplates.Enlarge,
-                    CardTemplates.Test,
+                    CardTemplates.SomeCantrip,
                 }),
                 new Deck(new[] {
                     CardTemplates.Zap,
