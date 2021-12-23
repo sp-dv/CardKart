@@ -181,12 +181,20 @@ namespace SGL
         {
             var w = (X0 / 2 + 0.5f) * ScreenWidth;
             var h = (Y0 / 2 + 0.5f) * ScreenHeight;
+
             FontDrawing.Print(
                 DefaultFont, 
                 text, 
                 new OpenTK.Vector3(w, h, 0),
                 QFontAlignment.Left, 
                 RenderOptions);
+
+
+            FontDrawing.RefreshBuffers();
+            FontDrawing.Draw();
+            FontDrawing.DrawingPimitiveses.Clear();
+            GL.UseProgram(0);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
         }
 
         public void DrawTextSmart(

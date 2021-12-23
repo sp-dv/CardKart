@@ -15,7 +15,7 @@ namespace CardKartClient.GUI
         public static QFontRenderOptions MainRenderOptions { get; } =
             new QFontRenderOptions
             {
-                DropShadowActive = true,
+                DropShadowActive = false,
                 Colour = Color.Black,
                 WordSpacing = 0.5f
             };

@@ -14,7 +14,7 @@ namespace SGL
     {
         private Matrix4 ProjectionMatrix;
 
-        private QFontDrawing FondDrawing;
+        private QFontDrawing FontDrawing;
 
         public Scene CurrentScene;
 
@@ -30,7 +30,7 @@ namespace SGL
 
             base.OnLoad(e);
 
-            FondDrawing = new QFontDrawing();
+            FontDrawing = new QFontDrawing();
 
             GL.ClearColor(Color4.CornflowerBlue);
 
@@ -53,13 +53,13 @@ namespace SGL
             GL.UseProgram(0);
             GL.BindTexture(TextureTarget.Texture2D, 0);
 
-            FondDrawing.ProjectionMatrix = ProjectionMatrix;
-            FondDrawing.DrawingPimitiveses.Clear();
+            FontDrawing.ProjectionMatrix = ProjectionMatrix;
+            FontDrawing.DrawingPimitiveses.Clear();
 
             if (CurrentScene != null)
             {
                 var da = new DrawAdapter();
-                da.FontDrawing = FondDrawing;
+                da.FontDrawing = FontDrawing;
                 da.DefaultFont = Fonts.MainFont10;
                 da.RenderOptions = Fonts.MainRenderOptions;
                 da.ScreenHeight = Height;
@@ -68,8 +68,8 @@ namespace SGL
                 CurrentScene.Draw(da);
             }
 
-            FondDrawing.RefreshBuffers();
-            FondDrawing.Draw();
+            //FondDrawing.RefreshBuffers();
+            //FondDrawing.Draw();
             SwapBuffers();
         }
 
