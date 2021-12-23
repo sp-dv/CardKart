@@ -26,8 +26,9 @@ namespace SGL
 
         public void HandleMouseButtonDown(MouseButton button, GLCoordinate location)
         {
-            foreach (var component in Components)
+            for (int i = Components.Count - 1; i >= 0; i--)
             {
+                GuiComponent component = Components[i];
                 if (component.HandleClick(location)) { return; }
             }
         }

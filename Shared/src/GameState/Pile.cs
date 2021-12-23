@@ -69,6 +69,11 @@ namespace CardKartShared.GameState
             PileChanged?.Invoke();
         }
 
+        public IEnumerable<Card> Peek(int count)
+        {
+            return Cards.Take(count).ToArray();
+        }
+
         public IEnumerator<Card> GetEnumerator()
         {
             return Cards.GetEnumerator();

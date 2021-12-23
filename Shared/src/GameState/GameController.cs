@@ -21,7 +21,6 @@ namespace CardKartShared.GameState
         public GameChoiceSynchronizer GameChoiceSynchronizer { get; }
         public ChoiceHelper ChoiceHelper { get; } = new ChoiceHelper();
 
-        public CastingStack CastingStack { get; } = new CastingStack();
 
         public delegate void RedrawAttackerAnimationsHandler(Token[] attackers, (Token, Token)[] defenders);
         public event RedrawAttackerAnimationsHandler RedrawAttackerAnimations;
@@ -68,6 +67,7 @@ namespace CardKartShared.GameState
                     CardTemplates.DepravedBloodhound,
                     CardTemplates.AngryGoblin,
                     CardTemplates.StandardBearer,
+                    CardTemplates.Enlarge,
                     CardTemplates.Test,
                 }),
                 new Deck(new[] {
@@ -148,7 +148,7 @@ namespace CardKartShared.GameState
                     castingPlayer = GameState.OtherPlayer(castingPlayer);
                 }
 
-                if (CastingStack.Count == 0) { break; }
+                if (GameState.CastingStack.Count == 0) { break; }
                 ResolveStack();
             }
         }
@@ -364,7 +364,7 @@ namespace CardKartShared.GameState
 
                 ability.EnactCastChoices(context);
 
-                CastingStack.Push(context);
+                GameState.CastingStack.Push(context);
                 if (ability.MoveToStackOnCast)
                 {
                     GameState.MoveCard(card, card.Owner.Stack);
@@ -380,16 +380,24 @@ namespace CardKartShared.GameState
 
         private void ResolveStack()
         {
-            while (CastingStack.Count > 0)
+            while (GameState.CastingStack.Count > 0)
             {
                 Thread.Sleep(1000);
 
-                var context = CastingStack.Pop();
+                var context = GameState.CastingStack.Pop();
 
                 var card = context.Card;
                 var ability = context.Ability;
 
-                ability.MakeResolveChoices(context);
+                if (context.CastingPlayer == Hero)
+                {
+                    ability.MakeResolveChoicesCastingPlayer(context);
+                    GameChoiceSynchronizer.SendChoice(context.Choices);
+                }
+                else
+                {
+                    context.Choices = GameChoiceSynchronizer.ReceiveChoice();
+                }
 
                 ability.EnactResolveChoices(context);
 
@@ -510,7 +518,7 @@ namespace CardKartShared.GameState
                     context.Choices = GameChoiceSynchronizer.ReceiveChoice();
                 }
 
-                CastingStack.Push(context);
+                GameState.CastingStack.Push(context);
             }
 
             if (resolveStack)
@@ -603,6 +611,8 @@ namespace CardKartShared.GameState
         public bool ShowOk;
         public bool ShowCancel;
         public bool ShowManaChoices;
+
+        public IEnumerable<Card> CardChoices;
 
         // Ugly hack to make UI updates accessible inside abilities...
         public delegate void RequestGUIUpdateHandler();
@@ -700,6 +710,8 @@ namespace CardKartShared.GameState
             ShowOk = false;
             ShowCancel = false;
             ShowManaChoices = false;
+
+            CardChoices = null;
 
             RequestGUIUpdate?.Invoke();
         }

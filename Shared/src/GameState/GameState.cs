@@ -17,6 +17,8 @@ namespace CardKartShared.GameState
         public Player ActivePlayer { get; private set; }
         public Player InactivePlayer { get; private set; }
 
+        public CastingStack CastingStack { get; } = new CastingStack();
+
         public IEnumerable<Token> AllTokens =>
             Player1.Battlefield
             .Concat(Player2.Battlefield)

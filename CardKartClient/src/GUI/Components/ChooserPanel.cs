@@ -18,6 +18,8 @@ namespace CardKartClient.GUI.Components
         public TextPanel MainText;
         public ManaButtonBar ManaChoices;
 
+        public CardChoicePanel CardChoicePanel;
+
         public delegate void OptionClickedHandler(OptionChoice optionChoice);
         public event OptionClickedHandler OptionClicked;
 
@@ -57,6 +59,9 @@ namespace CardKartClient.GUI.Components
             CancelButton.Visible = ChoiceHelper.ShowCancel;
 
             ManaChoices.Visible = ChoiceHelper.ShowManaChoices;
+
+            CardChoicePanel.Update(ChoiceHelper.CardChoices);
+            CardChoicePanel.Visible = ChoiceHelper.CardChoices != null;
         }
 
         public void Layout()
@@ -103,6 +108,7 @@ namespace CardKartClient.GUI.Components
             if (PassButton.HandleClick(location)) { }
             else if (OkButton.HandleClick(location)) { }
             else if (CancelButton.HandleClick(location)) { }
+            else if (ManaChoices.HandleClick(location)) { }
             else if (ManaChoices.HandleClick(location)) { }
         }
     }

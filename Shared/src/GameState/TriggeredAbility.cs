@@ -48,7 +48,7 @@ namespace CardKartShared.GameState
         {
         }
 
-        public override void MakeResolveChoices(AbilityCastingContext context)
+        public override void MakeResolveChoicesCastingPlayer(AbilityCastingContext context)
         {
         }
 

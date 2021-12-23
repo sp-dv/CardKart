@@ -135,15 +135,27 @@ namespace CardKartShared.GameState
                         };
                     } break;
 
-                case CardTemplates.Test:
+                case CardTemplates.Enlarge:
                     {
-                        Name = "Test";
+                        Name = "Enlarge";
                         Type = CardTypes.Instant;
                         Colour = ManaColour.Green;
                         CastingCost = new ManaSet(ManaColour.Green);
 
                         Abilities = new Ability[] {
-                            new TestCast(), 
+                            new EnlargeCast(), 
+                        };
+                    } break;
+
+                case CardTemplates.Test:
+                    {
+                        Name = "Test";
+                        Type = CardTypes.Channel;
+                        Colour = ManaColour.Black;
+                        CastingCost = new ManaSet(ManaColour.Black);
+
+                        Abilities = new Ability[] {
+                            new TestCast(),
                         };
                     } break;
 
@@ -207,6 +219,7 @@ namespace CardKartShared.GameState
         Zap,
         DepravedBloodhound,
         StandardBearer,
+        Enlarge,
 
         Test,
 

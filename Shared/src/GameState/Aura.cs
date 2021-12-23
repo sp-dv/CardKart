@@ -26,7 +26,7 @@
         }
     }
 
-    public class TestAura : Aura
+    public class EnlargeAura : Aura
     {
         public override void ApplyAura(Token token, GameState gameState)
         {
