@@ -383,5 +383,29 @@ namespace CardKartShared.GameState
             context.SetManaSet("manacost", payment);
             return true;
         }
+
+        public override void EnactCastChoices(AbilityCastingContext context)
+        {
+            context.GameState.SpendMana(
+                context.CastingPlayer,
+                context.GetManaSet("manacost"));
+        }
+
+        public override void MakeResolveChoicesNonCastingPlayer(
+            AbilityCastingContext context)
+        {
+            var choices = context.CastingPlayer.Opponent.Hand;
+            context.ChoiceHelper.CardChoices = choices;
+            context.ChoiceHelper.Text = "Choose a card to discard.";
+            var choice =
+                context.ChoiceHelper.ChooseCard(card => choices.Contains(card));
+            context.SetCard("target", choice);
+        }
+
+        public override void EnactResolveChoices(AbilityCastingContext context)
+        {
+            var card = context.GetCard("target");
+            context.GameState.MoveCard(card, card.Owner.Graveyard);
+        }
     }
 }

@@ -19,6 +19,8 @@ namespace CardKartShared.GameState
 
         public Card HeroCard { get; set; }
 
+        public Player Opponent { get; set; }
+
         public delegate void PlayerChangedHandler();
         public event PlayerChangedHandler PlayerChanged;
 

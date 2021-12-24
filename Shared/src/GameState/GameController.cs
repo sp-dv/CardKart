@@ -69,6 +69,7 @@ namespace CardKartShared.GameState
                     CardTemplates.StandardBearer,
                     CardTemplates.Enlarge,
                     CardTemplates.SomeCantrip,
+                    CardTemplates.Test,
                 }),
                 new Deck(new[] {
                     CardTemplates.Zap,
@@ -393,10 +394,15 @@ namespace CardKartShared.GameState
                 {
                     ability.MakeResolveChoicesCastingPlayer(context);
                     GameChoiceSynchronizer.SendChoice(context.Choices);
+
+                    context.Choices = GameChoiceSynchronizer.ReceiveChoice();
                 }
                 else
                 {
                     context.Choices = GameChoiceSynchronizer.ReceiveChoice();
+
+                    ability.MakeResolveChoicesNonCastingPlayer(context);
+                    GameChoiceSynchronizer.SendChoice(context.Choices);
                 }
 
                 ability.EnactResolveChoices(context);
@@ -460,7 +466,6 @@ namespace CardKartShared.GameState
             }
 
 
-            // todo Rework these to be contexts by loading shit at trigger.
             var pendingActive =
                 GameState.Player1 == ActivePlayer ?
                 GameState.PendingTriggersPlayer1 :

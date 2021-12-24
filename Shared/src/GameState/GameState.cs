@@ -41,6 +41,9 @@ namespace CardKartShared.GameState
             Player2 = new Player();
             AddGameObject(Player2);
 
+            Player1.Opponent = Player2;
+            Player2.Opponent = Player1;
+
             ActivePlayer = Player1;
             InactivePlayer = Player2;
         }
