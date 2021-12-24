@@ -82,16 +82,16 @@ namespace CardKartClient.GUI.Scenes
             HeroPanel = new PlayerPanel(hero);
             HeroPanel.X = -0.95f;
             HeroPanel.Y = -0.8f;
+            HeroPanel.PlayerPortraitClicked += player => GameObjectClicked(player);
             HeroPanel.Layout();
             Components.Add(HeroPanel);
 
             VillainPanel = new PlayerPanel(villain);
             VillainPanel.X = -0.95f;
             VillainPanel.Y = 0.6f;
+            VillainPanel.PlayerPortraitClicked += player => GameObjectClicked(player);
             VillainPanel.Layout();
             Components.Add(VillainPanel);
-
-
 
             CombatAnimator = new CombatAnimator(
                 HeroBattlefieldPanel,

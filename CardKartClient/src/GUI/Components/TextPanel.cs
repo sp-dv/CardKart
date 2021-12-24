@@ -10,6 +10,10 @@ namespace CardKartClient.GUI.Components
     {
         public String Text;
         public Color? BackgroundColor { get; set; }
+        public Texture BackgroundImage { get; set; }
+
+        public float TextInsetX { get; set; }
+        public float TextInsetY { get; set; }
 
         protected override void DrawInternal(DrawAdapter drawAdapter)
         {
@@ -17,9 +21,13 @@ namespace CardKartClient.GUI.Components
             {
                 drawAdapter.FillRectangle(X, Y, X + Width, Y + Height, BackgroundColor.Value);
             }
+            if (BackgroundImage != null)
+            {
+                drawAdapter.DrawSprite(X, Y, X + Width, Y + Height, BackgroundImage);
+            }
             if (Text != null)
             {
-                drawAdapter.DrawText(Text, X, Y);
+                drawAdapter.DrawText(Text, X + TextInsetX, Y + TextInsetY);
             }
         }
     }

@@ -659,13 +659,17 @@ namespace CardKartShared.GameState
                 {
                     return filter(pcs.GameObject as Token);
                 }
+                if (pcs.GameObject is Player)
+                {
+                    return filter((pcs.GameObject as Player).HeroCard.Token);
+                }
                 return false;
             });
             ResetGUIOptions();
 
-            if (choice.IsOptionChoice) { return null; }
-            else { return choice.GameObject as Token; }
-
+            if (choice.GameObject is Token) { return choice.GameObject as Token; }
+            else if (choice.GameObject is Player) { return (choice.GameObject as Player).HeroCard.Token; }
+            else { return null; }
         }
 
         public ManaColour ChooseColour(Func<ManaColour, bool> filter)

@@ -391,8 +391,7 @@ namespace CardKartShared.GameState
                 context.GetManaSet("manacost"));
         }
 
-        public override void MakeResolveChoicesNonCastingPlayer(
-            AbilityCastingContext context)
+        public override void MakeResolveChoicesNonCastingPlayer(AbilityCastingContext context)
         {
             var choices = context.CastingPlayer.Opponent.Hand;
             context.ChoiceHelper.CardChoices = choices;
