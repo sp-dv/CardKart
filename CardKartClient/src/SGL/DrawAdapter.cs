@@ -174,17 +174,19 @@ namespace SGL
             FillRectangle(x0, y0, x0 + barWidth, y1, bar);
         }
 
-        public void DrawText(string text, float X0, float Y0)
+        public void DrawText(string text, float X0, float Y0, QFont font, QFontRenderOptions renderOptions)
         {
+            if (font == null || renderOptions == null) { return; }
+
             var w = (X0 / 2 + 0.5f) * CardKartClient.CardKartClient.GUI.WindowWidth;
             var h = (Y0 / 2 + 0.5f) * CardKartClient.CardKartClient.GUI.WindowHeight;
 
             FontDrawing.Print(
-                DefaultFont, 
+                font, 
                 text, 
                 new OpenTK.Vector3(w, h, 0),
                 QFontAlignment.Left, 
-                RenderOptions);
+                renderOptions);
 
 
             FontDrawing.RefreshBuffers();

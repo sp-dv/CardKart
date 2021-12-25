@@ -83,7 +83,7 @@ namespace CardKartShared.GameState
                         CastingCost = new ManaSet(
                             ManaColour.Red
                             );
-                        BreadText = "Deal 2 damage to\ntarget creature.";
+                        BreadText = "Deal 2 damage to target creature.";
 
                         Abilities = new Ability[] {
                             new ZapCast(),
@@ -147,12 +147,13 @@ namespace CardKartShared.GameState
                         };
                     } break;
 
-                case CardTemplates.SomeCantrip:
+                case CardTemplates.AlterFate:
                     {
-                        Name = "Test";
+                        Name = "Alter Fate";
                         Type = CardTypes.Channel;
                         Colour = ManaColour.Blue;
                         CastingCost = new ManaSet(ManaColour.Blue);
+                        BreadText = "Look at the top three cards of your deck. Choose a card and put it into your hand. Shuffle the others into your deck.";
 
                         Abilities = new Ability[] {
                             new SomeCantripCast(),
@@ -232,7 +233,7 @@ namespace CardKartShared.GameState
         DepravedBloodhound,
         StandardBearer,
         Enlarge,
-        SomeCantrip,
+        AlterFate,
 
         Test, 
 

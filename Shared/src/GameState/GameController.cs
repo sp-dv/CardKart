@@ -63,13 +63,15 @@ namespace CardKartShared.GameState
             GameState.LoadDecks(
                 new Deck(new[] {
                     CardTemplates.ArmoredZombie,
-                    CardTemplates.Zap,
                     CardTemplates.DepravedBloodhound,
-                    CardTemplates.AngryGoblin,
                     CardTemplates.StandardBearer,
                     CardTemplates.Enlarge,
-                    CardTemplates.SomeCantrip,
+                    CardTemplates.AngryGoblin,
                     CardTemplates.Test,
+                    CardTemplates.Zap,
+                    CardTemplates.AlterFate,
+
+
                 }),
                 new Deck(new[] {
                     CardTemplates.Zap,

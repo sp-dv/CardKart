@@ -27,7 +27,7 @@ namespace CardKartClient.GUI.Components
             }
             if (Text != null)
             {
-                drawAdapter.DrawText(Text, X + TextInsetX, Y + TextInsetY);
+                drawAdapter.DrawText(Text, X + TextInsetX, Y + TextInsetY, Fonts.MainFont10, Fonts.MainRenderOptions);
             }
         }
     }

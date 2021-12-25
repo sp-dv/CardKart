@@ -169,7 +169,7 @@ namespace CardKartServer
         {
             new Thread(() =>
             {
-                while (true)
+                while (!Connection.IsClosed)
                 {
                     var rawMessage = Connection.ReceiveMessage();
                     CardKartServer.ClientHandler.HandleMessage(this, rawMessage);

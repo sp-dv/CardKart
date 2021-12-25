@@ -38,7 +38,7 @@ namespace CardKartClient.GUI.Components
                 //drawAdapter.DrawText(Text, X + 0.022f, Y + 0.045f);
 
                 // X/Y format
-                drawAdapter.DrawText(Text, X + 0.012f, Y + 0.045f);
+                drawAdapter.DrawText(Text, X + 0.012f, Y + 0.045f, Fonts.MainFont10, Fonts.MainRenderOptions);
             }
         }
     }

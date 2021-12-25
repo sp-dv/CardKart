@@ -6,7 +6,7 @@ namespace CardKartClient.GUI
 {
     internal static class Textures
     {
-        public static Texture Frame1;
+        public static Texture Frame1_Spell;
         public static Texture Frame1_Monster;
         public static Texture Goblin1;
         public static Texture Token1;
@@ -17,10 +17,11 @@ namespace CardKartClient.GUI
         public static Texture Hound1;
         public static Texture Hero1;
         public static Texture Health1;
+        public static Texture AlterFate1;
 
         public static void LoadTextures()
         {
-            Frame1 = TextureLoader.CreateTexture(Properties.Resources.frame1);
+            Frame1_Spell = TextureLoader.CreateTexture(Properties.Resources.frame1_spell);
             Frame1_Monster = TextureLoader.CreateTexture(Properties.Resources.frame1_monster);
             Goblin1 = TextureLoader.CreateTexture(Properties.Resources.goblin1);
             Token1 = TextureLoader.CreateTexture(Properties.Resources.token1);
@@ -31,6 +32,7 @@ namespace CardKartClient.GUI
             Hound1 = TextureLoader.CreateTexture(Properties.Resources.hound1);
             Hero1 = TextureLoader.CreateTexture(Properties.Resources.hero1);
             Health1 = TextureLoader.CreateTexture(Properties.Resources.health1);
+            AlterFate1 = TextureLoader.CreateTexture(Properties.Resources.alterFate1);
         }
 
         public static Texture Portraits(CardTemplates template)
@@ -42,7 +44,20 @@ namespace CardKartClient.GUI
                 case CardTemplates.Zap: { return Zap1; }
                 case CardTemplates.DepravedBloodhound: { return Hound1; }
                 case CardTemplates.HeroTest: { return Hero1; }
+                case CardTemplates.AlterFate: { return AlterFate1; }
                 default: { return NoPortait; }
+            }
+        }
+
+        public static Texture Frames(CardTypes cardType)
+        {
+            switch (cardType)
+            {
+                case CardTypes.Creature: { return Frame1_Monster; }
+                case CardTypes.Instant:
+                case CardTypes.Channel:
+                    { return Frame1_Spell; }
+                default: throw new NotImplementedException();
             }
         }
     }

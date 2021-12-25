@@ -11,11 +11,11 @@ namespace CardKartClient.GUI.Components
     {
         private ChoiceHelper ChoiceHelper;
 
-        public Button PassButton;
-        public Button OkButton;
-        public Button CancelButton;
+        public SmartTextPanel PassButton;
+        public SmartTextPanel OkButton;
+        public SmartTextPanel CancelButton;
 
-        public TextPanel MainText;
+        public SmartTextPanel MainText;
         public ManaButtonBar ManaChoices;
 
         public CardChoicePanel CardChoicePanel;
@@ -28,19 +28,19 @@ namespace CardKartClient.GUI.Components
             Width = 0.4f;
             Height = 0.4f;
 
-            PassButton = new Button();
+            PassButton = new SmartTextPanel();
             PassButton.Text = "Pass Turn";
             PassButton.Clicked += () => OptionClicked?.Invoke(OptionChoice.Pass);
 
-            OkButton = new Button();
+            OkButton = new SmartTextPanel();
             OkButton.Text = "OK";
             OkButton.Clicked += () => OptionClicked?.Invoke(OptionChoice.Ok);
 
-            CancelButton = new Button();
+            CancelButton = new SmartTextPanel();
             CancelButton.Text = "Cancel";
             CancelButton.Clicked += () => OptionClicked?.Invoke(OptionChoice.Cancel);
 
-            MainText = new TextPanel();
+            MainText = new SmartTextPanel();
 
             ManaChoices = new ManaButtonBar();
             ManaChoices.ColourClicked += 
@@ -70,21 +70,25 @@ namespace CardKartClient.GUI.Components
             PassButton.Y = Y + 0.15f;
             PassButton.Width = 0.12f;
             PassButton.Height = 0.07f;
+            PassButton.Layout();
 
             OkButton.X = X + 0.06f;
             OkButton.Y = Y + 0.15f;
             OkButton.Width = 0.12f;
             OkButton.Height = 0.07f;
+            OkButton.Layout();
 
             CancelButton.X = X + 0.2f;
             CancelButton.Y = Y + 0.15f;
             CancelButton.Width = 0.12f;
             CancelButton.Height = 0.07f;
+            CancelButton.Layout();
 
             MainText.X = X + 0.02f;
             MainText.Y = Y + Height - 0.05f;
             MainText.Width = Width - 0.04f;
             MainText.Height = 0.08f;
+            MainText.Layout();
 
             ManaChoices.X = X + 0.01f;
             ManaChoices.Y = Y + 0.015f;

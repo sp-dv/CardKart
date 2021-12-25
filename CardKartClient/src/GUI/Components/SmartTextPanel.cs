@@ -7,7 +7,7 @@ namespace CardKartClient.GUI.Components
     internal class SmartTextPanel : GuiComponent
     {
         public string Text { get; set; }
-        private ProcessedText ProcessedText;
+        ProcessedText ProcessedText;
 
         private float TextX0;
         private float TextY0;
@@ -15,10 +15,13 @@ namespace CardKartClient.GUI.Components
         public QFont Font { get; set; }
         public QFontRenderOptions RenderOptions { get; set; }
 
-        QFontAlignment Alignment = QFontAlignment.Left;
+        public QFontAlignment Alignment = QFontAlignment.Left;
 
         public Color? BackgroundColor { get; set; }
         public Texture BackgroundImage { get; set; }
+
+        public delegate void ClickedHandler();
+        public event ClickedHandler Clicked;
 
         public SmartTextPanel()
         {
@@ -31,11 +34,10 @@ namespace CardKartClient.GUI.Components
 
         public void Layout()
         {
+            if (Text == null ||Font == null || RenderOptions == null) { return; }
 
             var sw = (Width / 2) * CardKartClient.GUI.WindowWidth; // Width in terms of pixels.
             var sh = (Height / 2) * CardKartClient.GUI.WindowHeight; // Height in terms of pixels
-            TextX0 = (X / 2 + 0.5f) * CardKartClient.GUI.WindowWidth;
-            TextY0 = (Y / 2 + 0.5f) * CardKartClient.GUI.WindowHeight + sh + 2f;
 
             ProcessedText = QFontDrawingPimitive.ProcessText(Font, RenderOptions, Text, new SizeF(sw, sh), Alignment);
         }
@@ -54,8 +56,24 @@ namespace CardKartClient.GUI.Components
 
             if (ProcessedText != null)
             {
+                // I hate this.
+                var sw = (Width / 2) * CardKartClient.GUI.WindowWidth; // Width in terms of pixels.
+                var sh = (Height / 2) * CardKartClient.GUI.WindowHeight; // Height in terms of pixels
+                TextX0 = (X / 2 + 0.5f) * CardKartClient.GUI.WindowWidth;
+                TextY0 = (Y / 2 + 0.5f) * CardKartClient.GUI.WindowHeight + sh + 2f;
+
+                if (Alignment == QFontAlignment.Centre)
+                {
+                    TextX0 += sw / 2;
+                }
+
                 drawAdapter.DrawTextSmart(ProcessedText, TextX0, TextY0, Font, RenderOptions);
             }
+        }
+
+        protected override void HandleClickInternal(GLCoordinate location)
+        {
+            Clicked?.Invoke();
         }
     }
 }

@@ -7,8 +7,8 @@ namespace CardKartClient.GUI.Scenes
 {
     internal class MainMenuScene : Scene
     {
-        Button StartGameButton;
-        Button JoinQueueButton;
+        SmartTextPanel StartGameButton;
+        SmartTextPanel JoinQueueButton;
 
         public MainMenuScene()
         {
@@ -21,13 +21,14 @@ namespace CardKartClient.GUI.Scenes
 
 
 #if true
-            StartGameButton = new Button();
+            StartGameButton = new SmartTextPanel();
             StartGameButton.X = 0.1f;
             StartGameButton.Y = 0.0f;
             StartGameButton.Width = 0.15f;
             StartGameButton.Height = 0.09f;
             StartGameButton.Text = "Start Game";
-            StartGameButton.Colour = Color.DarkOrange;
+            StartGameButton.Layout();
+            StartGameButton.BackgroundColor = Color.DarkOrange;
             StartGameButton.Clicked += () =>
             {
                 CardKartClient.Controller.StartFakeGame();
@@ -35,13 +36,14 @@ namespace CardKartClient.GUI.Scenes
             Components.Add(StartGameButton);
 #endif
 
-            JoinQueueButton = new Button();
+            JoinQueueButton = new SmartTextPanel();
             JoinQueueButton.X = 0.1f;
             JoinQueueButton.Y = 0.09f;
             JoinQueueButton.Width = 0.15f;
             JoinQueueButton.Height = 0.1f;
             JoinQueueButton.Text = "Join Queue";
-            JoinQueueButton.Colour = Color.DarkOrange;
+            JoinQueueButton.Layout();
+            JoinQueueButton.BackgroundColor = Color.DarkOrange;
             JoinQueueButton.Clicked += () =>
             {
                 CardKartClient.Server.JoinQueue();

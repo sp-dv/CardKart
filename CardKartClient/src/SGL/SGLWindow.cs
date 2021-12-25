@@ -22,19 +22,19 @@ namespace SGL
         {
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusDstAlpha);
+
+            Fonts.LoadFonts();
+            TextureLoader.LoadTextures();
         }
 
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
 
-            base.OnLoad(e);
-
             FontDrawing = new QFontDrawing();
 
             GL.ClearColor(Color4.CornflowerBlue);
 
-            TextureLoader.LoadTextures();
         }
 
         protected override void OnResize(EventArgs e)

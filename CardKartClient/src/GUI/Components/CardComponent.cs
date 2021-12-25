@@ -25,11 +25,19 @@ namespace CardKartClient.GUI.Components
 
         public Card Card;
 
+        private SmartTextPanel BreadTextPanel;
+
+        private Texture FrameTexture;
+
         public CardComponent(Card card)
         {
             Card = card;
 
-            SetScale(1);
+            BreadTextPanel = new SmartTextPanel();
+            BreadTextPanel.Font = Fonts.CardFont8;
+            BreadTextPanel.Width = 0.18f;
+            BreadTextPanel.Height = 0.16f;
+            BreadTextPanel.Alignment = QuickFont.QFontAlignment.Centre;
 
             Layout();
         }
@@ -38,30 +46,29 @@ namespace CardKartClient.GUI.Components
         {
             if (Card != null)
             {
+                FrameTexture = Textures.Frames(Card.Type);
                 PortraitTexture = Textures.Portraits(Card.Template);
                 PaletteColor = Constants.PaletteColor(Card.Colour);
                 ManaCostOrbColors = 
                     Card.CastingCost.ToColourArray()
                     .Select(colour => Constants.PaletteColor(colour)).ToArray();
+
+                BreadTextPanel.Text = Card.BreadText;
+                BreadTextPanel.Layout();
             }
-        }
 
-        public void SetScale(float scale)
-        {
-            Width = 0.2f * scale;
-            Height = 0.52f * scale;
 
-            ImageInsetX = 0.009f * scale;
-            ImageInsetY = 0.23f * scale;
+            Width = 0.2f;
+            Height = 0.52f;
 
-            ImageWidth = 0.182f * scale;
-            ImageHeight = 0.23f * scale;
+            ImageInsetX = 0.009f;
+            ImageInsetY = 0.23f;
 
-            // Text doesn't really scale.
-            // Yet.
+            ImageWidth = 0.182f;
+            ImageHeight = 0.23f;
 
-            NameInsetX = 0.01f * scale;
-            NameInsetY = 0.51f * scale;
+            NameInsetX = 0.01f;
+            NameInsetY = 0.51f;
 
             AttackInsetX = 0.015f;
             AttackInsetY = 0.06f;
@@ -70,8 +77,15 @@ namespace CardKartClient.GUI.Components
             DefenceInsetY = AttackInsetY;
         }
 
+        public void SetScale()
+        {
+        }
+
         protected override void DrawInternal(DrawAdapter drawAdapter)
         {
+            BreadTextPanel.X = X + 0.01f;
+            BreadTextPanel.Y = Y + 0.03f;
+
 
             drawAdapter.DrawSprite(
                 X + ImageInsetX,
@@ -85,26 +99,28 @@ namespace CardKartClient.GUI.Components
                 Y,
                 X + Width,
                 Y + Height,
-                Textures.Frame1_Monster,
+                FrameTexture,
                 PaletteColor);
 
-            drawAdapter.DrawText(Card.Name, X + NameInsetX, Y + NameInsetY);
-            if (Card.BreadText != null)
-            {
-                drawAdapter.DrawText(Card.BreadText, X + 0.012f, Y + 0.17f);
-            }
+            drawAdapter.DrawText(Card.Name, X + NameInsetX, Y + NameInsetY, Fonts.CardFont10, Fonts.MainRenderOptions);
+
+            BreadTextPanel.Draw(drawAdapter);
 
             if (Card.Type == CardTypes.Creature)
             {
                 drawAdapter.DrawText(
                     Card.Attack.ToString(), 
                     X + AttackInsetX, 
-                    Y + AttackInsetY);
+                    Y + AttackInsetY, 
+                    Fonts.CardFont10, 
+                    Fonts.MainRenderOptions);
 
                 drawAdapter.DrawText(
                     Card.Health.ToString(), 
                     X + DefenceInsetX, 
-                    Y + DefenceInsetY);
+                    Y + DefenceInsetY, 
+                    Fonts.CardFont10, 
+                    Fonts.MainRenderOptions);
             }
 
             var orbX0 = X + Width / 2 + 0.011f + (ManaCostOrbColors.Length * -0.011f);
