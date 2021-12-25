@@ -1,4 +1,5 @@
-﻿using CardKartShared.Util;
+﻿using CardKartServer.Schemas;
+using CardKartShared.Util;
 using LiteDB;
 using System;
 
@@ -14,7 +15,8 @@ namespace CardKartServer
         {
             LiteDB = new LiteDatabase(@"./MyData.db");
 
-            Users.Load((LiteDB.GetCollection<UserEntry>("users")));
+            Users.Load(LiteDB.GetCollection<UserEntry>("users"));
+            LoginInfo.Load(LiteDB.GetCollection<LoginInfoEntry>("loginInfo"));
 
             Logging.Log(LogLevel.Info, "Database loaded successfully.");
         }
@@ -24,7 +26,7 @@ namespace CardKartServer
     internal class DBQuery<T>
     {
         public T Result { get; private set; }
-        private DBError DBError;
+        public DBError DBError { get; private set; }
 
         public DBQuery(T result)
         {

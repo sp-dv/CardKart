@@ -34,14 +34,9 @@ namespace CardKartClient.GUI
             re.Wait();
         }
 
-        public void ToMainMenu()
+        public void TransitionToScene(Scene scene)
         {
-            Window.CurrentScene = new MainMenuScene();
-        }
-
-        public void ToGame(GameController game)
-        {
-            Window.CurrentScene = new GameScene(game);
+            Window.CurrentScene = scene;
         }
     }
 }

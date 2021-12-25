@@ -1,4 +1,6 @@
-﻿using CardKartShared.GameState;
+﻿using CardKartClient.GUI.Scenes;
+using CardKartShared.GameState;
+using CardKartShared.Network.Messages;
 using CardKartShared.Util;
 using System;
 
@@ -16,7 +18,7 @@ namespace CardKartClient
 
             CardKartClient.GUI.OpenWindow();
 
-            CardKartClient.GUI.ToMainMenu();
+            CardKartClient.GUI.TransitionToScene(new LoginScene());
         }
 
         public void StartGame(int gameID, int heroIndex)
@@ -32,7 +34,7 @@ namespace CardKartClient
                 gameID, 
                 heroIndex, 
                 CardKartClient.Server.CreateGameChoiceSynchronizer(gameID));
-            CardKartClient.GUI.ToGame(ActiveGame);
+            CardKartClient.GUI.TransitionToScene(new GameScene(ActiveGame));
             ActiveGame.Start();
         }
 
@@ -42,13 +44,25 @@ namespace CardKartClient
                 0,
                 1,
                 null);
-            CardKartClient.GUI.ToGame(ActiveGame);
+            CardKartClient.GUI.TransitionToScene(new GameScene(ActiveGame));
             ActiveGame.Start();
         }
 
         public void HandleWindowClosed()
         {
             Environment.Exit(0);
+        }
+
+        public string Login(string username, string password)
+        {
+            var response = CardKartClient.Server.LogIn(username, password);
+            if (response.Code == GenericResponseMessage.Codes.OK)
+            {
+                User.Username = username;
+                CardKartClient.GUI.TransitionToScene(new MainMenuScene());
+            }
+
+            return response.Info;
         }
     }
 }

@@ -2,6 +2,7 @@
 using CardKartShared.Network;
 using CardKartShared.Network.Messages;
 using CardKartShared.Util;
+using Newtonsoft.Json;
 using System;
 using System.Threading;
 
@@ -15,22 +16,44 @@ namespace CardKartClient
         private PublicSaxophone<GameChoiceMessage> GameChoiceMessageSaxophone
             = new PublicSaxophone<GameChoiceMessage>();
 
-        public void Connect()
+        public bool Connect()
         {
             Connection = Constants.CurrentServer.Connect();
 
+            var magic = new Magic();
+            var encryptionSuite = new EncryptionSuite(magic.AesParams);
+
             var handshakeMessage = new HandshakeMessage();
             handshakeMessage.VersionString = Constants.Version;
+            handshakeMessage.MagicBytes = RSAEncryption.RSAEncrypt(JsonConvert.SerializeObject(magic));
             Connection.SendMessage(handshakeMessage.Encode());
 
             var responseRaw = Connection.ReceiveMessage();
-            var response = new GenericResponseMessage();
+            var response = new HandshakeResponse();
             response.Decode(responseRaw);
 
-            if (response.Code == GenericResponseMessage.Codes.Error)
+
+            if (response.Error != null)
             {
-                Logging.Log(LogLevel.Error, response.Info);
+                return false;
             }
+            if (response.MagicBytes == null)
+            {
+                return false;
+            }
+            var decryptedNonce = encryptionSuite.Decrypt(response.MagicBytes);
+            if (decryptedNonce.Length != magic.Nonce.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < magic.Nonce.Length; i++)
+            {
+                if (magic.Nonce[i] != decryptedNonce[i]) { return false; }
+            }
+
+
+            Connection.EncryptionSuite = encryptionSuite;
 
             new Thread(() =>
             {
@@ -39,20 +62,31 @@ namespace CardKartClient
                     HandleIncomingMessage(Connection.ReceiveMessage());
                 }
             }).Start();
+
+            return true;
         }
 
-        public void JoinQueue()
+        public GenericResponseMessage JoinQueue()
         {
             var joinQueueRequest = new JoinQueueRequest();
-            Connection.SendMessage(joinQueueRequest.Encode());
+            Connection.SendMessage(joinQueueRequest);
 
-            var response = WaitForGenericResponse();
-            if (response.Code != GenericResponseMessage.Codes.OK)
-            {
-                throw new NotImplementedException();
-            }
+            return WaitForGenericResponse();
         }
 
+        public GenericResponseMessage LogIn(string username, string password)
+        {
+            var request = new LoginRequest {
+                Username = username,
+                Password = password
+            };
+
+            Connection.SendMessage(request);
+            
+            return WaitForGenericResponse();
+        }
+
+        #region Ugly game synch hack functions
         public ClientSideGameSynchronizer CreateGameChoiceSynchronizer(int gameID)
         {
             return new ClientSideGameSynchronizer(gameID, GameChoiceMessageSaxophone);
@@ -65,6 +99,7 @@ namespace CardKartClient
             gameChoiceMessage.Choices = choice;
             Connection.SendMessage(gameChoiceMessage.Encode());
         }
+        #endregion
 
         private GenericResponseMessage WaitForGenericResponse()
         {

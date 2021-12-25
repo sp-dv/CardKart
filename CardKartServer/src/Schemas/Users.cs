@@ -1,46 +1,46 @@
 ﻿using LiteDB;
+using System;
 
-namespace CardKartServer
+namespace CardKartServer.Schemas
 {
     internal static class Users
     {
         private static ILiteCollection<UserEntry> UserCollection { get; set; }
 
+        public static UserEntry[] AllUsers => UserCollection.Query().ToArray();
+
         public static void Load(ILiteCollection<UserEntry> users)
         {
             UserCollection = users;
-            
-            UserCollection.EnsureIndex(user => user.Name);
+            UserCollection.EnsureIndex(user => user.UserID);
         }
 
-        public static DBQuery<UserEntry> RegisterUser(string username)
+        public static DBQuery<UserEntry> CreateUser()
         {
-            if (UserCollection.FindOne(user => user.Name == username) != null)
-            {
-                return new DBError("A user with that name already exists");
-            }
-
             var user = new UserEntry();
-            user.Name = username;
+
+            var rand = new Random();
+            var randomBytes = new byte[32];
+
+            while (true)
+            {
+                rand.NextBytes(randomBytes);
+                var newUserID = Convert.ToBase64String(randomBytes);
+
+                if (UserCollection.Query().Where(user => user.UserID == newUserID).Count() == 0)
+                {
+                    user.UserID = newUserID;
+                    break;
+                }
+            }
             UserCollection.Insert(user);
             return user;
-        }
-
-        public static DBQuery<UserEntry> GetUser(string username)
-        {
-            var user = UserCollection.FindOne(user => user.Name == username);
-            if (user == null)
-            {
-                return new DBError("No user with that name exists.");
-            }
-            else { return user; }
         }
     }
 
     internal class UserEntry
     {
         public int Id { get; set; }
-
-        public string Name { get; set; }
+        public string UserID { get; set; }
     }
 }

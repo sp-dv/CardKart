@@ -16,6 +16,9 @@ namespace CardKartShared.Network
         public delegate void OnCloseHander();
         public event OnCloseHander Closed;
 
+        public EncryptionSuite EncryptionSuite { get; set; }
+
+
         public Connection(NetworkStream stream)
         {
             Stream = stream;
@@ -40,6 +43,7 @@ namespace CardKartShared.Network
                     var bodyBuffer = new byte[bodyLength];
                     var bodyReadCount = Stream.Read(bodyBuffer, 0, bodyBuffer.Length);
                     if (bodyReadCount != bodyBuffer.Length) { throw new Exception(); }
+                    if (EncryptionSuite != null) { bodyBuffer = EncryptionSuite.Decrypt(bodyBuffer);}
                     var bodyString = RawEncoding.GetString(bodyBuffer);
 
                     return new RawMessage((MessageTypes)messageType, bodyBuffer);
@@ -68,9 +72,12 @@ namespace CardKartShared.Network
             {
                 try
                 {
-                    var bodyLengthBytes = BitConverter.GetBytes(message.Bytes.Length);
-                    var messageTypeBytes = BitConverter.GetBytes((int)message.MessageType);
                     var messageBodyBytes = message.Bytes;
+
+                    if (EncryptionSuite != null) { messageBodyBytes = EncryptionSuite.Encrypt(messageBodyBytes);}
+
+                    var bodyLengthBytes = BitConverter.GetBytes(messageBodyBytes.Length);
+                    var messageTypeBytes = BitConverter.GetBytes((int)message.MessageType);
 
                     Stream.Write(bodyLengthBytes, 0, bodyLengthBytes.Length);
                     Stream.Write(messageTypeBytes, 0, messageTypeBytes.Length);
@@ -82,6 +89,11 @@ namespace CardKartShared.Network
                     Closed?.Invoke();
                 }
             }
+        }
+
+        public void SendMessage(Message message)
+        {
+            SendMessage(message.Encode());
         }
     }
 

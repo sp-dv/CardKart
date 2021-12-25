@@ -1,5 +1,11 @@
-﻿using CardKartShared.Util;
+﻿using CardKartServer.Schemas;
+using CardKartShared.Network;
+using CardKartShared.Util;
+using Newtonsoft.Json;
 using System;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace CardKartServer
 {
@@ -14,11 +20,14 @@ namespace CardKartServer
             Logging.AddConsoleLogger();
             Logging.Log(LogLevel.Info, $"Running CardKart server version {Constants.Version}.");
 
+            RSAEncryption.LoadPrivateKey(JsonConvert.DeserializeObject<RSAParameters>(File.ReadAllText("server.key")));
+
             Database.Load();
-            ConnectionHandler = new ConnectionHandler();
+
             ClientHandler = new ClientHandler();
             GameCoordinator = new GameCoordinator();
-            
+
+            ConnectionHandler = new ConnectionHandler();
             ConnectionHandler.Start();
         }
     }
