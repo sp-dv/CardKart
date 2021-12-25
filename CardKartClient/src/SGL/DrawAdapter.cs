@@ -12,9 +12,6 @@ namespace SGL
         public QFont DefaultFont;
         public QFontRenderOptions RenderOptions;
 
-        public int ScreenWidth;
-        public int ScreenHeight;
-
         private static float[] CircleSins;
         private static float[] CircleCoss;
 
@@ -179,8 +176,8 @@ namespace SGL
 
         public void DrawText(string text, float X0, float Y0)
         {
-            var w = (X0 / 2 + 0.5f) * ScreenWidth;
-            var h = (Y0 / 2 + 0.5f) * ScreenHeight;
+            var w = (X0 / 2 + 0.5f) * CardKartClient.CardKartClient.GUI.WindowWidth;
+            var h = (Y0 / 2 + 0.5f) * CardKartClient.CardKartClient.GUI.WindowHeight;
 
             FontDrawing.Print(
                 DefaultFont, 
@@ -198,23 +195,19 @@ namespace SGL
         }
 
         public void DrawTextSmart(
-            string text, 
-            float X0, 
-            float Y0, 
-            float width, 
-            float height,
+            ProcessedText pt, 
+            float w, 
+            float h, 
             QFont font,
             QFontRenderOptions renderOptions)
         {
-            var w = (X0 / 2 + 0.5f) * ScreenWidth;
-            var h = (Y0 / 2 + 0.5f) * ScreenHeight;
+            FontDrawing.Print(font, pt, new OpenTK.Vector3(w, h, 0), renderOptions);
 
-            FontDrawing.Print(
-                font,
-                text,
-                new OpenTK.Vector3(w, h, 0),
-                QFontAlignment.Left,
-                renderOptions);
+            FontDrawing.RefreshBuffers();
+            FontDrawing.Draw();
+            FontDrawing.DrawingPimitiveses.Clear();
+            GL.UseProgram(0);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
         }
     }
 }

@@ -62,14 +62,10 @@ namespace SGL
                 da.FontDrawing = FontDrawing;
                 da.DefaultFont = Fonts.MainFont10;
                 da.RenderOptions = Fonts.MainRenderOptions;
-                da.ScreenHeight = Height;
-                da.ScreenWidth = Width;
 
                 CurrentScene.Draw(da);
             }
 
-            //FondDrawing.RefreshBuffers();
-            //FondDrawing.Draw();
             SwapBuffers();
         }
 

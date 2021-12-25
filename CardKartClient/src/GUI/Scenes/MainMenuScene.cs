@@ -13,7 +13,10 @@ namespace CardKartClient.GUI.Scenes
         public MainMenuScene()
         {
             SmartTextPanel debug = new SmartTextPanel();
-            debug.Text = "Long string of text to test shit out with. I sure hope this works. I sure hope future me has fixed text overflow xd.";
+            debug.Text = "Long string of text to test shit out with. I sure hope this works. I sure hope future me has fixed text overflow xd.\nThis should be a new line bud.";
+            debug.X = -0.8f;
+            debug.Y = 0.4f;
+            debug.Layout();
             Components.Add(debug);
 
 

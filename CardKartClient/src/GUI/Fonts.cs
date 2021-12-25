@@ -22,19 +22,12 @@ namespace CardKartClient.GUI
 
         static Fonts()
         {
-            var builderConfig = new QFontBuilderConfiguration(true)
+            var builderConfig = new QFontBuilderConfiguration(false)
             {
-                ShadowConfig =
-                {
-                    blurRadius = 0,
-                    blurPasses = 0,
-                    Type = ShadowType.Blurred
-                },
-                TextGenerationRenderHint = TextGenerationRenderHint.ClearTypeGridFit,
                 Characters = CharacterSet.General
             };
 
-            MainFont10 = new QFont("Fonts/times.ttf", 10, builderConfig);
+            MainFont10 = new QFont("./gamefonts/blackr.ttf", 15, builderConfig);
             MainFont6 = new QFont("Fonts/times.ttf", 6, builderConfig);
         }
     }

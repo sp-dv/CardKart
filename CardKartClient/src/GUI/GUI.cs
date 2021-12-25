@@ -15,6 +15,9 @@ namespace CardKartClient.GUI
     {
         private SGLWindow Window;
 
+        public int WindowHeight => Window.Height;
+        public int WindowWidth => Window.Width;
+
         public void OpenWindow()
         {
             Textures.LoadTextures();
