@@ -39,6 +39,11 @@ namespace SGL
 
         public void HandleMouseMove(GLCoordinate location)
         {
+            for (int i = Components.Count - 1; i >= 0; i--)
+            {
+                GuiComponent component = Components[i];
+                if (component.HandleMouseMove(location)) { return; }
+            }
         }
     }
 }

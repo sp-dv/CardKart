@@ -44,5 +44,19 @@ namespace CardKartClient.GUI
         {
             return location.InBounds(X, Y, X + Width, Y + Height);
         }
+
+        public bool HandleMouseMove(GLCoordinate location)
+        {
+            if (ComponentRectangleContains(location)) 
+            {
+                return HandleMouseMoveInternal(location); 
+            }
+            return false;
+        }
+
+        protected virtual bool HandleMouseMoveInternal(GLCoordinate location)
+        {
+            return false;
+        }
     }
 }

@@ -70,10 +70,10 @@ namespace CardKartClient.GUI.Components
             NameInsetX = 0.01f;
             NameInsetY = 0.51f;
 
-            AttackInsetX = 0.015f;
-            AttackInsetY = 0.06f;
+            AttackInsetX = 0.0155f;
+            AttackInsetY = 0.29f;
 
-            DefenceInsetX = 0.175f;
+            DefenceInsetX = 0.165f;
             DefenceInsetY = AttackInsetY;
         }
 
@@ -112,14 +112,14 @@ namespace CardKartClient.GUI.Components
                     Card.Attack.ToString(), 
                     X + AttackInsetX, 
                     Y + AttackInsetY, 
-                    Fonts.CardFont10, 
+                    Fonts.CardFont14, 
                     Fonts.MainRenderOptions);
 
                 drawAdapter.DrawText(
                     Card.Health.ToString(), 
                     X + DefenceInsetX, 
                     Y + DefenceInsetY, 
-                    Fonts.CardFont10, 
+                    Fonts.CardFont14, 
                     Fonts.MainRenderOptions);
             }
 

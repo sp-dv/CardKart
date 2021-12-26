@@ -62,12 +62,13 @@ namespace CardKartShared.GameState
             ChoiceHelper.ResetGUIOptions();
             GameState.LoadDecks(
                 new Deck(new[] {
+                    CardTemplates.Enlarge,
+                    CardTemplates.Test,
+                    CardTemplates.StandardBearer,
+
                     CardTemplates.ArmoredZombie,
                     CardTemplates.DepravedBloodhound,
-                    CardTemplates.StandardBearer,
-                    CardTemplates.Enlarge,
                     CardTemplates.AngryGoblin,
-                    CardTemplates.Test,
                     CardTemplates.Zap,
                     CardTemplates.AlterFate,
 
@@ -109,7 +110,7 @@ namespace CardKartShared.GameState
             }
 
             EnforceGameRules(true);
-            GameState.DrawCards(ActivePlayer, 1);
+            GameState.DrawCards(ActivePlayer, 5);
             EnforceGameRules(true);
 
             ManaColour colour;

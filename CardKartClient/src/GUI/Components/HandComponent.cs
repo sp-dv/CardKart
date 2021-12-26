@@ -68,11 +68,25 @@ namespace CardKartClient.GUI.Components
         {
             foreach (var cardComponent in CardComponents)
             {
-                if (cardComponent.ComponentRectangleContains(location))
+                if (cardComponent.HandleClick(location))
                 {
                     CardClicked?.Invoke(cardComponent);
+                    return;
                 }
             }
+        }
+
+        protected override bool HandleMouseMoveInternal(GLCoordinate location)
+        {
+            foreach (var cardComponent in CardComponents)
+            {
+                if (cardComponent.HandleMouseMove(location))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
