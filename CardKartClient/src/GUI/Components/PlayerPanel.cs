@@ -50,7 +50,7 @@ namespace CardKartClient.GUI.Components
             HealthPanel.Width = 0.06f;
             HealthPanel.Height = 0.08f;
             HealthPanel.TextInsetX = 0.02f;
-            HealthPanel.TextInsetY = 0.05f;
+            HealthPanel.TextInsetY = 0.075f;
 
             PlayerPortrait.X = X + 0.48f;
             PlayerPortrait.Y = Y + 0.02f;

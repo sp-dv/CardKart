@@ -53,6 +53,7 @@ namespace CardKartClient.GUI.Components
         private void Update()
         {
             MainText.Text = ChoiceHelper.Text;
+            MainText.Layout();
 
             PassButton.Visible = ChoiceHelper.ShowPass;
             OkButton.Visible = ChoiceHelper.ShowOk;
@@ -85,7 +86,7 @@ namespace CardKartClient.GUI.Components
             CancelButton.Layout();
 
             MainText.X = X + 0.02f;
-            MainText.Y = Y + Height - 0.05f;
+            MainText.Y = Y + Height - 0.1f;
             MainText.Width = Width - 0.04f;
             MainText.Height = 0.08f;
             MainText.Layout();

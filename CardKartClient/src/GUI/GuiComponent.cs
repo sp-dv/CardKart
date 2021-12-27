@@ -49,14 +49,15 @@ namespace CardKartClient.GUI
         {
             if (ComponentRectangleContains(location)) 
             {
-                return HandleMouseMoveInternal(location); 
+                HandleMouseMoveInternal(location);
+                return true;
             }
             return false;
         }
 
-        protected virtual bool HandleMouseMoveInternal(GLCoordinate location)
+        protected virtual void HandleMouseMoveInternal(GLCoordinate location)
         {
-            return false;
+
         }
     }
 }
