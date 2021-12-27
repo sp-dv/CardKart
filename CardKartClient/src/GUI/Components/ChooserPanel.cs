@@ -30,21 +30,29 @@ namespace CardKartClient.GUI.Components
 
             PassButton = new SmartTextPanel();
             PassButton.Text = "Pass Turn";
+            PassButton.BackgroundColor = Color.RosyBrown;
             PassButton.Clicked += () => OptionClicked?.Invoke(OptionChoice.Pass);
+            Components.Add(PassButton);
 
             OkButton = new SmartTextPanel();
             OkButton.Text = "OK";
+            OkButton.BackgroundColor = Color.Lavender;
             OkButton.Clicked += () => OptionClicked?.Invoke(OptionChoice.Ok);
+            Components.Add(OkButton);
 
             CancelButton = new SmartTextPanel();
             CancelButton.Text = "Cancel";
+            CancelButton.BackgroundColor = Color.Lavender;
             CancelButton.Clicked += () => OptionClicked?.Invoke(OptionChoice.Cancel);
+            Components.Add(CancelButton);
 
             MainText = new SmartTextPanel();
+            Components.Add(MainText);
 
             ManaChoices = new ManaButtonBar();
             ManaChoices.ColourClicked += 
                 (colour) => OptionClicked?.Invoke(colour);
+            Components.Add(ManaChoices);
 
             ChoiceHelper = choiceHelper;
             ChoiceHelper.RequestGUIUpdate += Update;
@@ -67,7 +75,7 @@ namespace CardKartClient.GUI.Components
 
         public void Layout()
         {
-            PassButton.X = X + 0.1f;
+            PassButton.X = X + 0.2f;
             PassButton.Y = Y + 0.15f;
             PassButton.Width = 0.12f;
             PassButton.Height = 0.07f;
@@ -99,22 +107,6 @@ namespace CardKartClient.GUI.Components
         protected override void DrawInternal(DrawAdapter drawAdapter)
         {
             drawAdapter.FillRectangle(X, Y, X + Width, Y + Height, Color.Silver);
-
-            PassButton.Draw(drawAdapter);
-            OkButton.Draw(drawAdapter);
-            CancelButton.Draw(drawAdapter);
-
-            MainText.Draw(drawAdapter);
-            ManaChoices.Draw(drawAdapter);
-        }
-
-        protected override void HandleClickInternal(GLCoordinate location)
-        {
-            if (PassButton.HandleClick(location)) { }
-            else if (OkButton.HandleClick(location)) { }
-            else if (CancelButton.HandleClick(location)) { }
-            else if (ManaChoices.HandleClick(location)) { }
-            else if (ManaChoices.HandleClick(location)) { }
         }
     }
 }

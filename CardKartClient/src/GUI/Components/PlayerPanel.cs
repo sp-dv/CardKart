@@ -6,14 +6,15 @@ namespace CardKartClient.GUI.Components
 {
     internal class PlayerPanel : GuiComponent
     {
-        private Player Player;
+        public Player Player { get; }
 
         public ManaButtonBar ManaBar;
         public TextPanel HealthPanel;
 
         public PlayerPortrait PlayerPortrait;
 
-        public event PlayerPortrait.PlayerClickedHandler PlayerPortraitClicked;
+        public delegate void PlayerClickedHandler(Player player);
+        public event PlayerClickedHandler PlayerPortraitClicked;
 
         public PlayerPanel(Player player)
         {
@@ -23,12 +24,15 @@ namespace CardKartClient.GUI.Components
             Height = 0.2f;
 
             ManaBar = new ManaButtonBar();
+            Components.Add(ManaBar);
 
             HealthPanel = new TextPanel();
             HealthPanel.BackgroundImage = Textures.Health1;
+            Components.Add(HealthPanel);
 
             PlayerPortrait = new PlayerPortrait(player);
-            PlayerPortrait.PlayerClicked += player => PlayerPortraitClicked?.Invoke(player);
+            PlayerPortrait.Clicked += () => PlayerPortraitClicked?.Invoke(player);
+            Components.Add(PlayerPortrait);
 
             Player.PlayerChanged += Update;
         }
@@ -59,15 +63,6 @@ namespace CardKartClient.GUI.Components
         protected override void DrawInternal(DrawAdapter drawAdapter)
         {
             drawAdapter.FillRectangle(X, Y, X + Width, Y + Height, Color.LightGray);
-
-            ManaBar.Draw(drawAdapter);
-            HealthPanel.Draw(drawAdapter);
-            PlayerPortrait.Draw(drawAdapter);
-        }
-
-        protected override void HandleClickInternal(GLCoordinate location)
-        {
-            if (PlayerPortrait.HandleClick(location)) { }
         }
     }
 
@@ -76,9 +71,6 @@ namespace CardKartClient.GUI.Components
         public Player Player;
 
         private Texture PortraitTexture;
-
-        public delegate void PlayerClickedHandler(Player player);
-        public event PlayerClickedHandler PlayerClicked;
 
         public PlayerPortrait(Player player)
         {
@@ -98,11 +90,6 @@ namespace CardKartClient.GUI.Components
             {
                 PortraitTexture = Textures.Portraits(Player.HeroCard.Template);
             }
-        }
-
-        protected override void HandleClickInternal(GLCoordinate location)
-        {
-            PlayerClicked?.Invoke(Player);
         }
     }
 }

@@ -144,6 +144,15 @@ namespace CardKartClient.GUI.Components
                     radius,
                     Color.Black);
             }
+
+            if (MouseIsInComponent)
+            {
+                drawAdapter.DrawRectange(X, Y, X + Width, Y + Height, Color.White);
+            }
+        }
+
+        protected override void MouseEntered(GLCoordinate location)
+        {
         }
     }
 }

@@ -25,12 +25,32 @@ namespace CardKartClient.GUI.Components
             Width = 0.4f;
 
             RedButton = new ManaBallButton(ManaColour.Red);
+            RedButton.Clicked += () => ColourClicked?.Invoke(OptionChoice.Red);
+            Components.Add(RedButton);
+
             GreenButton = new ManaBallButton(ManaColour.Green);
+            GreenButton.Clicked += () => ColourClicked?.Invoke(OptionChoice.Green);
+            Components.Add(GreenButton);
+
             WhiteButton = new ManaBallButton(ManaColour.White);
+            WhiteButton.Clicked += () => ColourClicked?.Invoke(OptionChoice.White);
+            Components.Add(WhiteButton);
+
             BlackButton = new ManaBallButton(ManaColour.Black);
+            BlackButton.Clicked += () => ColourClicked?.Invoke(OptionChoice.Black);
+            Components.Add(BlackButton);
+
             PurpleButton = new ManaBallButton(ManaColour.Purple);
+            PurpleButton.Clicked += () => ColourClicked?.Invoke(OptionChoice.Purple);
+            Components.Add(PurpleButton);
+
             BlueButton = new ManaBallButton(ManaColour.Blue);
+            BlueButton.Clicked += () => ColourClicked?.Invoke(OptionChoice.Blue);
+            Components.Add(BlueButton);
+
             ColourlessButton = new ManaBallButton(ManaColour.Colourless);
+            ColourlessButton.Clicked += () => ColourClicked?.Invoke(OptionChoice.Colourless);
+            Components.Add(ColourlessButton);
         }
 
 
@@ -85,32 +105,6 @@ namespace CardKartClient.GUI.Components
 
         protected override void DrawInternal(DrawAdapter drawAdapter)
         {
-            RedButton.Draw(drawAdapter);
-            GreenButton.Draw(drawAdapter);
-            PurpleButton.Draw(drawAdapter);
-            WhiteButton.Draw(drawAdapter);
-            BlackButton.Draw(drawAdapter);
-            BlueButton.Draw(drawAdapter);
-            ColourlessButton.Draw(drawAdapter);
-        }
-
-        protected override void HandleClickInternal(GLCoordinate location)
-        {
-            if (RedButton.ComponentRectangleContains(location)) { 
-                ColourClicked?.Invoke(OptionChoice.Red); 
-            } else if (GreenButton.ComponentRectangleContains(location)) {
-                ColourClicked?.Invoke(OptionChoice.Green);
-            } else if (BlackButton.ComponentRectangleContains(location)) {
-                ColourClicked?.Invoke(OptionChoice.Black);
-            } else if (WhiteButton.ComponentRectangleContains(location)) {
-                ColourClicked?.Invoke(OptionChoice.White);
-            } else if (PurpleButton.ComponentRectangleContains(location)) {
-                ColourClicked?.Invoke(OptionChoice.Purple);
-            } else if (BlueButton.ComponentRectangleContains(location)) {
-                ColourClicked?.Invoke(OptionChoice.Blue);
-            } else if (ColourlessButton.ComponentRectangleContains(location)) {
-                ColourClicked?.Invoke(OptionChoice.Colourless);
-            }
         }
     }
 }

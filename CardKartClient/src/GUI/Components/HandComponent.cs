@@ -12,8 +12,6 @@ namespace CardKartClient.GUI.Components
         private float PaddingY = 0.02f;
 
         private Pile Hand;
-        private List<CardComponent> CardComponents = new List<CardComponent>();
-        private object CardComponentsLock = new object();
 
         public delegate void CardClickedHandler(CardComponent cardComponent);
         public event CardClickedHandler CardClicked;
@@ -31,62 +29,28 @@ namespace CardKartClient.GUI.Components
 
         private void Layout()
         {
-            lock (CardComponentsLock)
+            lock (Components)
             {
                 var cards = Hand.ToArray();
 
-                CardComponents.Clear();
+                Components.Clear();
 
                 for (int i = 0; i < cards.Length; i++)
                 {
                     var card = cards[i];
                     var cardComponent = new CardComponent(card);
-                    CardComponents.Add(cardComponent);
+                    Components.Add(cardComponent);
 
                     cardComponent.X = X + i * cardComponent.Width;
                     cardComponent.Y = Y + PaddingY;
+                    cardComponent.Clicked += () => CardClicked?.Invoke(cardComponent);
                 }
             }
         }
 
         protected override void DrawInternal(DrawAdapter drawAdapter)
         {
-            lock (CardComponentsLock)
-            {
-                if (CardComponents == null) { return; }
-
-                drawAdapter.FillRectangle(X, Y, X + Width, Y + Height, Color.SaddleBrown);
-
-                foreach (var cardComponent in CardComponents)
-                {
-                    cardComponent.Draw(drawAdapter);
-                }
-            }
-        }
-
-        protected override void HandleClickInternal(GLCoordinate location)
-        {
-            foreach (var cardComponent in CardComponents)
-            {
-                if (cardComponent.HandleClick(location))
-                {
-                    CardClicked?.Invoke(cardComponent);
-                    return;
-                }
-            }
-        }
-
-        protected override bool HandleMouseMoveInternal(GLCoordinate location)
-        {
-            foreach (var cardComponent in CardComponents)
-            {
-                if (cardComponent.HandleMouseMove(location))
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            drawAdapter.FillRectangle(X, Y, X + Width, Y + Height, Color.SaddleBrown);
         }
     }
 }

@@ -32,10 +32,10 @@ namespace CardKartClient.GUI.Components
             {
                 TokenComponent rt;
 
-                rt = BattlefieldA.GetComponent(token);
+                rt = BattlefieldA.GetComponent(token.ID);
                 if (rt != null) { return rt; }
 
-                rt = BattlefieldB.GetComponent(token);
+                rt = BattlefieldB.GetComponent(token.ID);
                 if (rt != null) { return rt; }
 
                 return null;

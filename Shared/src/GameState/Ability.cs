@@ -233,6 +233,7 @@ namespace CardKartShared.GameState
     {
         public ZapCast()
         {
+            MoveToStackOnCast= true;
         }
 
         public override bool IsCastable(AbilityCastingContext context)

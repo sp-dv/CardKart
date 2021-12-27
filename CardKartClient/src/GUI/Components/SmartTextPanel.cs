@@ -20,9 +20,6 @@ namespace CardKartClient.GUI.Components
         public Color? BackgroundColor { get; set; }
         public Texture BackgroundImage { get; set; }
 
-        public delegate void ClickedHandler();
-        public event ClickedHandler Clicked;
-
         public SmartTextPanel()
         {
             Width = 0.2f;
@@ -69,11 +66,6 @@ namespace CardKartClient.GUI.Components
 
                 drawAdapter.DrawTextSmart(ProcessedText, TextX0, TextY0, Font, RenderOptions);
             }
-        }
-
-        protected override void HandleClickInternal(GLCoordinate location)
-        {
-            Clicked?.Invoke();
         }
     }
 }

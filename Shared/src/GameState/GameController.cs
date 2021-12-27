@@ -605,6 +605,29 @@ namespace CardKartShared.GameState
             
             return context;
         }
+
+        public List<int> GetTargetIDs(int index)
+        {
+            var context = Contexts.ElementAt(index);
+            var targets = new List<int>();
+
+            foreach (var kvp in context.Choices.Singletons)
+            {
+                if (kvp.Key[0] == '!')
+                {
+                    targets.Add(kvp.Value);
+                }
+            }
+            foreach (var kvp in context.Choices.Arrays)
+            {
+                if (kvp.Key[0] == '!')
+                {
+                    targets.AddRange(kvp.Value);
+                }
+            }
+
+            return targets;
+        }
     }
 
     public class ChoiceHelper

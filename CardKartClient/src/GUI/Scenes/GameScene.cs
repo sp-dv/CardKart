@@ -1,6 +1,8 @@
 ﻿using CardKartClient.GUI.Components;
 using CardKartShared.GameState;
 using SGL;
+using System.Drawing;
+using System.Linq;
 
 namespace CardKartClient.GUI.Scenes
 {
@@ -18,7 +20,8 @@ namespace CardKartClient.GUI.Scenes
         public CombatAnimator CombatAnimator;
         public CardChoicePanel CardChoicePanel;
 
-
+        private GLCoordinate StackFrom;
+        private GLCoordinate[] StackTo;
 
         public GameScene(GameController gameController)
         {
@@ -57,6 +60,7 @@ namespace CardKartClient.GUI.Scenes
             StackPanel = new StackPanel(gameController.GameState.CastingStack);
             StackPanel.X = -0.95f;
             StackPanel.Y = -0.5f;
+            StackPanel.TargetsUpdated += UpdateStackTargetLines;
             Components.Add(StackPanel);
 
             CardChoicePanel = new CardChoicePanel();
@@ -100,6 +104,48 @@ namespace CardKartClient.GUI.Scenes
             Components.Add(CombatAnimator);
         }
 
+        private void UpdateStackTargetLines(CardComponent caster, System.Collections.Generic.IEnumerable<int> targetIDs)
+        {
+            if (caster == null || targetIDs == null || targetIDs.Count() == 0) 
+            {
+                StackFrom = null;
+                StackTo = null;
+                return; 
+            }
+
+            var toLocations = targetIDs
+                .Select(id => GetComponentOf(id))
+                .Where(component => component != null)
+                .Select(component => component.GuiLocation1)
+                .ToArray();
+            StackFrom = caster.GuiLocation1;
+            StackTo = toLocations;
+        }
+
+        private GuiComponent GetComponentOf(int id)
+        {
+            if (HeroPanel.Player.ID == id ||
+                HeroPanel.Player.HeroCard.ID == id ||
+                HeroPanel.Player.HeroCard.Token.ID == id)
+            {
+                return HeroPanel.PlayerPortrait;
+            }
+            if (VillainPanel.Player.ID == id ||
+                VillainPanel.Player.HeroCard.ID == id ||
+                VillainPanel.Player.HeroCard.Token.ID == id)
+            {
+                return VillainPanel.PlayerPortrait;
+            }
+
+            var heroToken = HeroBattlefieldPanel.GetComponent(id);
+            if (heroToken != null) { return heroToken; }
+
+            var villainToken = VillainBattlefieldPanel.GetComponent(id);
+            if (villainToken != null) { return villainToken; }
+
+            return null;
+        }
+
         private void GameObjectClicked(GameObject gameObject)
         {
             GameController.ChoiceHelper.PlayerChoiceSaxophone.Play(new PlayerChoiceStruct(gameObject));
@@ -108,6 +154,17 @@ namespace CardKartClient.GUI.Scenes
         private void OptionChoiceClicked(OptionChoice optionChoice)
         {
             GameController.ChoiceHelper.PlayerChoiceSaxophone.Play(new PlayerChoiceStruct(optionChoice));
+        }
+
+        protected override void DrawPost(DrawAdapter drawAdapter)
+        {
+            if (StackFrom != null && StackTo != null)
+            {
+                foreach (var location in StackTo)
+                {
+                    drawAdapter.DrawLine(StackFrom.X, StackFrom.Y, location.X, location.Y, Color.Black);
+                }
+            }
         }
     }
 }

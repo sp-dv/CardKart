@@ -14,13 +14,35 @@ namespace CardKartClient.GUI
         public float Width { get; set; }
         public float Height { get; set; }
 
+        public GLCoordinate GuiLocation1 => new GLCoordinate(X + Width / 2, Y + Height / 2);
+
         public bool Visible { get; set; } = true;
 
-        public void Draw(DrawAdapter drawAdapter)
+        protected List<GuiComponent> Components = new List<GuiComponent>();
+
+        public delegate void ClickedHandler();
+        public event ClickedHandler Clicked;
+
+        public delegate void MouseEventHandler();
+        public event MouseEventHandler MouseEnteredEvent;
+        public event MouseEventHandler MouseMovedEvent;
+        public event MouseEventHandler MouseExitedEvent;
+
+        protected bool MouseIsInComponent { get; private set; }
+
+        public virtual void Draw(DrawAdapter drawAdapter)
         {
             if (Visible)
             {
                 DrawInternal(drawAdapter);
+
+                lock (Components)
+                {
+                    foreach (var child in Components)
+                    {
+                        child.Draw(drawAdapter);
+                    }
+                }
             }
         }
 
@@ -31,33 +53,58 @@ namespace CardKartClient.GUI
             if (!Visible) { return false; }
             if (!ComponentRectangleContains(location)) { return false; }
 
-            HandleClickInternal(location);
+            foreach (var child in Components.Reverse<GuiComponent>())
+            {
+                if (child.HandleClick(location)) { return true; }
+            }
+
+            Clicked?.Invoke();
             return true;
-        }
-
-        protected virtual void HandleClickInternal(GLCoordinate location)
-        {
-
         }
 
         public bool ComponentRectangleContains(GLCoordinate location)
         {
+            if (location == null) { return false; }
             return location.InBounds(X, Y, X + Width, Y + Height);
         }
 
-        public bool HandleMouseMove(GLCoordinate location)
+        public void HandleMouseMove(GLCoordinate location)
         {
-            if (ComponentRectangleContains(location)) 
+            bool rt;
+            if (ComponentRectangleContains(location))
             {
-                HandleMouseMoveInternal(location);
-                return true;
+                if (!MouseIsInComponent) 
+                { 
+                    MouseEntered(location);
+                    MouseEnteredEvent?.Invoke();
+                }
+
+                MouseIsInComponent = true;
+                MouseMoved(location);
+                MouseMovedEvent?.Invoke();
             }
-            return false;
+            else
+            {
+                if (MouseIsInComponent) { MouseExited(location); }
+                MouseIsInComponent = false;
+                MouseExitedEvent?.Invoke();
+            }
+
+            foreach (var child in Components.Reverse<GuiComponent>())
+            {
+                child.HandleMouseMove(location);
+            }
         }
 
-        protected virtual void HandleMouseMoveInternal(GLCoordinate location)
+        protected virtual void MouseMoved(GLCoordinate location)
         {
+        }
 
+        protected virtual void MouseEntered(GLCoordinate location)
+        {
+        }
+        protected virtual void MouseExited(GLCoordinate location)
+        {
         }
     }
 }

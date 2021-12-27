@@ -1,5 +1,6 @@
 ﻿using CardKartShared.GameState;
 using SGL;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -11,8 +12,6 @@ namespace CardKartClient.GUI.Components
         private float PaddingY = 0.02f;
 
         private Pile Battlefield;
-        private List<TokenComponent> TokenComponents = new List<TokenComponent>();
-        private object TokenComponentsLock = new object();
 
         public delegate void TokenClickedHandler(Token token);
         public event TokenClickedHandler TokenClicked;
@@ -29,76 +28,49 @@ namespace CardKartClient.GUI.Components
 
         }
 
-        public TokenComponent GetComponent(Token token)
+        public TokenComponent GetComponent(int id)
         {
-            lock (TokenComponentsLock)
+            foreach (TokenComponent tokenComponent in Components)
             {
-                foreach (TokenComponent component in TokenComponents)
+                if (tokenComponent?.Card?.ID == id ||
+                    tokenComponent?.Card?.Token?.ID == id)
                 {
-                    if (component.Card.Token == token) { return component; }
+                    return tokenComponent;
                 }
             }
+
             return null;
         }
 
         public void ResetHighlighting()
         {
-            lock (TokenComponentsLock)
+            foreach (TokenComponent component in Components)
             {
-                foreach (TokenComponent component in TokenComponents)
-                {
-                    component.HighlightColor = null;
-                }
+                component.HighlightColor = null;
             }
         }
 
         private void Layout()
         {
-            lock (TokenComponentsLock)
+            Components.Clear();
+
+            var cards = Battlefield.ToArray();
+
+            for (int i = 0; i < cards.Length; i++)
             {
-                var cards = Battlefield.ToArray();
-                TokenComponents.Clear();
+                var card = cards[i];
+                var tokenComponent = new TokenComponent(card);
+                tokenComponent.X = X + i * tokenComponent.Width;
+                tokenComponent.Y = Y;
+                tokenComponent.Clicked += () => { TokenClicked?.Invoke(card.Token); };
 
-                for (int i = 0; i < cards.Length; i++)
-                {
-                    var card = cards[i];
-                    var tokenComponent = new TokenComponent(card);
-                    TokenComponents.Add(tokenComponent);
-
-                    tokenComponent.X = X + i * tokenComponent.Width;
-                    tokenComponent.Y = Y;
-                }
+                Components.Add(tokenComponent);
             }
         }
 
         protected override void DrawInternal(DrawAdapter drawAdapter)
         {
-            lock (TokenComponentsLock)
-            {
-                if (TokenComponents == null) { return; }
-
-                drawAdapter.FillRectangle(X, Y, X + Width, Y + Height, Color.SandyBrown);
-
-                foreach (var tokenComponent in TokenComponents)
-                {
-                    tokenComponent.Draw(drawAdapter);
-                }
-            }
-        }
-
-        protected override void HandleClickInternal(GLCoordinate location)
-        {
-            lock (TokenComponentsLock)
-            {
-                foreach (var tokenComponent in TokenComponents)
-                {
-                    if (tokenComponent.HandleClick(location))
-                    {
-                        TokenClicked?.Invoke(tokenComponent.Card.Token);
-                        return;
-                    }
-                }
-            }
+            drawAdapter.FillRectangle(X, Y, X + Width, Y + Height, Color.SandyBrown);
         }
     }
 }

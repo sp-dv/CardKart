@@ -14,6 +14,12 @@ namespace SGL
             {
                 component.Draw(drawAdapter);
             }
+
+            DrawPost(drawAdapter);
+        }
+
+        protected virtual void DrawPost(DrawAdapter drawAdapter)
+        {
         }
 
         public void HandleKeyDown(KeyboardKeyEventArgs e)
@@ -41,8 +47,7 @@ namespace SGL
         {
             for (int i = Components.Count - 1; i >= 0; i--)
             {
-                GuiComponent component = Components[i];
-                if (component.HandleMouseMove(location)) { return; }
+                Components[i].HandleMouseMove(location);
             }
         }
     }
