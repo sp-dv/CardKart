@@ -4,60 +4,11 @@ using System.Text;
 
 namespace CardKartShared.GameState
 {
-    public abstract class TriggeredAbility : Ability
+    public class TriggeredAbility : Ability
     {
-        public abstract bool IsTriggeredBy(Trigger trigger);
+        public Func<Trigger, bool> IsTriggeredBy { get; set; } = trigger => false;
 
-        public abstract void SaveTriggerInfo(
-            Trigger trigger, 
-            AbilityCastingContext context);
-
-        public override bool IsCastable(AbilityCastingContext context)
-        {
-            return false;
-        }
-    }
-
-    public class DepravedBloodhoundTrigger : TriggeredAbility
-    {
-        public override bool IsTriggeredBy(Trigger trigger)
-        {
-            if (trigger is DrawTrigger)
-            {
-                var drawTrigger = trigger as DrawTrigger;
-
-                return true;
-            }
-
-            return false;
-        }
-
-
-        public override void SaveTriggerInfo(Trigger trigger, AbilityCastingContext context)
-        {
-            var drawTrigger = trigger as DrawTrigger;
-            context.SetPlayer("player", drawTrigger.Player);
-        }
-
-        public override bool MakeCastChoices(AbilityCastingContext context)
-        {
-            return true;
-        }
-
-        public override void EnactCastChoices(AbilityCastingContext context)
-        {
-        }
-
-        public override void MakeResolveChoicesCastingPlayer(AbilityCastingContext context)
-        {
-        }
-
-        public override void EnactResolveChoices(AbilityCastingContext context)
-        {
-            var player = context.GetPlayer("player");
-            var card = context.Card;
-            context.GameState.DealDamage(card, player.HeroCard.Token, 1);
-        }
+        public Action<Trigger, AbilityCastingContext> SaveTriggerInfo { get; set; } = (trigger, context) => {};
 
     }
 

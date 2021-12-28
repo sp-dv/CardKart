@@ -63,7 +63,7 @@ namespace CardKartShared.GameState
             GameState.LoadDecks(
                 new Deck(new[] {
                     CardTemplates.Enlarge,
-                    CardTemplates.Test,
+                    CardTemplates.MindFlay,
                     CardTemplates.StandardBearer,
 
                     CardTemplates.ArmoredZombie,
@@ -71,6 +71,7 @@ namespace CardKartShared.GameState
                     CardTemplates.AngryGoblin,
                     CardTemplates.Zap,
                     CardTemplates.AlterFate,
+                    CardTemplates.GolbinBombsmith,
 
 
                 }),
@@ -672,7 +673,9 @@ namespace CardKartShared.GameState
             ResetGUIOptions();
 
             if (choice.IsOptionChoice) { return null; }
-            else { return choice.GameObject as Card; }
+            else if (choice.GameObject is Card) { return choice.GameObject as Card; }
+            else if (choice.GameObject is Token) { return (choice.GameObject as Token).TokenOf; }
+            throw new NotImplementedException();
         }
 
         public Token ChooseToken(Func<Token, bool> filter)

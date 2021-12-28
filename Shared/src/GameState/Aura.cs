@@ -1,48 +1,12 @@
-﻿namespace CardKartShared.GameState
+﻿using System;
+
+namespace CardKartShared.GameState
 {
-    public abstract class Aura
+    public class Aura
     {
-        public abstract void ApplyAura(Token token, GameState gameState);
-        public abstract bool IsCancelledBy(Trigger trigger, Token token, GameState gameState);
-    }
+        public string BreadText { get; set; }
 
-    public class StandardBearerAura : Aura
-    {
-        public override void ApplyAura(Token token, GameState gameState)
-        {
-            foreach (var otherToken in gameState.AllTokens)
-            {
-                if (otherToken != token && otherToken.Controller == token.Controller)
-                {
-                    otherToken.AuraModifiers.Attack += 1;
-                    otherToken.AuraModifiers.Health += 1;
-                }
-            }
-        }
-
-        public override bool IsCancelledBy(Trigger trigger, Token token, GameState gameState)
-        {
-            return false;
-        }
-    }
-
-    public class EnlargeAura : Aura
-    {
-        public override void ApplyAura(Token token, GameState gameState)
-        {
-            token.AuraModifiers.Attack += 2;
-            token.AuraModifiers.Health += 2;
-        }
-
-        public override bool IsCancelledBy(Trigger trigger, Token token, GameState gameState)
-        {
-            if (trigger is GameTimeTrigger)
-            {
-                var gameTime = trigger as GameTimeTrigger;
-
-                return gameTime.Time == GameTime.EndOfTurn;
-            }
-            return false;
-        }
+        public Action<Token, GameState> ApplyAura = (token, gameState) => { };
+        public Func<Trigger, Token, GameState, bool> IsCancelledBy = (trigger, token, gameState) => false;
     }
 }

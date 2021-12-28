@@ -61,8 +61,8 @@ namespace CardKartClient.GUI.Components
             {
                 var token = Card.Token;
 
-                drawAdapter.DrawText(token.Attack.ToString(), X + 0.065f, Y + 0.05f, Fonts.MainFont10, Fonts.MainRenderOptions);
-                drawAdapter.DrawText(token.CurrentHealth.ToString(), X + 0.125f, Y + 0.05f, Fonts.MainFont10, Fonts.MainRenderOptions);
+                drawAdapter.DrawText(token.Attack.ToString(), X + 0.065f, Y + 0.065f, Fonts.MainFont10, Fonts.MainRenderOptions);
+                drawAdapter.DrawText(token.CurrentHealth.ToString(), X + 0.125f, Y + 0.065f, Fonts.MainFont10, Fonts.MainRenderOptions);
 
                 if (token.Exhausted)
                 {

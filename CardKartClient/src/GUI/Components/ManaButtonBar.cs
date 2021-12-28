@@ -68,12 +68,25 @@ namespace CardKartClient.GUI.Components
         public void Update(ManaSet currentMana, ManaSet maxMana)
         {
             RedButton.Text = currentMana.Red.ToString() + "/" + maxMana.Red.ToString();
+            RedButton.Visible = currentMana.Red > 0 || maxMana.Red > 0;
+
             GreenButton.Text = currentMana.Green.ToString() + "/" + maxMana.Green.ToString();
+            GreenButton.Visible = currentMana.Green > 0 || maxMana.Green > 0;
+
             WhiteButton.Text = currentMana.White.ToString() + "/" + maxMana.White.ToString();
+            WhiteButton.Visible = currentMana.White > 0 || maxMana.White > 0;
+
             BlackButton.Text = currentMana.Black.ToString() + "/" + maxMana.Black.ToString();
+            BlackButton.Visible = currentMana.Black > 0 || maxMana.Black > 0;
+            
             PurpleButton.Text = currentMana.Purple.ToString() + "/" + maxMana.Purple.ToString();
+            PurpleButton.Visible = currentMana.Purple > 0 || maxMana.Purple > 0;
+            
             BlueButton.Text = currentMana.Blue.ToString() + "/" + maxMana.Blue.ToString();
+            BlueButton.Visible = currentMana.Blue > 0 || maxMana.Blue > 0;
+            
             ColourlessButton.Text = currentMana.Colourless.ToString() + "/" + maxMana.Colourless.ToString();
+            ColourlessButton.Visible = currentMana.Colourless > 0 || maxMana.Colourless > 0;
         }
 
         public void Layout()

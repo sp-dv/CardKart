@@ -1,130 +1,50 @@
 ﻿using CardKartShared.Network.Messages;
+using System;
 using System.Linq;
 using System.Text;
 
 namespace CardKartShared.GameState
 {
-    public abstract class Ability
+    public class Ability
     {
         public Card Card;
 
-        public bool MoveToStackOnCast { get; protected set; }
+        public bool MoveToStackOnCast { get; set; }
+        public string BreadText { get; set; }
 
-        public virtual bool IsCastable(AbilityCastingContext context)
+        public Func<AbilityCastingContext, bool> IsCastable { get; set; } = context =>
         {
             return false;
-        }
+        };
 
-        public virtual bool MakeCastChoices(AbilityCastingContext context)
+        public Func<AbilityCastingContext, bool> MakeCastChoices { get; set; } = context =>
         {
             return false;
-        }
+        };
 
-        public virtual void EnactCastChoices(AbilityCastingContext context)
+        public Action<AbilityCastingContext> EnactCastChoices { get; set; } = context =>
         {
-        }
+        };
 
-        public virtual void MakeResolveChoicesCastingPlayer(
-            AbilityCastingContext context)
+        public Action<AbilityCastingContext> MakeResolveChoicesCastingPlayer { get; set; } = context =>
         {
-        }
-
-        public virtual void MakeResolveChoicesNonCastingPlayer(
-            AbilityCastingContext context)
+        };
+        public Action<AbilityCastingContext> MakeResolveChoicesNonCastingPlayer { get; set; } = context =>
         {
-        }
-
-        public virtual void EnactResolveChoices(AbilityCastingContext context)
+        };
+        public Action<AbilityCastingContext> EnactResolveChoices { get; set; } = context =>
         {
-        }
+        };
 
-
-        protected ManaSet PayMana(ManaSet cost, AbilityCastingContext context)
-        {
-            if (cost.Colourless == 0)
-            {
-                return new ManaSet(cost);
-            }
-
-            if (cost.Size == context.CastingPlayer.CurrentMana.Size)
-            {
-                return new ManaSet(context.CastingPlayer.CurrentMana);
-            }
-
-            var pool = new ManaSet(context.CastingPlayer.CurrentMana);
-            var colourlessToPay = cost.Colourless;
-            var payment = new ManaSet(cost);
-            payment.Colourless = 0;
-
-            while (colourlessToPay > 0)
-            {
-
-                string paymentString;
-                var paymentColours = payment.ToColourArray();
-                if (paymentColours.Count == 0)
-                {
-                    paymentString = "Nothing yet!";
-                }
-                else
-                {
-                    var stringBuilder = new StringBuilder();
-                    foreach (var colour in paymentColours)
-                    {
-                        stringBuilder.Append(colour.ToString());
-                        stringBuilder.Append(", ");
-                    }
-                    stringBuilder.Length -= 2; // Trim the trailing ", ".
-                    paymentString = stringBuilder.ToString();
-                }
-
-                context.ChoiceHelper.Text =
-                    $"Paying with:\n{paymentString}";
-                context.ChoiceHelper.ShowCancel = true;
-                var choice = context.ChoiceHelper.ChooseColour(colour =>
-                {
-                    var paymentCopy = new ManaSet(payment);
-                    paymentCopy.IncrementColour(colour);
-                    return pool.Covers(paymentCopy);
-                });
-
-                if (choice == ManaColour.None) { return null; }
-
-                payment.IncrementColour(choice);
-                colourlessToPay--;
-            }
-
-            return payment;
-        }
-        protected bool InHandAndOwned(AbilityCastingContext context)
-        {
-            if (Card.Location != PileLocation.Hand) { return false; }
-            if (Card.Owner != context.CastingPlayer) { return false; }
-
-            return true;
-        }
-        protected bool ChannelsAreCastable(AbilityCastingContext context)
-        {
-            if (context.GameState.ActivePlayer != context.CastingPlayer) { return false; }
-            if (context.GameState.CastingStack.Count > 0) { return false; }
-
-            return true;
-        }
-
-        protected bool ManaCostIsPayable(ManaSet cost, AbilityCastingContext context)
-        {
-            return context.CastingPlayer.CurrentMana.Covers(cost);
-
-        }
 
     }
-
     public class AbilityCastingContext
     {
         public GameChoice Choices;
         public ChoiceHelper ChoiceHelper;
         public GameState GameState;
 
-        #region Synced
+#region Synced
 
         // Synched by putting it in Choices.
 
@@ -153,7 +73,7 @@ namespace CardKartShared.GameState
         private bool HasAbility =>
             HasCard && Choices.Singletons.ContainsKey("_Ability");
 
-        #endregion
+#endregion
 
         
         public void SetCard(string key, Card card)
@@ -196,216 +116,6 @@ namespace CardKartShared.GameState
             var set = new ManaSet();
             set.FromInts(Choices.Arrays[key]);
             return set;
-        }
-    }
-
-    public class GenericCreatureCast : Ability
-    {
-        public GenericCreatureCast()
-        {
-            MoveToStackOnCast = true;
-        }
-
-        public override bool IsCastable(AbilityCastingContext context)
-        {
-            return InHandAndOwned(context) && 
-                ChannelsAreCastable(context) && 
-                ManaCostIsPayable(Card.CastingCost, context);
-        }
-
-        public override bool MakeCastChoices(AbilityCastingContext context)
-        {
-            var payment = PayMana(Card.CastingCost, context);
-            if (payment == null) { return false; }
-
-            context.SetManaSet("manacost", payment);
-            return true;
-        }
-
-        public override void EnactCastChoices(AbilityCastingContext context)
-        {
-            var payment = context.GetManaSet("manacost");
-            context.GameState.SpendMana(context.CastingPlayer, payment);
-        }
-    }
-
-    public class ZapCast : Ability
-    {
-        public ZapCast()
-        {
-            MoveToStackOnCast= true;
-        }
-
-        public override bool IsCastable(AbilityCastingContext context)
-        {
-            return InHandAndOwned(context) && 
-                ManaCostIsPayable(Card.CastingCost, context);
-        }
-
-        public override bool MakeCastChoices(AbilityCastingContext context)
-        {
-            var payment = PayMana(Card.CastingCost, context);
-            if (payment == null) { return false; }
-
-            context.ChoiceHelper.Text = "Choose a target for Zap.";
-            context.ChoiceHelper.ShowCancel = true;
-            var target = context.ChoiceHelper.ChooseToken(token => true);
-            if (target == null) { return false; }
-
-            context.SetManaSet("manacost", payment);
-            context.SetToken("!target", target);
-            return true;
-        }
-
-        public override void EnactCastChoices(AbilityCastingContext context)
-        {
-            var payment = context.GetManaSet("manacost");
-            context.GameState.SpendMana(context.CastingPlayer, payment);
-        }
-
-        public override void EnactResolveChoices(AbilityCastingContext context)
-        {
-            var target = context.GetToken("!target");
-            context.GameState.DealDamage(Card, target, 2);
-        }
-
-    }
-
-    public class EnlargeCast : Ability
-    {
-        public EnlargeCast()
-        {
-            MoveToStackOnCast = true;
-        }
-
-        public override bool IsCastable(AbilityCastingContext context)
-        {
-            return InHandAndOwned(context) &&
-                ManaCostIsPayable(Card.CastingCost, context);
-        }
-
-        public override bool MakeCastChoices(AbilityCastingContext context)
-        {
-            var payment = PayMana(Card.CastingCost, context);
-            if (payment == null) { return false; }
-
-            context.ChoiceHelper.Text = "Choose a target for Enlarge.";
-            context.ChoiceHelper.ShowCancel = true;
-            var target = context.ChoiceHelper.ChooseToken(token => true);
-            if (target == null) { return false; }
-
-            context.SetManaSet("manacost", payment);
-            context.SetToken("!target", target);
-            return true;
-        }
-
-        public override void EnactCastChoices(AbilityCastingContext context)
-        {
-            context.GameState.SpendMana(
-                context.CastingPlayer, 
-                context.GetManaSet("manacost"));
-        }
-
-        public override void EnactResolveChoices(AbilityCastingContext context)
-        {
-            var target = context.GetToken("!target");
-            target.Auras.Add(new EnlargeAura());
-        }
-    }
-
-    public class SomeCantripCast : Ability
-    {
-        public SomeCantripCast()
-        {
-            MoveToStackOnCast = true;
-        }
-
-        public override bool IsCastable(AbilityCastingContext context)
-        {
-            return
-                InHandAndOwned(context) &&
-                ChannelsAreCastable(context) &&
-                ManaCostIsPayable(Card.CastingCost, context);
-
-        }
-
-        public override bool MakeCastChoices(AbilityCastingContext context)
-        {
-            var payment = PayMana(Card.CastingCost, context);
-            if (payment == null) { return false; }
-
-            context.SetManaSet("manacost", payment);
-            return true;
-        }
-
-        public override void EnactCastChoices(AbilityCastingContext context)
-        {
-            context.GameState.SpendMana(
-                context.CastingPlayer,
-                context.GetManaSet("manacost"));
-        }
-
-        public override void MakeResolveChoicesCastingPlayer(AbilityCastingContext context)
-        {
-            var choices = context.CastingPlayer.Deck.Peek(3);
-            context.ChoiceHelper.CardChoices = choices;
-            context.ChoiceHelper.Text = "Choose a card to draw.";
-            var choice =
-                context.ChoiceHelper.ChooseCard(card => choices.Contains(card));
-            context.SetCard("target", choice);
-        }
-
-        public override void EnactResolveChoices(AbilityCastingContext context)
-        {
-            var card = context.GetCard("target");
-            context.GameState.MoveCard(card, card.Owner.Hand);
-        }
-    }
-
-    public class TestCast : Ability
-    {
-        public TestCast()
-        {
-            MoveToStackOnCast = true;
-        }
-
-        public override bool IsCastable(AbilityCastingContext context)
-        {
-            return InHandAndOwned(context) && 
-                ChannelsAreCastable(context) && 
-                ManaCostIsPayable(Card.CastingCost, context);
-        }
-
-        public override bool MakeCastChoices(AbilityCastingContext context)
-        {
-            var payment = PayMana(Card.CastingCost, context);
-            if (payment == null) { return false; }
-
-            context.SetManaSet("manacost", payment);
-            return true;
-        }
-
-        public override void EnactCastChoices(AbilityCastingContext context)
-        {
-            context.GameState.SpendMana(
-                context.CastingPlayer,
-                context.GetManaSet("manacost"));
-        }
-
-        public override void MakeResolveChoicesNonCastingPlayer(AbilityCastingContext context)
-        {
-            var choices = context.CastingPlayer.Opponent.Hand;
-            context.ChoiceHelper.CardChoices = choices;
-            context.ChoiceHelper.Text = "Choose a card to discard.";
-            var choice =
-                context.ChoiceHelper.ChooseCard(card => choices.Contains(card));
-            context.SetCard("target", choice);
-        }
-
-        public override void EnactResolveChoices(AbilityCastingContext context)
-        {
-            var card = context.GetCard("target");
-            context.GameState.MoveCard(card, card.Owner.Graveyard);
         }
     }
 }
