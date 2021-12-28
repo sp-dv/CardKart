@@ -18,6 +18,7 @@ namespace CardKartClient.GUI
         public static Texture Hero1;
         public static Texture Health1;
         public static Texture AlterFate1;
+        public static Texture Graveyard1;
 
         public static void LoadTextures()
         {
@@ -33,6 +34,7 @@ namespace CardKartClient.GUI
             Hero1 = TextureLoader.CreateTexture(Properties.Resources.hero1);
             Health1 = TextureLoader.CreateTexture(Properties.Resources.health1);
             AlterFate1 = TextureLoader.CreateTexture(Properties.Resources.alterFate1);
+            Graveyard1 = TextureLoader.CreateTexture(Properties.Resources.graveyard1);
         }
 
         public static Texture Portraits(CardTemplates template)

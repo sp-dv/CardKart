@@ -13,6 +13,8 @@ namespace CardKartClient.GUI.Components
 
         public PlayerPortrait PlayerPortrait;
 
+        public SmartTextPanel GraveyardButton;
+
         public delegate void PlayerClickedHandler(Player player);
         public event PlayerClickedHandler PlayerPortraitClicked;
 
@@ -33,6 +35,23 @@ namespace CardKartClient.GUI.Components
             PlayerPortrait = new PlayerPortrait(player);
             PlayerPortrait.Clicked += () => PlayerPortraitClicked?.Invoke(player);
             Components.Add(PlayerPortrait);
+
+            GraveyardButton = new SmartTextPanel();
+            GraveyardButton.BackgroundImage = Textures.Graveyard1;
+            GraveyardButton.Font = Fonts.MainFont14;
+            GraveyardButton.Text = "0";
+            GraveyardButton.RenderOptions = new QuickFont.QFontRenderOptions
+            {
+                Colour = Color.White,
+            };
+            GraveyardButton.Alignment = QuickFont.QFontAlignment.Centre;
+            GraveyardButton.Layout();
+            player.Graveyard.PileChanged += () =>
+            {
+                GraveyardButton.Text = player.Graveyard.Count.ToString();
+                GraveyardButton.Layout();
+            };
+            Components.Add(GraveyardButton);
 
             Player.PlayerChanged += Update;
         }
@@ -58,6 +77,11 @@ namespace CardKartClient.GUI.Components
 
             PlayerPortrait.X = X + 0.48f;
             PlayerPortrait.Y = Y + 0.02f;
+
+            GraveyardButton.Width = 0.07f;
+            GraveyardButton.Height = 0.07f;
+            GraveyardButton.X = X + 0.04f;
+            GraveyardButton.Y = Y + 0.09f;
         }
 
         protected override void DrawInternal(DrawAdapter drawAdapter)

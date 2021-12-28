@@ -20,6 +20,9 @@ namespace CardKartClient.GUI.Scenes
         public CombatAnimator CombatAnimator;
         public CardChoicePanel CardChoicePanel;
 
+        public PileDisplayPanel HeroGraveyardDisplay;
+        public PileDisplayPanel VillainGraveyardDisplay;
+
         private GLCoordinate StackFrom;
         private GLCoordinate[] StackTo;
 
@@ -97,6 +100,19 @@ namespace CardKartClient.GUI.Scenes
             VillainPanel.PlayerPortraitClicked += player => GameObjectClicked(player);
             VillainPanel.Layout();
             Components.Add(VillainPanel);
+
+            HeroGraveyardDisplay = new PileDisplayPanel(hero.Graveyard);
+            HeroPanel.GraveyardButton.Clicked += () => { HeroGraveyardDisplay.Visible ^= true; };
+            HeroGraveyardDisplay.Visible = false;
+            HeroGraveyardDisplay.CardClicked += cardComponent => GameObjectClicked(cardComponent.Card);
+            Components.Add(HeroGraveyardDisplay);
+
+            VillainGraveyardDisplay = new PileDisplayPanel(villain.Graveyard);
+            VillainPanel.GraveyardButton.Clicked += () => { VillainGraveyardDisplay.Visible ^= true; };
+            VillainGraveyardDisplay.Visible = false;
+            VillainGraveyardDisplay.CardClicked += cardComponent => GameObjectClicked(cardComponent.Card);
+            Components.Add(VillainGraveyardDisplay);
+
 
             CombatAnimator = new CombatAnimator(
                 HeroBattlefieldPanel,

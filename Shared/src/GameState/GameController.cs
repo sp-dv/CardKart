@@ -73,6 +73,7 @@ namespace CardKartShared.GameState
                     CardTemplates.AlterFate,
                     CardTemplates.GolbinBombsmith,
                     CardTemplates.Test,
+                    CardTemplates.Test2,
 
 
                 }),

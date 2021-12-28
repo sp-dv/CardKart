@@ -48,7 +48,7 @@ namespace CardKartClient.GUI.Components
 
             if (BackgroundImage != null)
             {
-                drawAdapter.DrawSprite(X, Y, X + Width, X + Height, BackgroundImage);
+                drawAdapter.DrawSprite(X, Y, X + Width, Y + Height, BackgroundImage);
             }
 
             if (ProcessedText != null)

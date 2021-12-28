@@ -451,6 +451,40 @@ namespace CardKartShared.GameState
                         };
                     } break;
 
+                case CardTemplates.Test2:
+                    {
+                        Name = "Test2";
+                        Type = CardTypes.Creature;
+                        Colour = ManaColour.Black;
+                        CastingCost = new ManaSet(ManaColour.Black);
+
+                        Abilities = new[] {
+                            GenericCreatureCast(),
+                            new Ability
+                            {
+                                MoveToStackOnCast = true,
+
+                                IsCastable = context =>
+                                {
+                                    if (Location != PileLocation.Graveyard) { return false; }
+                                    if (Owner != context.CastingPlayer) { return false; }
+
+                                    return ManaCostIsPayable(CastingCost, context) && ChannelsAreCastable(context);
+                                },
+
+                                MakeCastChoices = context =>
+                                {
+                                    return GenericPayManaChoice(CastingCost, context);
+                                },
+
+                                EnactCastChoices = context =>
+                                {
+                                    GenericPayManaEnact(context);
+                                },
+                            }
+                        };
+                    } break;
+
                 default:
                     {
                         throw new Exception("Bad card template...");
@@ -503,7 +537,7 @@ namespace CardKartShared.GameState
             throw new NotImplementedException();
         }
 
-        #region Helper Functions
+#region Helper Functions
 
         private ManaSet PayMana(ManaSet cost, AbilityCastingContext context)
         {
@@ -620,7 +654,7 @@ namespace CardKartShared.GameState
             context.GameState.SpendMana(context.CastingPlayer, payment);
         }
 
-        #endregion
+#endregion
     }
 
     public enum CardTypes
@@ -647,6 +681,7 @@ namespace CardKartShared.GameState
         GolbinBombsmith,
 
         Test,
+        Test2,
 
         HeroTest,
     }
