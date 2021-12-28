@@ -51,12 +51,13 @@ namespace CardKartClient.GUI
         public bool HandleClick(GLCoordinate location)
         {
             if (!Visible) { return false; }
-            if (!ComponentRectangleContains(location)) { return false; }
 
             foreach (var child in Components.Reverse<GuiComponent>())
             {
                 if (child.HandleClick(location)) { return true; }
             }
+
+            if (!ComponentRectangleContains(location)) { return false; }
 
             Clicked?.Invoke();
             return true;

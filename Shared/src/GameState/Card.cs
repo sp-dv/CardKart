@@ -394,6 +394,63 @@ namespace CardKartShared.GameState
                         };
                     } break;
 
+                case CardTemplates.Test:
+                    {
+                        Name = "Test";
+                        Type = CardTypes.Creature;
+                        Colour = ManaColour.Red;
+                        CastingCost = new ManaSet(ManaColour.Red);
+
+                        Attack = 1;
+                        Health = 1;
+
+                        Abilities = new[] {
+                            GenericCreatureCast(),
+                            new Ability {
+                                BreadText = "Ability A.",
+                                IsCastable = context => Location == PileLocation.Battlefield && !Token.Exhausted && context.CastingPlayer == Token.Controller,
+                                MakeCastChoices = context => {
+                                    context.ChoiceHelper.Text = "Choose a target for Throw Bomb.";
+                                    context.ChoiceHelper.ShowCancel = true;
+                                    var target = context.ChoiceHelper.ChooseToken(token => true);
+                                    if (target == null) { return false; }
+
+                                    context.SetToken("!target", target);
+                                    return true;
+                                },
+                                EnactCastChoices = context => {
+                                    Token.Exhausted = true;
+                                },
+                                EnactResolveChoices = context =>
+                                {
+                                    var target = context.GetToken("!target");
+                                    context.GameState.DealDamage(this, target, 1);
+                                }
+                            },
+                            new Ability {
+                                BreadText = "Ability B.",
+                                IsCastable = context => Location == PileLocation.Battlefield && !Token.Exhausted && context.CastingPlayer == Token.Controller,
+                                MakeCastChoices = context => {
+                                    context.ChoiceHelper.Text = "Choose a target for Throw Bomb.";
+                                    context.ChoiceHelper.ShowCancel = true;
+                                    var target = context.ChoiceHelper.ChooseToken(token => true);
+                                    if (target == null) { return false; }
+
+                                    context.SetToken("!target", target);
+                                    return true;
+                                },
+                                EnactCastChoices = context => {
+                                    Token.Exhausted = true;
+                                },
+                                EnactResolveChoices = context =>
+                                {
+                                    var target = context.GetToken("!target");
+                                    context.GameState.DealDamage(this, target, 2);
+                                }
+                            }
+                        };
+                    } break;
+
                 default:
                     {
                         throw new Exception("Bad card template...");
@@ -587,8 +644,9 @@ namespace CardKartShared.GameState
         Enlarge,
         AlterFate,
         MindFlay, 
-
         GolbinBombsmith,
+
+        Test,
 
         HeroTest,
     }

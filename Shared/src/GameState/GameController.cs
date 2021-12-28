@@ -72,6 +72,7 @@ namespace CardKartShared.GameState
                     CardTemplates.Zap,
                     CardTemplates.AlterFate,
                     CardTemplates.GolbinBombsmith,
+                    CardTemplates.Test,
 
 
                 }),
@@ -336,17 +337,31 @@ namespace CardKartShared.GameState
                         var card = ChoiceHelper.ChooseCard(card =>
                         {
                             var abilities = card.GetUsableAbilities(context);
-                            if (abilities.Length == 1) { return true; }
+                            if (abilities.Length > 0) { return true; }
 
                             return false;
                         });
                         if (card == null) { return; }
 
-                        var ability = card.GetUsableAbilities(context)[0];
-                        if (!ability.MakeCastChoices(context)) { continue; }
+                        var usableAbilities = card.GetUsableAbilities(context);
+                        Ability castAbility;
+                        
+                        if (usableAbilities.Length == 0) { return; } // This should never happen and if it does just pretend the user passed?
+                        if (usableAbilities.Length == 1) { castAbility = usableAbilities[0]; }
+                        else
+                        {
+                            ChoiceHelper.Text = "Choose which ability to cast.";
+                            ChoiceHelper.AbilityChoices = usableAbilities;
+                            ChoiceHelper.ShowCancel = true;
+                            var choice = ChoiceHelper.ChooseAbility();
+                            if (choice == null) { continue; }
+                            castAbility = choice;
+                        }
+
+                        if (!castAbility.MakeCastChoices(context)) { continue; }
 
                         context.Card = card;
-                        context.Ability = ability;
+                        context.Ability = castAbility;
                         return;
                     }
                 })();
@@ -547,8 +562,16 @@ namespace CardKartShared.GameState
     {
         public OptionChoice OptionChoice;
         public GameObject GameObject;
+        public Ability AbilityChoice;
 
         public bool IsOptionChoice => OptionChoice != OptionChoice.None;
+        public bool IsGameObjectChoice => GameObject != null;
+        public bool IsAbilityChoice => AbilityChoice != null;
+
+        public PlayerChoiceStruct(Ability abilityChoice)
+        {
+            AbilityChoice = abilityChoice;
+        }
 
         public PlayerChoiceStruct(GameObject gameObject)
         {
@@ -645,6 +668,7 @@ namespace CardKartShared.GameState
         public bool ShowManaChoices;
 
         public IEnumerable<Card> CardChoices;
+        public IEnumerable<Ability> AbilityChoices;
 
         // Ugly hack to make UI updates accessible inside abilities...
         public delegate void RequestGUIUpdateHandler();
@@ -735,6 +759,20 @@ namespace CardKartShared.GameState
             }
         }
 
+        public Ability ChooseAbility()
+        {
+            RequestGUIUpdate?.Invoke();
+            var choice = PlayerChoiceSaxophone.Listen(pcs =>
+            {
+                if (pcs.IsOptionChoice) { return true; }
+                return pcs.IsAbilityChoice;
+            });
+            ResetGUIOptions();
+
+            if (choice.IsOptionChoice) { return null; }
+            return choice.AbilityChoice;
+        }
+
         public void ShowText(string text)
         {
             Text = text;
@@ -750,6 +788,7 @@ namespace CardKartShared.GameState
             ShowManaChoices = false;
 
             CardChoices = null;
+            AbilityChoices = null;
 
             RequestGUIUpdate?.Invoke();
         }

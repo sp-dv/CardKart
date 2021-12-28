@@ -80,6 +80,7 @@ namespace CardKartClient.GUI.Scenes
             ChooserPanel.Y = -0.15f;
             ChooserPanel.Layout();
             ChooserPanel.OptionClicked += OptionChoiceClicked;
+            ChooserPanel.AbilityClicked += AbilityChoiceClicked;
             ChooserPanel.CardChoicePanel = CardChoicePanel;
             Components.Add(ChooserPanel);
 
@@ -154,6 +155,11 @@ namespace CardKartClient.GUI.Scenes
         private void OptionChoiceClicked(OptionChoice optionChoice)
         {
             GameController.ChoiceHelper.PlayerChoiceSaxophone.Play(new PlayerChoiceStruct(optionChoice));
+        }
+
+        private void AbilityChoiceClicked(Ability ability)
+        {
+            GameController.ChoiceHelper.PlayerChoiceSaxophone.Play(new PlayerChoiceStruct(ability));
         }
 
         protected override void DrawPost(DrawAdapter drawAdapter)

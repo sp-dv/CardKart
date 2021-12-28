@@ -19,9 +19,13 @@ namespace CardKartClient.GUI.Components
         public ManaButtonBar ManaChoices;
 
         public CardChoicePanel CardChoicePanel;
+        public AbilityChoicePanel AbilityChoicePanel;
 
         public delegate void OptionClickedHandler(OptionChoice optionChoice);
         public event OptionClickedHandler OptionClicked;
+
+        public event AbilityChoicePanel.AbilityClickedHandler AbilityClicked;
+
 
         public ChooserPanel(ChoiceHelper choiceHelper)
         {
@@ -54,6 +58,10 @@ namespace CardKartClient.GUI.Components
                 (colour) => OptionClicked?.Invoke(colour);
             Components.Add(ManaChoices);
 
+            AbilityChoicePanel = new AbilityChoicePanel();
+            AbilityChoicePanel.AbilityClicked += ability => AbilityClicked?.Invoke(ability);
+            Components.Add(AbilityChoicePanel);
+
             ChoiceHelper = choiceHelper;
             ChoiceHelper.RequestGUIUpdate += Update;
         }
@@ -71,6 +79,9 @@ namespace CardKartClient.GUI.Components
 
             CardChoicePanel.Update(ChoiceHelper.CardChoices);
             CardChoicePanel.Visible = ChoiceHelper.CardChoices != null;
+
+            AbilityChoicePanel.SetChoices(ChoiceHelper.AbilityChoices);
+            AbilityChoicePanel.Visible = ChoiceHelper.AbilityChoices != null;
         }
 
         public void Layout()

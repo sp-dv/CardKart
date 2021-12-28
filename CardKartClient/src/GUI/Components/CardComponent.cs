@@ -42,6 +42,12 @@ namespace CardKartClient.GUI.Components
             Layout();
         }
 
+        public void ForceBreadText(string breadText)
+        {
+            BreadTextPanel.Text = breadText;
+            BreadTextPanel.Layout();
+        }
+
         private void Layout()
         {
             if (Card != null)
@@ -75,10 +81,6 @@ namespace CardKartClient.GUI.Components
 
             DefenceInsetX = 0.165f;
             DefenceInsetY = AttackInsetY;
-        }
-
-        public void SetScale()
-        {
         }
 
         protected override void DrawInternal(DrawAdapter drawAdapter)
