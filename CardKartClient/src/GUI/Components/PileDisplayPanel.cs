@@ -10,8 +10,6 @@ namespace CardKartClient.GUI.Components
 {
     internal class PileDisplayPanel : GuiComponent
     {
-        // Absolutely repulsive hack to get card to draw on top.
-
         private Pile Pile;
 
         public delegate void CardClickedHandler(CardComponent card);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace CardKartShared.GameState
@@ -23,6 +24,19 @@ namespace CardKartShared.GameState
             HasAbility = new bool[Enum.GetValues(typeof(KeywordAbilityNames)).Length];
         }
 
+        public List<KeywordAbilityNames> GetAbilities()
+        {
+            var rt = new List<KeywordAbilityNames>();
+            for (int i = 0; i < HasAbility.Length; i++)
+            {
+                if (HasAbility[i])
+                {
+                    rt.Add((KeywordAbilityNames)i);
+                }
+            }
+            return rt;
+        }
+
         public void ZeroOut()
         {
             for (int i = 0; i < HasAbility.Length; i++)
@@ -37,5 +51,6 @@ namespace CardKartShared.GameState
         None,
 
         Bloodlust,
+        Vigilance, 
     }
 }

@@ -43,6 +43,7 @@ namespace CardKartShared.GameState
         public GameChoice Choices;
         public ChoiceHelper ChoiceHelper;
         public GameState GameState;
+        public Player Hero;
 
 #region Synced
 

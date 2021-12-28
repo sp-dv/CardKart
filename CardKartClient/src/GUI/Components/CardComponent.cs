@@ -60,6 +60,14 @@ namespace CardKartClient.GUI.Components
                     .Select(colour => Constants.PaletteColor(colour)).ToArray();
 
                 BreadTextPanel.Text = Card.BreadText;
+                if (Card.BreadText.Length < 60)
+                {
+                    BreadTextPanel.Font = Fonts.CardFont10;
+                }
+                else
+                {
+                    BreadTextPanel.Font = Fonts.CardFont8;
+                }
                 BreadTextPanel.Layout();
             }
 

@@ -28,6 +28,7 @@ namespace CardKartShared.Util
                 case ManaColour.White: { return Color.White; }
                 case ManaColour.Green: { return Color.Green; }
                 case ManaColour.Colourless: { return Color.Gray; }
+                case ManaColour.Mixed: { return Color.Gold; }
 
                 default: throw new Exception();
             }

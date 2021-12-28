@@ -17,6 +17,8 @@ namespace CardKartShared.GameState
         public ManaSet CurrentMana { get; } = new ManaSet();
         public ManaSet MaxMana { get; } = new ManaSet();
 
+        public int CurrentHealth => HeroCard.Token.CurrentHealth;
+
         public Card HeroCard { get; set; }
 
         public Player Opponent { get; set; }

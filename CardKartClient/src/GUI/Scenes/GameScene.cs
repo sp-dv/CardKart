@@ -1,6 +1,7 @@
 ﻿using CardKartClient.GUI.Components;
 using CardKartShared.GameState;
 using SGL;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 
@@ -113,12 +114,22 @@ namespace CardKartClient.GUI.Scenes
             VillainGraveyardDisplay.CardClicked += cardComponent => GameObjectClicked(cardComponent.Card);
             Components.Add(VillainGraveyardDisplay);
 
-
             CombatAnimator = new CombatAnimator(
                 HeroBattlefieldPanel,
                 VillainBattlefieldPanel,
                 gameController);
             Components.Add(CombatAnimator);
+
+            gameController.ChoiceHelper.RequestShowCards += ShowCards;
+        }
+
+        private void ShowCards(IEnumerable<Card> cards)
+        {
+            var showCardsPanel = new ShowCardsPanel(cards.Select(card => card.Template));
+            lock (Components)
+            {
+                Components.Add(showCardsPanel);
+            }
         }
 
         private void UpdateStackTargetLines(CardComponent caster, System.Collections.Generic.IEnumerable<int> targetIDs)

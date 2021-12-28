@@ -6,16 +6,19 @@ namespace SGL
 {
     internal abstract class Scene
     {
-        public List<GuiComponent> Components = new List<GuiComponent>();
+        public List<GuiComponent> Components { get; } = new List<GuiComponent>();
 
         public void Draw(DrawAdapter drawAdapter)
         {
-            foreach (var component in Components)
+            lock (Components)
             {
-                component.Draw(drawAdapter);
-            }
+                foreach (var component in Components)
+                {
+                    component.Draw(drawAdapter);
+                }
 
-            DrawPost(drawAdapter);
+                DrawPost(drawAdapter);
+            }
         }
 
         protected virtual void DrawPost(DrawAdapter drawAdapter)

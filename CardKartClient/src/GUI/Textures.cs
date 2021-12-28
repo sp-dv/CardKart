@@ -59,7 +59,7 @@ namespace CardKartClient.GUI
                 case CardTypes.Instant:
                 case CardTypes.Channel:
                     { return Frame1_Spell; }
-                default: throw new NotImplementedException();
+                default: { return Frame1_Spell; }
             }
         }
     }

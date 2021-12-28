@@ -21,7 +21,6 @@ namespace CardKartShared.GameState
         public GameChoiceSynchronizer GameChoiceSynchronizer { get; }
         public ChoiceHelper ChoiceHelper { get; } = new ChoiceHelper();
 
-
         public delegate void RedrawAttackerAnimationsHandler(Token[] attackers, (Token, Token)[] defenders);
         public event RedrawAttackerAnimationsHandler RedrawAttackerAnimations;
 
@@ -72,8 +71,9 @@ namespace CardKartShared.GameState
                     CardTemplates.Zap,
                     CardTemplates.AlterFate,
                     CardTemplates.GolbinBombsmith,
-                    CardTemplates.Test,
-                    CardTemplates.Test2,
+                    CardTemplates.CrystalizedGeyser,
+                    CardTemplates.RegeneratingZombie,
+                    CardTemplates.MindProbe,
 
 
                 }),
@@ -204,6 +204,8 @@ namespace CardKartShared.GameState
                     attackerIDs.Select(id => GameState.GetByID(id) as Token).ToList();
             }
 
+
+            
             RedrawAttackerAnimations(attackers.ToArray(), null);
             EnforceGameRules(true);
 
@@ -312,6 +314,14 @@ namespace CardKartShared.GameState
                     unblocked.TokenOf,
                     InactivePlayer.HeroCard.Token,
                     unblocked.Attack);
+            }
+
+            foreach (var attacker in attackers)
+            {
+                if (!attacker.HasKeywordAbility(KeywordAbilityNames.Vigilance))
+                {
+                    attacker.Exhausted = true;
+                }
             }
 
             Thread.Sleep(1000);
@@ -450,6 +460,7 @@ namespace CardKartShared.GameState
             context.ChoiceHelper = ChoiceHelper;
             context.Choices = new GameChoice();
             context.GameState = GameState;
+            context.Hero = Hero;
 
             return context;
         }
@@ -675,6 +686,9 @@ namespace CardKartShared.GameState
         public delegate void RequestGUIUpdateHandler();
         public event RequestGUIUpdateHandler RequestGUIUpdate;
 
+        public delegate void RequestShowCardsHandler(IEnumerable<Card> cards);
+        public event RequestShowCardsHandler RequestShowCards;
+
         public ChoiceHelper()
         {
         }
@@ -774,10 +788,31 @@ namespace CardKartShared.GameState
             return choice.AbilityChoice;
         }
 
+        public Player ChoosePlayer()
+        {
+            RequestGUIUpdate?.Invoke();
+            var choice = PlayerChoiceSaxophone.Listen(pcs =>
+            {
+                if (pcs.IsOptionChoice) { return true; }
+                if (pcs.IsGameObjectChoice && pcs.GameObject is Player)
+                {
+                    return true;
+                }
+                return false;
+            });
+            if (choice.IsOptionChoice) { return null; }
+            else { return choice.GameObject as Player; }
+        }
+
         public void ShowText(string text)
         {
             Text = text;
             RequestGUIUpdate();
+        }
+
+        public void ShowCards(IEnumerable<Card> cards)
+        {
+            RequestShowCards?.Invoke(cards);
         }
 
         public void ResetGUIOptions()

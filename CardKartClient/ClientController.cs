@@ -53,6 +53,11 @@ namespace CardKartClient
             Environment.Exit(0);
         }
 
+        public void ToDeckEditor()
+        {
+            CardKartClient.GUI.TransitionToScene(new DeckEditorScene());
+        }
+
         public string Login(string username, string password)
         {
             var response = CardKartClient.Server.LogIn(username, password);

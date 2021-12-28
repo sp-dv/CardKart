@@ -9,6 +9,8 @@ namespace CardKartClient.GUI.Scenes
     {
         SmartTextPanel StartGameButton;
         SmartTextPanel JoinQueueButton;
+        SmartTextPanel ToDeckEditorButton;
+
 
         public MainMenuScene()
         {
@@ -47,9 +49,24 @@ namespace CardKartClient.GUI.Scenes
             JoinQueueButton.Clicked += () =>
             {
                 CardKartClient.Server.JoinQueue();
-                JoinQueueButton.X = 10;
+                JoinQueueButton.Visible = false;
             };
             Components.Add(JoinQueueButton);
+
+
+            ToDeckEditorButton = new SmartTextPanel();
+            ToDeckEditorButton.X = 0.1f;
+            ToDeckEditorButton.Y = -0.2f;
+            ToDeckEditorButton.Width = 0.15f;
+            ToDeckEditorButton.Height = 0.1f;
+            ToDeckEditorButton.Text = "To Deck Editor";
+            ToDeckEditorButton.Layout();
+            ToDeckEditorButton.BackgroundColor = Color.DarkOrange;
+            ToDeckEditorButton.Clicked += () =>
+            {
+                CardKartClient.Controller.ToDeckEditor();
+            };
+            Components.Add(ToDeckEditorButton);
         }
     }
 }
