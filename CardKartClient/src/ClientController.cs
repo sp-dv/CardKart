@@ -53,6 +53,11 @@ namespace CardKartClient
             Environment.Exit(0);
         }
 
+        public void ToMainMenu()
+        {
+            CardKartClient.GUI.TransitionToScene(new MainMenuScene());
+        }
+
         public void ToDeckEditor()
         {
             CardKartClient.GUI.TransitionToScene(new DeckEditorScene());
@@ -64,7 +69,7 @@ namespace CardKartClient
             if (response.Code == GenericResponseMessage.Codes.OK)
             {
                 User.Username = username;
-                CardKartClient.GUI.TransitionToScene(new MainMenuScene());
+                ToMainMenu();
             }
 
             return response.Info;

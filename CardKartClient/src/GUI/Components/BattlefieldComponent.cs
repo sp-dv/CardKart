@@ -52,19 +52,22 @@ namespace CardKartClient.GUI.Components
 
         private void Layout()
         {
-            Components.Clear();
-
-            var cards = Battlefield.ToArray();
-
-            for (int i = 0; i < cards.Length; i++)
+            lock (Components)
             {
-                var card = cards[i];
-                var tokenComponent = new TokenComponent(card);
-                tokenComponent.X = X + i * tokenComponent.Width;
-                tokenComponent.Y = Y;
-                tokenComponent.Clicked += () => { TokenClicked?.Invoke(card.Token); };
+                Components.Clear();
 
-                Components.Add(tokenComponent);
+                var cards = Battlefield.ToArray();
+
+                for (int i = 0; i < cards.Length; i++)
+                {
+                    var card = cards[i];
+                    var tokenComponent = new TokenComponent(card);
+                    tokenComponent.X = X + i * tokenComponent.Width;
+                    tokenComponent.Y = Y;
+                    tokenComponent.Clicked += () => { TokenClicked?.Invoke(card.Token); };
+
+                    Components.Add(tokenComponent);
+                }
             }
         }
 

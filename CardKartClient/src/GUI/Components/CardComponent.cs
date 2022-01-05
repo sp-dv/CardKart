@@ -25,6 +25,9 @@ namespace CardKartClient.GUI.Components
 
         public Card Card;
 
+        private string TypeString;
+        private Color RarityColor;
+
         private SmartTextPanel BreadTextPanel;
 
         private Texture FrameTexture;
@@ -34,7 +37,7 @@ namespace CardKartClient.GUI.Components
             Card = card;
 
             BreadTextPanel = new SmartTextPanel();
-            BreadTextPanel.Font = Fonts.CardFont8;
+            BreadTextPanel.Font = Fonts.BreadTextFont10;
             BreadTextPanel.Width = 0.18f;
             BreadTextPanel.Height = 0.16f;
             BreadTextPanel.Alignment = QuickFont.QFontAlignment.Centre;
@@ -58,6 +61,8 @@ namespace CardKartClient.GUI.Components
                 ManaCostOrbColors = 
                     Card.CastingCost.ToColourArray()
                     .Select(colour => Constants.PaletteColor(colour)).ToArray();
+                RarityColor = Constants.RarityColor(Card.Rarity);
+                TypeString = Card.Type.ToString();
 
                 BreadTextPanel.Text = Card.BreadText;
                 if (Card.BreadText.Length < 60)
@@ -112,7 +117,28 @@ namespace CardKartClient.GUI.Components
                 FrameTexture,
                 PaletteColor);
 
-            drawAdapter.DrawText(Card.Name, X + NameInsetX, Y + NameInsetY, Fonts.CardFont10, Fonts.MainRenderOptions);
+            drawAdapter.DrawSprite(
+                X + 0.005f,
+                Y + 0.433f,
+                X + 0.025f,
+                Y + 0.4562f,
+                Textures.Logo1stEdition,
+                RarityColor);
+
+            drawAdapter.DrawText(
+                Card.Name, 
+                X + NameInsetX, 
+                Y + NameInsetY, 
+                Card.Name.Length < 100 ? Fonts.CardFont10 : Fonts.CardFont8, 
+                Fonts.MainRenderOptions);
+
+            drawAdapter.DrawText(
+                TypeString,
+                X + 0.1f,
+                Y + 0.265f,
+                Fonts.CardFont10,
+                Fonts.MainRenderOptions,
+                QuickFont.QFontAlignment.Centre);
 
             BreadTextPanel.Draw(drawAdapter);
 

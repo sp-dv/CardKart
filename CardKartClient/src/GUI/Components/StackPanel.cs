@@ -20,6 +20,9 @@ namespace CardKartClient.GUI.Components
         public delegate void TargetsUpdatedHandler(CardComponent caster, IEnumerable<int> targetIDs);
         public event TargetsUpdatedHandler TargetsUpdated;
 
+        public delegate void AbilityClickedHandler(AbilityCastingContext context);
+        public event AbilityClickedHandler AbilityClicked;
+
         public StackPanel(CastingStack stack)
         {
             Width = 0.24f;
@@ -29,7 +32,7 @@ namespace CardKartClient.GUI.Components
             Stack.StackChanged += Update;
         }
 
-        private void Update(Card[] cards)
+        private void Update(AbilityCastingContext[] contexts)
         {
             var dummy = new CardComponent(null);
             var cardHeight = dummy.Height;
@@ -41,17 +44,23 @@ namespace CardKartClient.GUI.Components
             PrevTop = null;
             TargetsUpdated?.Invoke(null, null);
 
+            var cards = contexts.Select(context => context.Card).ToArray();
+
             lock (Components)
             {
                 Components.Clear();
                 for (int i = 0; i < cards.Length; i++)
                 {
+                    int stackIndex = i;//cards.Length - i - 1;
+
                     var component =
-                        new CardComponent(cards[cards.Length - i - 1]);
+                        new CardComponent(cards[stackIndex]);
                     Components.Add(component);
                     component.X = X + 0.01f;
                     component.Y = y0 - i * 0.05f;
-                    int stackIndex = cards.Length - i - 1;
+                    component.Clicked += () => { 
+                        AbilityClicked?.Invoke(contexts[stackIndex]);
+                    };
                     component.MouseMovedEvent += () =>
                     {
                         // This depends on components being iterated in reverse order and

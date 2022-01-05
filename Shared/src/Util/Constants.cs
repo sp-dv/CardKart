@@ -33,5 +33,18 @@ namespace CardKartShared.Util
                 default: throw new Exception();
             }
         }
+
+        public static Color RarityColor(CardRarities rarity)
+        {
+            switch (rarity)
+            {
+                case CardRarities.Common: { return Color.GhostWhite; }
+                case CardRarities.Uncommon: { return Color.Blue; }
+                case CardRarities.Rare: { return Color.Purple; }
+                case CardRarities.Legendary: { return Color.DarkOrange; }
+            }
+
+            throw new NotImplementedException();
+        }
     }
 }

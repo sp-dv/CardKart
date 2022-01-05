@@ -29,6 +29,7 @@ namespace CardKartShared.GameState
              MaxHealth - DamageTaken;
 
         public bool IsHero => TokenOf.IsHero;
+        public bool IsCreature => TokenOf.Type == CardTypes.Creature;
         public bool CanAttack => !Exhausted;
         public bool CanBlock => !Exhausted;
 

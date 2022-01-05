@@ -65,6 +65,7 @@ namespace CardKartClient.GUI.Scenes
             StackPanel.X = -0.95f;
             StackPanel.Y = -0.5f;
             StackPanel.TargetsUpdated += UpdateStackTargetLines;
+            StackPanel.AbilityClicked += CastingContextClicked;
             Components.Add(StackPanel);
 
             CardChoicePanel = new CardChoicePanel();
@@ -187,6 +188,11 @@ namespace CardKartClient.GUI.Scenes
         private void AbilityChoiceClicked(Ability ability)
         {
             GameController.ChoiceHelper.PlayerChoiceSaxophone.Play(new PlayerChoiceStruct(ability));
+        }
+
+        private void CastingContextClicked(AbilityCastingContext context)
+        {
+            GameController.ChoiceHelper.PlayerChoiceSaxophone.Play(new PlayerChoiceStruct(context));
         }
 
         protected override void DrawPost(DrawAdapter drawAdapter)

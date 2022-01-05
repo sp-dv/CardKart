@@ -12,6 +12,7 @@ namespace CardKartClient.GUI
         public static QFont CardFont14 { get; private set; }
         public static QFont CardFont10 { get; private set; }
         public static QFont CardFont8 { get; private set; }
+        public static QFont BreadTextFont10 { get; private set; }
         public static QFont MainFont14 { get; private set; }
         public static QFont MainFont10 { get; private set; }
         public static QFont MainFont6 { get; private set; }
@@ -36,9 +37,11 @@ namespace CardKartClient.GUI
                 KerningConfig = kerning,
             };
 
-            CardFont14 = new QFont("./gamefonts/cooper.ttf", 14, builderConfig);
-            CardFont10 = new QFont("./gamefonts/cooper.ttf", 10, builderConfig);
-            CardFont8 = new QFont("./gamefonts/cooper.ttf", 8, builderConfig);
+            CardFont14 = new QFont("./gamefonts/matrixbold.ttf", 14, builderConfig);
+            CardFont10 = new QFont("./gamefonts/matrixbold.ttf", 10, builderConfig);
+            CardFont8 = new QFont("./gamefonts/matrixbold.ttf", 8, builderConfig);
+
+            BreadTextFont10 = new QFont("./gamefonts/mplantin.ttf", 10, builderConfig);
 
             MainFont14 = new QFont("./gamefonts/ep1.ttf", 14, builderConfig);
             MainFont10 = new QFont("./gamefonts/ep1.ttf", 10, builderConfig);

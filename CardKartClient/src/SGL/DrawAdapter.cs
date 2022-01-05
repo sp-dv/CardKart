@@ -174,7 +174,7 @@ namespace SGL
             FillRectangle(x0, y0, x0 + barWidth, y1, bar);
         }
 
-        public void DrawText(string text, float X0, float Y0, QFont font, QFontRenderOptions renderOptions)
+        public void DrawText(string text, float X0, float Y0, QFont font, QFontRenderOptions renderOptions, QFontAlignment alignment = QFontAlignment.Left)
         {
             if (font == null || renderOptions == null) { return; }
 
@@ -185,7 +185,7 @@ namespace SGL
                 font, 
                 text, 
                 new OpenTK.Vector3(w, h, 0),
-                QFontAlignment.Left, 
+                alignment, 
                 renderOptions);
 
 

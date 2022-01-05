@@ -175,17 +175,21 @@ namespace CardKartShared.GameState
             player.NotifyOfChange();
         }
 
-        public void MoveCard(Card card, Pile pile)
+        public void MoveCard(Card card, Pile to)
         {
+            var from = card.Pile;
+
             card.Token = null;
 
-            if (pile.Location == PileLocation.Battlefield)
+            if (to.Location == PileLocation.Battlefield)
             {
                 var token = CreateToken(card);
                 token.SummoningSick = true;
             }
 
-            pile.Add(card);
+            to.Add(card);
+
+            Trigger(new MoveTrigger(card, card.Pile, to));
         }
 
         public void DealDamage(Card source, Token target, int amount)
@@ -198,6 +202,15 @@ namespace CardKartShared.GameState
             {
                 target.TokenOf.Owner.NotifyOfChange();
             }    
+        }
+
+        public void Counterspell(Card source, AbilityCastingContext counterspelledContext)
+        {
+            CastingStack.Remove(counterspelledContext);
+            if (counterspelledContext.Ability.MoveToStackOnCast)
+            {
+                MoveCard(counterspelledContext.Card, counterspelledContext.Card.Owner.Graveyard);
+            }
         }
 
         public void SetTime(GameTime time)
@@ -229,6 +242,78 @@ namespace CardKartShared.GameState
         {
             newObject.ID = IDCounter++;
             GameObjects.Add(newObject);
+        }
+    }
+
+    public class CastingStack
+    {
+        private List<AbilityCastingContext> Contexts { get; } = new List<AbilityCastingContext>();
+        public delegate void StackChangedHandler(AbilityCastingContext[] contexts);
+        public event StackChangedHandler StackChanged;
+
+        public int Count => Contexts.Count;
+
+        // We need a way to reference things on the stack from abilities (e.g. for counterspell)
+        // Since the stack might change this can't simply be indexes into the stack. Therefor generate
+        // an ID every time a spell is added to the stack.
+        private int IDCounter;
+        private Dictionary<int, AbilityCastingContext> ContextDictionary = new Dictionary<int, AbilityCastingContext>();
+
+        public void Push(AbilityCastingContext context)
+        {
+            Contexts.Add(context);
+            ContextDictionary[IDCounter++] = context;
+            StackChanged?.Invoke(Contexts.ToArray());
+        }
+
+        public AbilityCastingContext Pop()
+        {
+            var context = Contexts[Contexts.Count - 1];
+            Contexts.RemoveAt(Contexts.Count - 1);
+
+            StackChanged?.Invoke(Contexts.ToArray());
+
+            return context;
+        }
+
+        public bool Remove(AbilityCastingContext context)
+        {
+            var rt = Contexts.Remove(context);
+            StackChanged?.Invoke(Contexts.ToArray());
+            return rt;
+        }
+
+        public List<int> GetTargetIDs(int index)
+        {
+            var context = Contexts.ElementAt(index);
+            var targets = new List<int>();
+
+            foreach (var kvp in context.Choices.Singletons)
+            {
+                if (kvp.Key[0] == '!')
+                {
+                    targets.Add(kvp.Value);
+                }
+            }
+            foreach (var kvp in context.Choices.Arrays)
+            {
+                if (kvp.Key[0] == '!')
+                {
+                    targets.AddRange(kvp.Value);
+                }
+            }
+
+            return targets;
+        }
+
+        public int IndexOf(AbilityCastingContext context)
+        {
+            return ContextDictionary.First(kvp => kvp.Value == context).Key;
+        }
+
+        public AbilityCastingContext GetAtIndex(int i)
+        {
+            return ContextDictionary[i];
         }
     }
 }

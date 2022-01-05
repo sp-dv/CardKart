@@ -74,6 +74,12 @@ namespace CardKartShared.GameState
                     CardTemplates.CrystalizedGeyser,
                     CardTemplates.RegeneratingZombie,
                     CardTemplates.MindProbe,
+                    CardTemplates.Counterspell,
+                    CardTemplates.MindSlip,
+                    CardTemplates.SuckerPunch,
+                    CardTemplates.ScribeMagi,
+                    CardTemplates.Unmake,
+                    CardTemplates.HorsemanOfDeath,
 
 
                 }),
@@ -572,13 +578,15 @@ namespace CardKartShared.GameState
 
     public class PlayerChoiceStruct
     {
-        public OptionChoice OptionChoice;
-        public GameObject GameObject;
-        public Ability AbilityChoice;
+        public OptionChoice OptionChoice { get; }
+        public GameObject GameObject { get; }
+        public Ability AbilityChoice { get; }
+        public AbilityCastingContext ContextChoice { get; }
 
         public bool IsOptionChoice => OptionChoice != OptionChoice.None;
         public bool IsGameObjectChoice => GameObject != null;
         public bool IsAbilityChoice => AbilityChoice != null;
+        public bool IsCastinContextChoice => ContextChoice != null;
 
         public PlayerChoiceStruct(Ability abilityChoice)
         {
@@ -594,6 +602,11 @@ namespace CardKartShared.GameState
         public PlayerChoiceStruct(OptionChoice optionChoice)
         {
             OptionChoice = optionChoice;
+        }
+
+        public PlayerChoiceStruct(AbilityCastingContext contextChoice)
+        {
+            ContextChoice = contextChoice;
         }
     }
 
@@ -616,55 +629,7 @@ namespace CardKartShared.GameState
         Colourless,
     }
 
-    public class CastingStack
-    {
-        private Stack<AbilityCastingContext> Contexts { get; } = new Stack<AbilityCastingContext>();
-        public delegate void StackChangedHandler(Card[] cards);
-        public event StackChangedHandler StackChanged;
-
-        public int Count => Contexts.Count;
-
-        public void Push(AbilityCastingContext context)
-        {
-            Contexts.Push(context);
-            StackChanged?.Invoke(
-                Contexts.Select(context => context.Card).ToArray());
-
-        }
-
-        public AbilityCastingContext Pop()
-        {
-            var context = Contexts.Pop();
-
-            StackChanged?.Invoke(
-                Contexts.Select(context => context.Card).ToArray());
-            
-            return context;
-        }
-
-        public List<int> GetTargetIDs(int index)
-        {
-            var context = Contexts.ElementAt(index);
-            var targets = new List<int>();
-
-            foreach (var kvp in context.Choices.Singletons)
-            {
-                if (kvp.Key[0] == '!')
-                {
-                    targets.Add(kvp.Value);
-                }
-            }
-            foreach (var kvp in context.Choices.Arrays)
-            {
-                if (kvp.Key[0] == '!')
-                {
-                    targets.AddRange(kvp.Value);
-                }
-            }
-
-            return targets;
-        }
-    }
+    
 
     public class ChoiceHelper
     {
@@ -679,7 +644,7 @@ namespace CardKartShared.GameState
         public bool ShowCancel;
         public bool ShowManaChoices;
 
-        public IEnumerable<Card> CardChoices;
+        public IEnumerable<Card> CardChoices { get; private set; }
         public IEnumerable<Ability> AbilityChoices;
 
         // Ugly hack to make UI updates accessible inside abilities...
@@ -714,6 +679,30 @@ namespace CardKartShared.GameState
             if (choice.IsOptionChoice) { return null; }
             else if (choice.GameObject is Card) { return choice.GameObject as Card; }
             else if (choice.GameObject is Token) { return (choice.GameObject as Token).TokenOf; }
+            throw new NotImplementedException();
+        }
+
+        public Card ChooseCardFromOptions(IEnumerable<Card> options, Func<Card, bool> filter)
+        {
+            CardChoices = options.Where(option => filter(option)).ToArray();
+
+            if (CardChoices.Count() == 0) { ShowCancel = true; }
+
+            RequestGUIUpdate?.Invoke();
+            var choice = PlayerChoiceSaxophone.Listen(pcs =>
+            {
+                if (pcs.IsOptionChoice) { return true; }
+                if (pcs.GameObject is Card)
+                {
+                    var card = pcs.GameObject as Card;
+                    return CardChoices.Contains(card) && (filter(card));
+                }
+                return false;
+            });
+            ResetGUIOptions();
+
+            if (choice.IsOptionChoice) { return null; }
+            else if (choice.GameObject is Card) { return choice.GameObject as Card; }
             throw new NotImplementedException();
         }
 
@@ -802,6 +791,20 @@ namespace CardKartShared.GameState
             });
             if (choice.IsOptionChoice) { return null; }
             else { return choice.GameObject as Player; }
+        }
+
+        public AbilityCastingContext ChooseCastingContext(Func<AbilityCastingContext, bool> filter)
+        {
+            RequestGUIUpdate?.Invoke();
+            var choice = PlayerChoiceSaxophone.Listen(pcs =>
+            {
+                if (pcs.IsOptionChoice) { return true; }
+                return pcs.IsCastinContextChoice;
+            });
+            ResetGUIOptions();
+
+            if (choice.IsOptionChoice) { return null; }
+            return choice.ContextChoice;
         }
 
         public void ShowText(string text)

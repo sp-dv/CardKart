@@ -8,19 +8,28 @@ namespace CardKartTests
     [TestClass]
     public class CardTests
     {
-        CardTemplates[] AllTemplates = (CardTemplates[])Enum.GetValues(typeof(CardTemplates));
+        Card[] AllCards = Enum.GetValues(typeof(CardTemplates)).Cast<CardTemplates>()
+            .Where(template => template != CardTemplates.None)
+            .Select(template => new Card(template)).ToArray();
 
         [TestMethod]
         public void TemplateInitilization()
         {
-
-            foreach (var template in AllTemplates)
+            foreach (var card in AllCards)
             {
-                var card = new Card(template);
-
                 Assert.IsNotNull(card.Name);
-
+                Assert.IsNotNull(card.Abilities);
                 Assert.AreNotEqual(CardTypes.None, card.Type);
+                Assert.AreNotEqual(CardRarities.None, card.Rarity);
+
+                if (card.Type == CardTypes.Hero)
+                {
+
+                }
+                else
+                {
+                    Assert.IsNotNull(card.CastingCost);
+                }
             }
         }
     }

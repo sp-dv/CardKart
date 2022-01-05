@@ -34,19 +34,22 @@ namespace CardKartClient.GUI.Components
 
             PassButton = new SmartTextPanel();
             PassButton.Text = "Pass Turn";
-            PassButton.BackgroundColor = Color.RosyBrown;
+            //PassButton.BackgroundColor = Color.RosyBrown;
+            PassButton.BackgroundImage = Textures.Button1;
             PassButton.Clicked += () => OptionClicked?.Invoke(OptionChoice.Pass);
             Components.Add(PassButton);
 
             OkButton = new SmartTextPanel();
             OkButton.Text = "OK";
-            OkButton.BackgroundColor = Color.Lavender;
+            //OkButton.BackgroundColor = Color.Lavender;
+            OkButton.BackgroundImage = Textures.Button1;
             OkButton.Clicked += () => OptionClicked?.Invoke(OptionChoice.Ok);
             Components.Add(OkButton);
 
             CancelButton = new SmartTextPanel();
             CancelButton.Text = "Cancel";
-            CancelButton.BackgroundColor = Color.Lavender;
+            //CancelButton.BackgroundColor = Color.Lavender;
+            CancelButton.BackgroundImage = Textures.Button1;
             CancelButton.Clicked += () => OptionClicked?.Invoke(OptionChoice.Cancel);
             Components.Add(CancelButton);
 

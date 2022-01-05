@@ -17,6 +17,7 @@ namespace CardKartShared.GameState
         public CardTypes Type;
         public CardTemplates Template;
         public ManaColour Colour;
+        public CardRarities Rarity;
 
         public Player Owner;
         public Player Controller => Owner;
@@ -47,6 +48,7 @@ namespace CardKartShared.GameState
                         Name = "Angry Goblin";
                         Type = CardTypes.Creature;
                         Colour = ManaColour.Red;
+                        Rarity = CardRarities.Common;
                         CastingCost = new ManaSet(
                             ManaColour.Red);
 
@@ -64,6 +66,7 @@ namespace CardKartShared.GameState
                         Name = "Armored Zombie";
                         Type = CardTypes.Creature;
                         Colour= ManaColour.Black;
+                        Rarity = CardRarities.Common;
                         CastingCost = new ManaSet(
                             ManaColour.Black, 
                             ManaColour.Black);
@@ -79,8 +82,9 @@ namespace CardKartShared.GameState
                 case CardTemplates.Zap:
                     {
                         Name = "Zap";
-                        Type = CardTypes.Instant;
+                        Type = CardTypes.Scroll;
                         Colour = ManaColour.Red;
+                        Rarity = CardRarities.Common;
                         CastingCost = new ManaSet(
                             ManaColour.Red
                             );
@@ -88,14 +92,14 @@ namespace CardKartShared.GameState
                         Abilities = new[] {
                             new Ability {
                                 MoveToStackOnCast = true,
-                                BreadText = "Deal 2 damage to target creature.",
+                                BreadText = "Deal 2 damage to target creature or player.",
 
                                 IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost, context),
                                 MakeCastChoices = context => {
                                     var payment = MakePayManaChoice(CastingCost, context, context.CastingPlayer);
                                     if (payment == null) { return false; }
 
-                                    context.ChoiceHelper.Text = "Choose a target for Zap.";
+                                    context.ChoiceHelper.Text = $"Choose a target for {Name}.";
                                     context.ChoiceHelper.ShowCancel = true;
                                     var target = context.ChoiceHelper.ChooseToken(token => true);
                                     if (target == null) { return false; }
@@ -116,9 +120,10 @@ namespace CardKartShared.GameState
 
                 case CardTemplates.HeroTest:
                     {
-                        Name = "Heroxd";
+                        Name = "Heromanx";
                         Type = CardTypes.Hero;
                         Colour = ManaColour.White;
+                        Rarity = CardRarities.Legendary;
                         CastingCost = new ManaSet();
 
                         Health = 27;
@@ -129,6 +134,7 @@ namespace CardKartShared.GameState
                         Name = "Depraved Bloodhound";
                         Type = CardTypes.Creature;
                         Colour = ManaColour.Black;
+                        Rarity = CardRarities.Rare;
                         CastingCost = new ManaSet(ManaColour.Black, ManaColour.Black);
 
                         Attack = 2;
@@ -168,10 +174,11 @@ namespace CardKartShared.GameState
                         Name = "Standard Bearer";
                         Type = CardTypes.Creature;
                         Colour = ManaColour.White;
-                        CastingCost = new ManaSet(ManaColour.White);
+                        Rarity = CardRarities.Uncommon;
+                        CastingCost = new ManaSet(ManaColour.White, ManaColour.White, ManaColour.Colourless);
 
-                        Attack = 1;
-                        Health = 1;
+                        Attack = 2;
+                        Health = 2;
 
                         Abilities = new Ability[] {
                             GenericCreatureCast(),
@@ -197,8 +204,9 @@ namespace CardKartShared.GameState
                 case CardTemplates.Enlarge:
                     {
                         Name = "Enlarge";
-                        Type = CardTypes.Instant;
+                        Type = CardTypes.Scroll;
                         Colour = ManaColour.Green;
+                        Rarity = CardRarities.Common;
                         CastingCost = new ManaSet(ManaColour.Green);
 
                         Abilities = new Ability[] {
@@ -216,7 +224,7 @@ namespace CardKartShared.GameState
                                     var payment = MakePayManaChoice(CastingCost, context, context.CastingPlayer);
                                     if (payment == null) { return false; }
 
-                                    context.ChoiceHelper.Text = "Choose a target for Enlarge.";
+                                    context.ChoiceHelper.Text = $"Choose a target for {Name}.";
                                     context.ChoiceHelper.ShowCancel = true;
                                     var target = context.ChoiceHelper.ChooseToken(token => true);
                                     if (target == null) { return false; }
@@ -263,6 +271,7 @@ namespace CardKartShared.GameState
                         Name = "Alter Fate";
                         Type = CardTypes.Channel;
                         Colour = ManaColour.Blue;
+                        Rarity = CardRarities.Common;
                         CastingCost = new ManaSet(ManaColour.Blue);
                         
 
@@ -295,11 +304,9 @@ namespace CardKartShared.GameState
                                 },
                                 MakeResolveChoicesCastingPlayer = context =>
                                 {
-                                    var choices = context.CastingPlayer.Deck.Peek(3);
-                                    context.ChoiceHelper.CardChoices = choices;
+                                    var options = context.CastingPlayer.Deck.Peek(3);
                                     context.ChoiceHelper.Text = "Choose a card to draw.";
-                                    var choice =
-                                        context.ChoiceHelper.ChooseCard(card => choices.Contains(card));
+                                    var choice = context.ChoiceHelper.ChooseCardFromOptions(options, card => true);
                                     context.SetCard("target", choice);
                                 },
                                 EnactResolveChoices = context =>
@@ -316,6 +323,7 @@ namespace CardKartShared.GameState
                         Name = "Mind Flay";
                         Type = CardTypes.Channel;
                         Colour = ManaColour.Black;
+                        Rarity = CardRarities.Common;
                         CastingCost = new ManaSet(ManaColour.Black);
 
                         Abilities = new Ability[] {
@@ -343,11 +351,9 @@ namespace CardKartShared.GameState
 
                                 MakeResolveChoicesNonCastingPlayer = context =>
                                 {
-                                    var choices = context.CastingPlayer.Opponent.Hand;
-                                    context.ChoiceHelper.CardChoices = choices;
                                     context.ChoiceHelper.Text = "Choose a card to discard.";
                                     var choice =
-                                        context.ChoiceHelper.ChooseCard(card => choices.Contains(card));
+                                        context.ChoiceHelper.ChooseCardFromOptions(context.CastingPlayer.Opponent.Hand, card => true);
                                     context.SetCard("target", choice);
                                 },
 
@@ -365,6 +371,7 @@ namespace CardKartShared.GameState
                         Name = "Goblin Bombsmith";
                         Type = CardTypes.Creature;
                         Colour = ManaColour.Red;
+                        Rarity = CardRarities.Common;
                         CastingCost = new ManaSet(ManaColour.Red);
 
                         Attack = 1;
@@ -401,10 +408,11 @@ namespace CardKartShared.GameState
                         Name = "Crystalized Geyser";
                         Type = CardTypes.Creature;
                         Colour = ManaColour.Mixed;
-                        CastingCost = new ManaSet(ManaColour.Red, ManaColour.Blue);
+                        Rarity = CardRarities.Rare;
+                        CastingCost = new ManaSet(ManaColour.Red, ManaColour.Red, ManaColour.Blue, ManaColour.Blue, ManaColour.Colourless);
 
-                        Attack = 1;
-                        Health = 1;
+                        Attack = 3;
+                        Health = 5;
 
                         var abilityAManacost = new ManaSet(ManaColour.Blue);
                         var abilityBManacost = new ManaSet(ManaColour.Red);
@@ -470,6 +478,7 @@ namespace CardKartShared.GameState
                         Name = "Regenerating Zombie";
                         Type = CardTypes.Creature;
                         Colour = ManaColour.Black;
+                        Rarity = CardRarities.Uncommon;
                         CastingCost = new ManaSet(ManaColour.Black, ManaColour.Colourless);
 
                         Attack = 1;
@@ -479,7 +488,7 @@ namespace CardKartShared.GameState
                             GenericCreatureCast(),
                             new Ability
                             {
-                                BreadText = "You may cast Regenerating Zombie from your graveyard.",
+                                BreadText = $"You may cast {Name} from your graveyard.",
                                 MoveToStackOnCast = true,
 
                                 IsCastable = context =>
@@ -506,8 +515,9 @@ namespace CardKartShared.GameState
                 case CardTemplates.MindProbe:
                     {
                         Name = "Mind Probe";
-                        Type = CardTypes.Instant;
+                        Type = CardTypes.Scroll;
                         Colour = ManaColour.Blue;
+                        Rarity = CardRarities.Uncommon;
                         CastingCost = new ManaSet(ManaColour.Blue);
 
                         Abilities = new[] {
@@ -566,6 +576,268 @@ namespace CardKartShared.GameState
                                 }
                             }
                         };
+                    } break;
+
+                case CardTemplates.Counterspell:
+                    {
+                        Name = "Counterspell";
+                        Type = CardTypes.Scroll;
+                        Colour = ManaColour.Blue;
+                        Rarity = CardRarities.Common;
+                        CastingCost = new ManaSet(ManaColour.Blue, ManaColour.Blue, ManaColour.Colourless);
+
+                        Abilities = new[] {
+                            new Ability{
+                                BreadText = "Counter target spell.",
+                                MoveToStackOnCast = true,
+                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost, context),
+                                MakeCastChoices = context => {
+                                    var manacost = MakePayManaChoice(CastingCost, context, context.CastingPlayer);
+                                    if (manacost == null) {return false; }
+
+                                    context.ChoiceHelper.ShowCancel = true;
+                                    var choice = context.ChoiceHelper.ChooseCastingContext(acc => acc.Ability.MoveToStackOnCast);
+                                    if (choice == null) { return false; }
+                                    var contextIndex = context.GameState.CastingStack.IndexOf(choice);
+
+                                    context.SetManaSet("manacost", manacost);
+                                    context.Choices.Singletons["contextIndex"] = contextIndex;
+                                    return true;
+                                },
+                                EnactCastChoices = context => {
+                                    EnactPayManaChoice(context.GetManaSet("manacost"), context, context.CastingPlayer);
+                                },
+                                EnactResolveChoices = context => {
+                                    var counteredContextIndex = context.Choices.Singletons["contextIndex"];
+                                    var counteredContext = context.GameState.CastingStack.GetAtIndex(counteredContextIndex);
+                                    context.GameState.Counterspell(this, counteredContext);
+                                }
+                            }
+                        };
+
+                    } break;
+
+                case CardTemplates.MindSlip:
+                    {
+                        Name = "Mind Slip";
+                        Type = CardTypes.Scroll;
+                        Colour = ManaColour.Blue;
+                        Rarity = CardRarities.Uncommon;
+                        CastingCost = new ManaSet(ManaColour.Blue, ManaColour.Blue);
+
+                        Abilities = new[] {
+                            new Ability{
+                                BreadText = "Counter target spell unless it's owner pays 2 colorless mana.",
+                                MoveToStackOnCast = true,
+                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost, context),
+                                MakeCastChoices = context => {
+                                    var manacost = MakePayManaChoice(CastingCost, context, context.CastingPlayer);
+                                    if (manacost == null) {return false; }
+
+                                    context.ChoiceHelper.ShowCancel = true;
+                                    var choice = context.ChoiceHelper.ChooseCastingContext(acc => acc.Ability.MoveToStackOnCast);
+                                    if (choice == null) { return false; }
+                                    var contextIndex = context.GameState.CastingStack.IndexOf(choice);
+
+                                    context.SetManaSet("manacost", manacost);
+                                    context.Choices.Singletons["contextIndex"] = contextIndex;
+                                    return true;
+                                },
+                                EnactCastChoices = context => {
+                                    EnactPayManaChoice(context.GetManaSet("manacost"), context, context.CastingPlayer);
+                                },
+                                MakeResolveChoicesNonCastingPlayer = context => {
+                                    var hostagePayment = MakePayManaChoice(new ManaSet(ManaColour.Colourless, ManaColour.Colourless), context, context.CastingPlayer.Opponent);
+                                    if (hostagePayment != null) 
+                                    {
+                                        context.SetManaSet("hostagePayment", hostagePayment);
+                                    }
+                                },
+                                EnactResolveChoices = context => {
+
+                                    if (context.Choices.Arrays.ContainsKey("hostagePayment"))
+                                    {
+                                        var hostagePayment = context.GetManaSet("hostagePayment");
+                                        EnactPayManaChoice(hostagePayment, context, context.CastingPlayer.Opponent);
+                                    }
+                                    else
+                                    {
+                                        var counteredContextIndex = context.Choices.Singletons["contextIndex"];
+                                        var counteredContext = context.GameState.CastingStack.GetAtIndex(counteredContextIndex);
+                                        context.GameState.Counterspell(this, counteredContext);
+                                    }
+                                }
+                            }
+                        };
+                    } break;
+
+                case CardTemplates.SuckerPunch:
+                    {
+                        Name = "Sucker Punch";
+                        Type = CardTypes.Scroll;
+                        Colour = ManaColour.Purple;
+                        Rarity = CardRarities.Uncommon;
+                        CastingCost = new ManaSet(ManaColour.Purple);
+
+                        Abilities = new[] {
+                            new Ability {
+                                MoveToStackOnCast = true,
+                                BreadText = $"As an additional cost to casting {Name}; discard a card.\nDeal 4 damage to target creature.",
+
+                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost, context),
+                                MakeCastChoices = context => {
+                                    var payment = MakePayManaChoice(CastingCost, context, context.CastingPlayer);
+                                    if (payment == null) { return false; }
+
+                                    context.ChoiceHelper.Text = "Choose a card to discard.";
+                                    var discardCard = context.ChoiceHelper.ChooseCardFromOptions(context.CastingPlayer.Hand, card => card != this);
+                                    if (discardCard == null) { return false; }
+
+                                    context.ChoiceHelper.Text = $"Choose a target for {Name}.";
+                                    context.ChoiceHelper.ShowCancel = true;
+                                    var target = context.ChoiceHelper.ChooseToken(token => !token.IsHero);
+                                    if (target == null) { return false; }
+
+                                    context.SetManaSet("manacost", payment);
+                                    context.SetCard("discard", discardCard);
+                                    context.SetToken("!target", target);
+                                    return true;
+                                },
+                                EnactCastChoices = context => {
+                                    GenericPayManaEnact(context);
+                                    context.GameState.MoveCard(context.GetCard("discard"), context.CastingPlayer.Graveyard);
+                                },
+                                EnactResolveChoices = context =>
+                                {
+                                    var target = context.GetToken("!target");
+                                    context.GameState.DealDamage(this, target, 4);
+                                }
+                            }
+                        };
+                    } break;
+
+                case CardTemplates.ScribeMagi:
+                    {
+                        Name = "Scribe Magi";
+                        Type = CardTypes.Creature;
+                        Colour = ManaColour.Blue;
+                        Rarity = CardRarities.Rare;
+                        CastingCost = new ManaSet(ManaColour.Blue, ManaColour.Blue);
+
+                        Attack = 2;
+                        Health = 1;
+
+                        Abilities = new[] {
+                            GenericCreatureCast(),
+                            new TriggeredAbility {
+                                BreadText = $"When {Name} enters the battlefield; choose a Scroll or Channel from your graveyard and put it in your hand.",
+
+                                IsTriggeredBy = trigger =>
+                                {
+                                    if (trigger is MoveTrigger)
+                                    {
+                                        var moveTrigger = trigger as MoveTrigger;
+                                        return moveTrigger.Card == this && moveTrigger.To.Location == PileLocation.Battlefield;
+                                    }
+
+                                    return false;
+                                },
+                                MakeCastChoices = context => {
+                                    context.ChoiceHelper.Text = "Choose a card to put in your hand.";
+                                    var choice = context.ChoiceHelper.ChooseCardFromOptions(
+                                        context.CastingPlayer.Graveyard, 
+                                        card => card.Type == CardTypes.Scroll || card.Type == CardTypes.Channel);
+                                    if (choice == null) { return false; }
+
+                                    context.SetCard("!return", choice);
+                                    return true;
+                                },
+                                EnactResolveChoices = context => {
+                                    context.GameState.MoveCard(context.GetCard("!return"), context.CastingPlayer.Hand);
+                                },
+                            },
+                        };
+                    } break;
+
+                case CardTemplates.Unmake:
+                    {
+                        Name = "Unmake";
+                        Type = CardTypes.Scroll;
+                        Colour = ManaColour.Blue;
+                        Rarity = CardRarities.Common;
+                        CastingCost = new ManaSet(ManaColour.Blue);
+
+                        Abilities = new[] {
+                            new Ability {
+                                MoveToStackOnCast = true,
+                                BreadText = "Return target creature to its owners hand.",
+
+                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost, context),
+                                MakeCastChoices = context => {
+                                    var payment = MakePayManaChoice(CastingCost, context, context.CastingPlayer);
+                                    if (payment == null) { return false; }
+
+                                    context.ChoiceHelper.Text = $"Choose a target for {Name}.";
+                                    context.ChoiceHelper.ShowCancel = true;
+                                    var target = context.ChoiceHelper.ChooseToken(token => token.IsCreature);
+                                    if (target == null) { return false; }
+
+                                    context.SetManaSet("manacost", payment);
+                                    context.SetToken("!target", target);
+                                    return true;
+                                },
+                                EnactCastChoices = context => GenericPayManaEnact(context),
+                                EnactResolveChoices = context =>
+                                {
+                                    var target = context.GetToken("!target");
+                                    context.GameState.MoveCard(target.TokenOf, target.TokenOf.Owner.Hand);
+                                }
+                            }
+                        };
+                    } break;
+
+                case CardTemplates.HorsemanOfDeath:
+                    {
+                        Name = "Horseman Of Death";
+                        Type = CardTypes.Creature;
+                        Colour = ManaColour.Black;
+                        Rarity = CardRarities.Legendary;
+                        CastingCost = new ManaSet(ManaColour.Black, ManaColour.Black, ManaColour.Black, ManaColour.Colourless, ManaColour.Colourless);
+
+                        Attack = 3;
+                        Health = 6;
+
+                        Abilities = new[] {
+                            GenericCreatureCast(),
+                            new TriggeredAbility {
+                                BreadText = $"When {Name} enters the battlefield; destroy target creature your opponent controls.",
+
+                                IsTriggeredBy = trigger =>
+                                {
+                                    if (trigger is MoveTrigger)
+                                    {
+                                        var moveTrigger = trigger as MoveTrigger;
+                                        return moveTrigger.Card == this && moveTrigger.To.Location == PileLocation.Battlefield;
+                                    }
+
+                                    return false;
+                                },
+                                MakeCastChoices = context => {
+                                    // Abort if opponent has no creature to destroy.
+                                    if (context.CastingPlayer.Opponent.Battlefield.Where(card => card.Type == CardTypes.Creature).Count() == 0) { return false; }
+                                    context.ChoiceHelper.Text = "Choose a creature to destroy.";
+                                    var choice = context.ChoiceHelper.ChooseToken(token => token.IsCreature && token.Controller == context.CastingPlayer.Opponent);
+                                    if (choice == null) { return false; }
+
+                                    context.SetToken("!target", choice);
+                                    return true;
+                                },
+                                EnactResolveChoices = context => {
+                                    context.GameState.MoveCard(context.GetToken("!target").TokenOf, context.CastingPlayer.Graveyard);
+                                },
+                            },
+                        };
+
                     } break;
 
                 default:
@@ -758,7 +1030,7 @@ namespace CardKartShared.GameState
         None,
 
         Creature,
-        Instant,
+        Scroll,
         Channel,
         Relic,
         Hero,
@@ -766,6 +1038,8 @@ namespace CardKartShared.GameState
 
     public enum CardTemplates
     {
+        None,
+
         AngryGoblin,
         ArmoredZombie,
         Zap,
@@ -777,9 +1051,24 @@ namespace CardKartShared.GameState
         GolbinBombsmith,
         RegeneratingZombie,
         CrystalizedGeyser,
-
         MindProbe,
+        Counterspell,
+        MindSlip,
+        SuckerPunch,
+        ScribeMagi,
+        Unmake,
+        HorsemanOfDeath,
 
         HeroTest,
+    }
+
+    public enum CardRarities
+    {
+        None, 
+
+        Common,
+        Uncommon,
+        Rare,
+        Legendary,
     }
 }

@@ -19,6 +19,22 @@ namespace CardKartClient.GUI
         public static Texture Health1;
         public static Texture AlterFate1;
         public static Texture Graveyard1;
+        public static Texture Button1;
+        public static Texture Enlarge1;
+        public static Texture GoblinBombsmith1;
+        public static Texture MindProbe1;
+        public static Texture StandardBearer1;
+        public static Texture MindFlay1;
+        public static Texture VolcanicHatchling1;
+        public static Texture RegeneratingZombie1;
+        public static Texture Counterspell1;
+        public static Texture MindSlip1;
+        public static Texture SuckerPunch1;
+        public static Texture ScribeMagi1;
+        public static Texture Unmake1;
+        public static Texture HorsemanOfDeath1;
+        public static Texture Logo1stEdition;
+
 
         public static void LoadTextures()
         {
@@ -35,6 +51,21 @@ namespace CardKartClient.GUI
             Health1 = TextureLoader.CreateTexture(Properties.Resources.health1);
             AlterFate1 = TextureLoader.CreateTexture(Properties.Resources.alterFate1);
             Graveyard1 = TextureLoader.CreateTexture(Properties.Resources.graveyard1);
+            Button1 = TextureLoader.CreateTexture(Properties.Resources.button1);
+            Enlarge1 = TextureLoader.CreateTexture(Properties.Resources.enlarge1);
+            GoblinBombsmith1 = TextureLoader.CreateTexture(Properties.Resources.goblinbombsmith1);
+            MindProbe1 = TextureLoader.CreateTexture(Properties.Resources.mindprobe1);
+            StandardBearer1 = TextureLoader.CreateTexture(Properties.Resources.standardbearer1);
+            MindFlay1 = TextureLoader.CreateTexture(Properties.Resources.mindflay1);
+            VolcanicHatchling1 = TextureLoader.CreateTexture(Properties.Resources.volcanichatchling1);
+            RegeneratingZombie1 = TextureLoader.CreateTexture(Properties.Resources.regeneratingzombie1);
+            Counterspell1 = TextureLoader.CreateTexture(Properties.Resources.counterspell1);
+            MindSlip1 = TextureLoader.CreateTexture(Properties.Resources.mindslip1);
+            SuckerPunch1 = TextureLoader.CreateTexture(Properties.Resources.suckerpunch1);
+            ScribeMagi1 = TextureLoader.CreateTexture(Properties.Resources.scribemagi1);
+            Unmake1 = TextureLoader.CreateTexture(Properties.Resources.unmake1);
+            HorsemanOfDeath1 = TextureLoader.CreateTexture(Properties.Resources.horsemanofdeath1);
+            Logo1stEdition = TextureLoader.CreateTexture(Properties.Resources.logo1e);
         }
 
         public static Texture Portraits(CardTemplates template)
@@ -47,6 +78,19 @@ namespace CardKartClient.GUI
                 case CardTemplates.DepravedBloodhound: { return Hound1; }
                 case CardTemplates.HeroTest: { return Hero1; }
                 case CardTemplates.AlterFate: { return AlterFate1; }
+                case CardTemplates.Enlarge: { return Enlarge1; }
+                case CardTemplates.GolbinBombsmith: { return GoblinBombsmith1; }
+                case CardTemplates.MindProbe: { return MindProbe1; }
+                case CardTemplates.StandardBearer: { return StandardBearer1; }
+                case CardTemplates.MindFlay: { return MindFlay1; }
+                case CardTemplates.CrystalizedGeyser: { return VolcanicHatchling1; }
+                case CardTemplates.RegeneratingZombie: { return RegeneratingZombie1; }
+                case CardTemplates.Counterspell: { return Counterspell1; }
+                case CardTemplates.MindSlip: { return MindSlip1; }
+                case CardTemplates.SuckerPunch: { return SuckerPunch1; }
+                case CardTemplates.ScribeMagi: { return ScribeMagi1; }
+                case CardTemplates.Unmake: { return Unmake1; }
+                case CardTemplates.HorsemanOfDeath: { return HorsemanOfDeath1; }
                 default: { return NoPortait; }
             }
         }
@@ -56,7 +100,7 @@ namespace CardKartClient.GUI
             switch (cardType)
             {
                 case CardTypes.Creature: { return Frame1_Monster; }
-                case CardTypes.Instant:
+                case CardTypes.Scroll:
                 case CardTypes.Channel:
                     { return Frame1_Spell; }
                 default: { return Frame1_Spell; }

@@ -121,6 +121,15 @@
   <data name="alterFate1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\alterFate1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="button1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\button1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="counterspell1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\counterspell1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="enlarge1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\enlarge1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="frame1_monster" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\frame1_monster.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -129,6 +138,9 @@
   </data>
   <data name="goblin1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\goblin1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="goblinbombsmith1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\goblinbombsmith1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="graveyard1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\graveyard1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -139,14 +151,47 @@
   <data name="hero1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\hero1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="horsemanofdeath1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\horsemanofdeath1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="hound1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\hound1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="logo1e" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\logo1e.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="mindflay1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\mindflay1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="mindprobe1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\mindprobe1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="mindslip1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\mindslip1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="noportrait" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\noportrait.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="regeneratingzombie1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\regeneratingzombie1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="scribemagi1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\scribemagi1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="standardbearer1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\standardbearer1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="suckerpunch1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\suckerpunch1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="token1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\token1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="unmake1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\unmake1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="volcanichatchling1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\volcanichatchling1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="zap1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\zap1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
