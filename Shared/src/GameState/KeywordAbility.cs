@@ -52,5 +52,7 @@ namespace CardKartShared.GameState
 
         Bloodlust,
         Vigilance, 
+        Flying,
+        Range,
     }
 }

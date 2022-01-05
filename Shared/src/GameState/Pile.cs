@@ -39,9 +39,7 @@ namespace CardKartShared.GameState
 
             if (cardToAdd.Pile != null)
             {
-                var removeFrom = cardToAdd.Pile;
-                removeFrom.Cards.Remove(cardToAdd);
-                removeFrom.PileChanged?.Invoke();
+                cardToAdd.Pile.Remove(cardToAdd);
             }
 
             cardToAdd.Pile = this;
@@ -69,9 +67,16 @@ namespace CardKartShared.GameState
             PileChanged?.Invoke();
         }
 
+        public bool Remove(Card card)
+        {
+            var rt = Cards.Remove(card);
+            PileChanged?.Invoke();
+            return rt;
+        }
+
         public IEnumerable<Card> Peek(int count)
         {
-            return Cards.Take(count).ToArray();
+            return Cards.Reverse<Card>().Take(count).ToArray();
         }
 
         public IEnumerator<Card> GetEnumerator()

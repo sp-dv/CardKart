@@ -17,6 +17,20 @@ namespace CardKartShared.GameState
         
     }
 
+    public class DamageDoneTrigger : Trigger
+    {
+        public Card Source { get; }
+        public Token Target { get; }
+        public int Amount { get; }
+
+        public DamageDoneTrigger(Card source, Token target, int amount)
+        {
+            Source = source;
+            Target = target;
+            Amount = amount;
+        }
+    }
+
     public class MoveTrigger : Trigger
     {
         public Card Card { get; }

@@ -7,7 +7,7 @@ namespace CardKartShared.GameState
 {
     public class Token : GameObject
     {
-        public Card TokenOf { get; }
+        public Card TokenOf;
 
         public Player Controller;
 
@@ -32,6 +32,7 @@ namespace CardKartShared.GameState
         public bool IsCreature => TokenOf.Type == CardTypes.Creature;
         public bool CanAttack => !Exhausted;
         public bool CanBlock => !Exhausted;
+        public bool IsValid => TokenOf != null;
 
         public TriggeredAbility[] TriggeredAbilities;
         private KeywordAbilityContainer KeywordAbilities;
@@ -52,6 +53,7 @@ namespace CardKartShared.GameState
 
         public bool CanBlockToken(Token other) 
         {
+            if (other.HasKeywordAbility(KeywordAbilityNames.Flying) && !this.HasKeywordAbility(KeywordAbilityNames.Range)) { return false; }
             return true;
         }
 

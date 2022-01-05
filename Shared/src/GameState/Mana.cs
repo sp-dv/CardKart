@@ -37,13 +37,13 @@ namespace CardKartShared.GameState
         {
             switch (colour)
             {
-                case ManaColour.Red: { Red += 1; break; }
-                case ManaColour.Black: { Black += 1; break; }
-                case ManaColour.Green: { Green += 1; break; }
-                case ManaColour.Blue: { Blue += 1; break; }
-                case ManaColour.White: { White += 1; break; }
-                case ManaColour.Purple: { Purple += 1; break; }
-                case ManaColour.Colourless: { Colourless += 1; break; }
+                case ManaColour.Red: { Red += value; break; }
+                case ManaColour.Black: { Black += value; break; }
+                case ManaColour.Green: { Green += value; break; }
+                case ManaColour.Blue: { Blue += value; break; }
+                case ManaColour.White: { White += value; break; }
+                case ManaColour.Purple: { Purple += value; break; }
+                case ManaColour.Colourless: { Colourless += value; break; }
             }
         }
 

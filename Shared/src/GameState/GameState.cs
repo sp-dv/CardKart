@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CardKartShared.Util;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -50,30 +51,20 @@ namespace CardKartShared.GameState
 
         public void LoadDecks(Deck deckPlayer1, Deck deckPlayer2)
         {
-            var heroCard1 = CreateCard(CardTemplates.HeroTest);
-            heroCard1.Owner = Player1;
+            var heroCard1 = CreateCard(CardTemplates.HeroTest, Player1);
             var heroToken1 = CreateToken(heroCard1);
             Player1.HeroCard = heroCard1;
 
             Player1.Deck.Add(
-                deckPlayer1.CardTemplates.Select(template => CreateCard(template)).ToArray());
-            foreach (var card in Player1.Deck)
-            {
-                card.Owner = Player1;
-            }
+                deckPlayer1.CardTemplates.Select(template => CreateCard(template, Player1)).ToArray());
 
-
-            var heroCard2 = CreateCard(CardTemplates.HeroTest);
+            var heroCard2 = CreateCard(CardTemplates.HeroTest, Player2);
             heroCard2.Owner = Player2;
             var heroToken2 = CreateToken(heroCard2);
             Player2.HeroCard = heroCard2;
 
             Player2.Deck.Add(
-                deckPlayer2.CardTemplates.Select(template => CreateCard(template)).ToArray());
-            foreach (var card in Player2.Deck)
-            {
-                card.Owner = Player2;
-            }
+                deckPlayer2.CardTemplates.Select(template => CreateCard(template, Player2)).ToArray());
         }
 
         public GameObject GetByID(int gameID)
@@ -164,9 +155,15 @@ namespace CardKartShared.GameState
             player.NotifyOfChange();
         }
 
-        public void GainMana(Player player, ManaColour colour)
+        public void GainPermanentMana(Player player, ManaColour colour)
         {
             player.MaxMana.IncrementColour(colour);
+        }
+
+        public void GainTemporaryMana(Player player, ManaColour colour, int count = 1)
+        {
+            player.CurrentMana.IncrementColour(colour, count);
+            player.NotifyOfChange();
         }
 
         public void SpendMana(Player player, ManaSet spentMana)
@@ -179,7 +176,11 @@ namespace CardKartShared.GameState
         {
             var from = card.Pile;
 
-            card.Token = null;
+            if (card.Token != null)
+            {
+                card.Token.TokenOf = null;
+                card.Token = null;
+            }
 
             if (to.Location == PileLocation.Battlefield)
             {
@@ -187,7 +188,16 @@ namespace CardKartShared.GameState
                 token.SummoningSick = true;
             }
 
-            to.Add(card);
+            if (card.IsTokenCard && to.Location != PileLocation.Battlefield)
+            {
+                // If we are moving a token card anywhere but the battlefield; destroy it by not adding
+                // it to the 'to' Pile.
+                from.Remove(card);
+            }
+            else
+            {
+                to.Add(card);
+            }
 
             Trigger(new MoveTrigger(card, card.Pile, to));
         }
@@ -201,7 +211,21 @@ namespace CardKartShared.GameState
             if (target.TokenOf.IsHero)
             {
                 target.TokenOf.Owner.NotifyOfChange();
-            }    
+            }
+
+            Trigger(new DamageDoneTrigger(source, target, amount));
+        }
+
+        public void SummonToken(CardTemplates template, Player controller)
+        {
+            var card = CreateCard(template, controller);
+            if (!card.IsTokenCard)
+            {
+                Logging.Log(LogLevel.Warning, "Tried to summon a token of non-token card.");
+                return;
+            }
+
+            MoveCard(card, controller.Battlefield);
         }
 
         public void Counterspell(Card source, AbilityCastingContext counterspelledContext)
@@ -220,11 +244,12 @@ namespace CardKartShared.GameState
 
         #endregion
 
-        private Card CreateCard(CardTemplates template)
+        private Card CreateCard(CardTemplates template, Player owner)
         {
             var card = new Card(template);
             AddGameObject(card);
             Cards.Add(card);
+            card.Owner = owner;
 
             return card;
         }

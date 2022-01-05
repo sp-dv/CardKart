@@ -34,6 +34,7 @@ namespace CardKartClient
                 gameID, 
                 heroIndex, 
                 CardKartClient.Server.CreateGameChoiceSynchronizer(gameID));
+            ActiveGame.LoadDeckDelegate = () => User.LoadDeck();
             CardKartClient.GUI.TransitionToScene(new GameScene(ActiveGame));
             ActiveGame.Start();
         }

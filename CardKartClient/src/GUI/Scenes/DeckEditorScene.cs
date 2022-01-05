@@ -70,7 +70,9 @@ namespace CardKartClient.GUI.Scenes
 
             AllCards = Enum.GetValues(typeof(CardTemplates)).Cast<CardTemplates>()
                 .Where(template => template != CardTemplates.None)
-                .Select(template => new Card(template)).ToArray();
+                .Select(template => new Card(template))
+                //.Where(card => !card.IsTokenCard)
+                .ToArray();
 
             DeckPanel = new CardChoicePanel();
             DeckPanel.X = 0.7f;
@@ -129,16 +131,13 @@ namespace CardKartClient.GUI.Scenes
 
         private void SaveDeck()
         {
-            var deck = new Deck(DeckCards.Select(card => card.Template).ToArray());
-            var deckString = JsonConvert.SerializeObject(deck);
-            File.WriteAllText("./a.ckd", deckString);
+            User.SaveDeck(DeckCards);
         }
 
         private void LoadDeck()
         {
-            if (!File.Exists("./a.ckd")) { return; }
-            var deckString = File.ReadAllText("./a.ckd");
-            var deck = JsonConvert.DeserializeObject<Deck>(deckString);
+            var deck = User.LoadDeck();
+            if (deck == null) { return; }
 
             DeckCards.Clear();
             DeckCards.AddRange(deck.CardTemplates.Select(template => new Card(template)));
@@ -174,7 +173,7 @@ namespace CardKartClient.GUI.Scenes
                 case CardRarities.Uncommon: maxCount = 3; break;
                 case CardRarities.Rare: maxCount = 2; break;
                 case CardRarities.Legendary: maxCount = 1; break;
-                default: throw new NotImplementedException();
+                default: maxCount = 0; break;
             }
 
             if (alreadyInDeckCount >= maxCount) { return; }

@@ -21,6 +21,9 @@ namespace CardKartShared.GameState
         public GameChoiceSynchronizer GameChoiceSynchronizer { get; }
         public ChoiceHelper ChoiceHelper { get; } = new ChoiceHelper();
 
+        // Nasty hack to let decks be chosen after the game has started.
+        public Func<Deck> LoadDeckDelegate { get; set; }
+
         public delegate void RedrawAttackerAnimationsHandler(Token[] attackers, (Token, Token)[] defenders);
         public event RedrawAttackerAnimationsHandler RedrawAttackerAnimations;
 
@@ -59,45 +62,50 @@ namespace CardKartShared.GameState
         private void GameSetup()
         {
             ChoiceHelper.ResetGUIOptions();
-            GameState.LoadDecks(
-                new Deck(new[] {
-                    CardTemplates.Enlarge,
-                    CardTemplates.MindFlay,
-                    CardTemplates.StandardBearer,
-
-                    CardTemplates.ArmoredZombie,
-                    CardTemplates.DepravedBloodhound,
-                    CardTemplates.AngryGoblin,
-                    CardTemplates.Zap,
-                    CardTemplates.AlterFate,
-                    CardTemplates.GolbinBombsmith,
-                    CardTemplates.CrystalizedGeyser,
-                    CardTemplates.RegeneratingZombie,
-                    CardTemplates.MindProbe,
-                    CardTemplates.Counterspell,
-                    CardTemplates.MindSlip,
-                    CardTemplates.SuckerPunch,
-                    CardTemplates.ScribeMagi,
-                    CardTemplates.Unmake,
-                    CardTemplates.HorsemanOfDeath,
 
 
-                }),
-                new Deck(new[] {
-                    CardTemplates.Zap,
-                    CardTemplates.DepravedBloodhound,
-                    CardTemplates.ArmoredZombie,
-                    CardTemplates.AngryGoblin,
-                }));
+            Deck player1Deck;
+            Deck player2Deck;
+
+            if (Hero == GameState.Player1)
+            {
+                player1Deck = LoadDeckDelegate();
+                var choices = new GameChoice();
+                choices.Arrays["deck"] = player1Deck.CardTemplates.Select(template => (int)template).ToArray();
+                GameChoiceSynchronizer.SendChoice(choices);
+
+                var player2Choices = GameChoiceSynchronizer.ReceiveChoice();
+                var player2Templates = player2Choices.Arrays["deck"].Select(i => (CardTemplates)i).ToArray();
+                player2Deck = new Deck(player2Templates);
+            }
+            else
+            {
+                var player1Choices = GameChoiceSynchronizer.ReceiveChoice();
+                var player1Templates = player1Choices.Arrays["deck"].Select(i => (CardTemplates)i).ToArray();
+                player1Deck = new Deck(player1Templates);
+
+                player2Deck = LoadDeckDelegate();
+                var choices = new GameChoice();
+                choices.Arrays["deck"] = player2Deck.CardTemplates.Select(template => (int)template).ToArray();
+                GameChoiceSynchronizer.SendChoice(choices);
+            }
+
+            GameState.LoadDecks(player1Deck, player2Deck);
 
             GameState.ResetMana(GameState.Player1);
             GameState.ResetMana(GameState.Player2);
+
+            GameState.DrawCards(GameState.Player1, 3);
+            GameState.DrawCards(GameState.Player2, 3);
         }
 
         private void GameLoop()
         {
             while (true)
             {
+                GameState.SetTime(GameTime.StartOfTurn);
+                EnforceGameRules(true);
+
                 DrawStep();
                 CastStep();
                 CombatStep();
@@ -117,9 +125,9 @@ namespace CardKartShared.GameState
                 card.Token.Exhausted = false;
                 card.Token.SummoningSick = false;
             }
-
             EnforceGameRules(true);
-            GameState.DrawCards(ActivePlayer, 5);
+
+            GameState.DrawCards(ActivePlayer, 1);
             EnforceGameRules(true);
 
             ManaColour colour;
@@ -140,7 +148,7 @@ namespace CardKartShared.GameState
                 colour = (ManaColour)choice.Singletons["_colour"];
             }
 
-            GameState.GainMana(ActivePlayer, colour);
+            GameState.GainPermanentMana(ActivePlayer, colour);
             GameState.ResetMana(ActivePlayer);
             
             EnforceGameRules(true);
@@ -789,6 +797,8 @@ namespace CardKartShared.GameState
                 }
                 return false;
             });
+            ResetGUIOptions();
+
             if (choice.IsOptionChoice) { return null; }
             else { return choice.GameObject as Player; }
         }
@@ -835,6 +845,7 @@ namespace CardKartShared.GameState
 
     public enum GameTime
     {
+        StartOfTurn,
         EndOfTurn,
     }
 }

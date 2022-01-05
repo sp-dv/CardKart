@@ -19,6 +19,10 @@ namespace CardKartShared.GameState
         public ManaColour Colour;
         public CardRarities Rarity;
 
+        public CreatureTypes CreatureType;
+
+        public bool IsTokenCard => Rarity == CardRarities.Token;
+
         public Player Owner;
         public Player Controller => Owner;
 
@@ -47,6 +51,7 @@ namespace CardKartShared.GameState
                     {
                         Name = "Angry Goblin";
                         Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Goblin;
                         Colour = ManaColour.Red;
                         Rarity = CardRarities.Common;
                         CastingCost = new ManaSet(
@@ -65,6 +70,7 @@ namespace CardKartShared.GameState
                     {
                         Name = "Armored Zombie";
                         Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Zombie;
                         Colour= ManaColour.Black;
                         Rarity = CardRarities.Common;
                         CastingCost = new ManaSet(
@@ -101,7 +107,7 @@ namespace CardKartShared.GameState
 
                                     context.ChoiceHelper.Text = $"Choose a target for {Name}.";
                                     context.ChoiceHelper.ShowCancel = true;
-                                    var target = context.ChoiceHelper.ChooseToken(token => true);
+                                    var target = context.ChoiceHelper.ChooseToken(token => token.IsCreature || token.IsHero);
                                     if (target == null) { return false; }
 
                                     context.SetManaSet("manacost", payment);
@@ -133,6 +139,7 @@ namespace CardKartShared.GameState
                     {
                         Name = "Depraved Bloodhound";
                         Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Beast;
                         Colour = ManaColour.Black;
                         Rarity = CardRarities.Rare;
                         CastingCost = new ManaSet(ManaColour.Black, ManaColour.Black);
@@ -173,6 +180,7 @@ namespace CardKartShared.GameState
                     {
                         Name = "Standard Bearer";
                         Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Warrior;
                         Colour = ManaColour.White;
                         Rarity = CardRarities.Uncommon;
                         CastingCost = new ManaSet(ManaColour.White, ManaColour.White, ManaColour.Colourless);
@@ -329,7 +337,7 @@ namespace CardKartShared.GameState
                         Abilities = new Ability[] {
                             new Ability
                             {
-                                BreadText = "Your opponent chooses a card from their hand and discards it.",
+                                BreadText = "Look at your opponents hand and choose a card.\nYour opponent discards the chosen card.",
                                 MoveToStackOnCast = true,
 
                                 IsCastable = context =>
@@ -349,7 +357,7 @@ namespace CardKartShared.GameState
                                     GenericPayManaEnact(context);
                                 },
 
-                                MakeResolveChoicesNonCastingPlayer = context =>
+                                MakeResolveChoicesCastingPlayer = context =>
                                 {
                                     context.ChoiceHelper.Text = "Choose a card to discard.";
                                     var choice =
@@ -370,6 +378,7 @@ namespace CardKartShared.GameState
                     {
                         Name = "Goblin Bombsmith";
                         Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Goblin;
                         Colour = ManaColour.Red;
                         Rarity = CardRarities.Common;
                         CastingCost = new ManaSet(ManaColour.Red);
@@ -407,6 +416,7 @@ namespace CardKartShared.GameState
                     {
                         Name = "Crystalized Geyser";
                         Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Elemental;
                         Colour = ManaColour.Mixed;
                         Rarity = CardRarities.Rare;
                         CastingCost = new ManaSet(ManaColour.Red, ManaColour.Red, ManaColour.Blue, ManaColour.Blue, ManaColour.Colourless);
@@ -477,6 +487,7 @@ namespace CardKartShared.GameState
                     {
                         Name = "Regenerating Zombie";
                         Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Zombie;
                         Colour = ManaColour.Black;
                         Rarity = CardRarities.Uncommon;
                         CastingCost = new ManaSet(ManaColour.Black, ManaColour.Colourless);
@@ -720,6 +731,7 @@ namespace CardKartShared.GameState
                     {
                         Name = "Scribe Magi";
                         Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Wizard;
                         Colour = ManaColour.Blue;
                         Rarity = CardRarities.Rare;
                         CastingCost = new ManaSet(ManaColour.Blue, ManaColour.Blue);
@@ -798,8 +810,9 @@ namespace CardKartShared.GameState
 
                 case CardTemplates.HorsemanOfDeath:
                     {
-                        Name = "Horseman Of Death";
+                        Name = "Horseman of Death";
                         Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Warrior;
                         Colour = ManaColour.Black;
                         Rarity = CardRarities.Legendary;
                         CastingCost = new ManaSet(ManaColour.Black, ManaColour.Black, ManaColour.Black, ManaColour.Colourless, ManaColour.Colourless);
@@ -838,6 +851,331 @@ namespace CardKartShared.GameState
                             },
                         };
 
+                    } break;
+
+                case CardTemplates.SquireToken1:
+                    {
+                        Name = "Squire";
+                        Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Human;
+                        Colour = ManaColour.White;
+                        Rarity = CardRarities.Token;
+                        CastingCost = new ManaSet();
+
+                        Attack = 1;
+                        Health = 1;
+
+                    } break;
+
+                case CardTemplates.CallToArms:
+                    {
+                        Name = "Call to Arms";
+                        Type = CardTypes.Channel;
+                        Colour = ManaColour.White;
+                        Rarity = CardRarities.Common;
+                        CastingCost = new ManaSet(ManaColour.White);
+
+                        Abilities = new[] {
+                            new Ability{
+                                BreadText = "Summon two 1/1 white Squire tokens.",
+                                MoveToStackOnCast = true,
+
+                                IsCastable = context => {
+                                    return InHandAndOwned(context) &&
+                                        ChannelsAreCastable(context) &&
+                                        ManaCostIsPayable(CastingCost, context);
+                                },
+                                MakeCastChoices = context => {
+                                    return GenericPayManaChoice(CastingCost, context);
+                                },
+                                EnactCastChoices = context => {
+                                    GenericPayManaEnact(context);
+                                },
+                                EnactResolveChoices = context => {
+                                    context.GameState.SummonToken(CardTemplates.SquireToken1, context.CastingPlayer);
+                                    context.GameState.SummonToken(CardTemplates.SquireToken1, context.CastingPlayer);
+                                }
+                            }
+                        };
+                    } break;
+
+                case CardTemplates.ExiledScientist:
+                    {
+                        Name = "Hermit Scientist";
+                        Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Artificer;
+                        Colour = ManaColour.Purple;
+                        Rarity = CardRarities.Uncommon;
+                        CastingCost = new ManaSet(ManaColour.Purple);
+
+                        Attack = 1;
+                        Health = 1;
+
+                        Abilities = new[] {
+                            GenericCreatureCast(),
+                            new TriggeredAbility{
+                                BreadText = $"At the start of your turn reveal the top card of your deck. If you reveal a scroll or a sorcery; destroy {Name} and summon a 3/2 Insect token with Flying.",
+                                IsTriggeredBy = trigger => {
+                                    if (trigger is GameTimeTrigger)
+                                    {
+                                        var gameTimeTrigger = trigger as GameTimeTrigger;
+                                        if (Location == PileLocation.Battlefield && 
+                                            gameTimeTrigger.Time == GameTime.StartOfTurn && 
+                                            gameTimeTrigger.ActivePlayer == Token.Controller) { return true; }
+                                    }
+
+                                    return false;
+                                },
+                                
+                                MakeCastChoices = context => {
+                                    return true;
+                                },
+
+                                EnactResolveChoices = context => {
+                                    var topCard = context.CastingPlayer.Deck.Peek(1).ElementAtOrDefault(0);
+                                    if (topCard == null) { return; }
+
+                                    context.ChoiceHelper.ShowCards(new []{topCard});
+
+                                    if (topCard.Type == CardTypes.Scroll || topCard.Type == CardTypes.Channel)
+                                    {
+                                        context.GameState.SummonToken(CardTemplates.InsectToken1, Token.Controller);
+                                        context.GameState.MoveCard(this, Owner.Graveyard);
+                                    }
+                                }
+                                
+                            }
+                        };
+                    } break;
+
+                case CardTemplates.InsectToken1:
+                    {
+                        Name = "Insect";
+                        Type = CardTypes.Creature;
+                        Colour = ManaColour.Purple;
+                        CreatureType = CreatureTypes.Insect;
+                        Rarity = CardRarities.Token;
+                        CastingCost = new ManaSet();
+
+                        Attack = 3;
+                        Health = 2;
+
+                        KeywordAbilities[KeywordAbilityNames.Flying] = true;
+
+                    } break;
+
+                case CardTemplates.SilvervenomSpider:
+                    {
+                        Name = "Silvervenom Spider";
+                        Type = CardTypes.Creature;
+                        Colour = ManaColour.Green;
+                        CreatureType = CreatureTypes.Spider;
+                        Rarity = CardRarities.Common;
+                        CastingCost = new ManaSet(ManaColour.Green, ManaColour.Green);
+
+                        Attack = 2;
+                        Health = 3;
+
+                        KeywordAbilities[KeywordAbilityNames.Range] = true;
+
+                        Abilities = new[] {
+                            GenericCreatureCast(),
+                        };
+                    } break;
+
+                case CardTemplates.Eliminate:
+                    {
+                        Name = "Eliminate";
+                        Type = CardTypes.Scroll;
+                        Colour = ManaColour.Black;
+                        Rarity = CardRarities.Common;
+                        CastingCost = new ManaSet(ManaColour.Black);
+
+                        Abilities = new[] {
+                            new Ability {
+                                MoveToStackOnCast = true,
+                                BreadText = "Destroy target creature.",
+
+                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost, context),
+                                MakeCastChoices = context => {
+                                    var payment = MakePayManaChoice(CastingCost, context, context.CastingPlayer);
+                                    if (payment == null) { return false; }
+
+                                    context.ChoiceHelper.Text = $"Choose a target for {Name}.";
+                                    context.ChoiceHelper.ShowCancel = true;
+                                    var target = context.ChoiceHelper.ChooseToken(token => token.IsCreature);
+                                    if (target == null) { return false; }
+
+                                    context.SetManaSet("manacost", payment);
+                                    context.SetToken("!target", target);
+                                    return true;
+                                },
+                                EnactCastChoices = context => GenericPayManaEnact(context),
+                                EnactResolveChoices = context =>
+                                {
+                                    var target = context.GetToken("!target");
+                                    if (!target.IsValid) { return; }
+
+                                    context.GameState.MoveCard(target.TokenOf, target.TokenOf.Owner.Graveyard);
+                                }
+                            }
+                        };
+                    } break;
+
+                case CardTemplates.Inspiration:
+                    {
+                        Name = "Inspiration";
+                        Type = CardTypes.Channel;
+                        Colour = ManaColour.Purple;
+                        Rarity = CardRarities.Rare;
+                        CastingCost = new ManaSet(ManaColour.Purple);
+
+                        Abilities = new[] {
+                            new Ability {
+                                MoveToStackOnCast = true,
+                                BreadText = "Gain 3 Purple mana until the start of your next turn.",
+
+                                IsCastable = context => ChannelsAreCastable(context) && 
+                                    InHandAndOwned(context) && 
+                                    ManaCostIsPayable(CastingCost, context),
+
+                                MakeCastChoices = context => {
+                                    return GenericPayManaChoice(CastingCost, context);
+                                },
+
+                                EnactCastChoices = context => GenericPayManaEnact(context),
+                                EnactResolveChoices = context =>
+                                {
+                                    context.GameState.GainTemporaryMana(context.CastingPlayer, ManaColour.Purple, 3);
+                                }
+                            }
+                        };
+                    } break;
+
+                case CardTemplates.CourtInformant:
+                    {
+                        Name = "Court Informant";
+                        Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Spy;
+                        Colour = ManaColour.Purple;
+                        Rarity = CardRarities.Uncommon;
+                        CastingCost = new ManaSet(ManaColour.Purple, ManaColour.Colourless);
+
+                        Attack = 3;
+                        Health = 2;
+
+                        Abilities = new[] {
+                            GenericCreatureCast(),
+                            new TriggeredAbility {
+                                BreadText = $"Whenever {Name} deals damage to a player; draw a card.",
+                                IsTriggeredBy = trigger => {
+                                    if (trigger is DamageDoneTrigger)
+                                    {
+                                        var damageDoneTrigger = trigger as DamageDoneTrigger;
+
+                                        if (damageDoneTrigger.Source == this && damageDoneTrigger.Target.IsHero)
+                                        {
+                                            return true;
+                                        }
+                                    }
+                                    
+                                    return false;
+                                },
+
+                                EnactResolveChoices = context => {
+                                    context.GameState.DrawCards(context.CastingPlayer, 1);
+                                }
+                            }
+                        };
+
+                    } break;
+
+                case CardTemplates.BattlehardenedMage:
+                    {
+                        Name = "Battlehardened Mage";
+                        Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Warrior;
+                        Colour = ManaColour.Blue;
+                        Rarity = CardRarities.Common;
+                        CastingCost = new ManaSet(ManaColour.Blue, ManaColour.Colourless);
+
+                        Attack = 1;
+                        Health = 3;
+
+                        Abilities = new[] {
+                            GenericCreatureCast(),
+                            new TriggeredAbility {
+                                BreadText = $"Whenever {Name} takes damage; draw a card.",
+                                IsTriggeredBy = trigger => {
+                                    if (trigger is DamageDoneTrigger)
+                                    {
+                                        var damageDoneTrigger = trigger as DamageDoneTrigger;
+
+                                        if (this.Token != null && damageDoneTrigger.Target == this.Token)
+                                        {
+                                            return true;
+                                        }
+                                    }
+
+                                    return false;
+                                },
+
+                                EnactResolveChoices = context => {
+                                    context.GameState.DrawCards(context.CastingPlayer, 1);
+                                }
+                            }
+                        };
+                    } break;
+
+                case CardTemplates.ArcticWatchman:
+                    {
+                        Name = "Arctic Watchman";
+                        Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Hunter;
+                        Colour = ManaColour.Green;
+                        Rarity = CardRarities.Uncommon;
+                        CastingCost = new ManaSet(ManaColour.Green);
+
+                        Attack = 2;
+                        Health = 3;
+
+                        Abilities = new[] {
+                            GenericCreatureCast(),
+                            new TriggeredAbility {
+                                BreadText = $"When {Name} enters the battlefield; summon a Green 2/1 Hawk token with flying.",
+                                IsTriggeredBy = trigger => {
+                                    if (trigger is MoveTrigger)
+                                    {
+                                        var moveTrigger = trigger as MoveTrigger;
+                                        if (moveTrigger.Card == this && moveTrigger.To.Location == PileLocation.Battlefield)
+                                        {
+                                            return true;
+                                        }
+                                    }
+
+                                    return false;
+                                },
+                                EnactResolveChoices = context => {
+                                    context.GameState.SummonToken(CardTemplates.HawkToken1, Owner);
+                                }
+                            }
+                        };
+
+                    } break;
+
+                case CardTemplates.HawkToken1:
+                    {
+                        Name = "Hawk";
+                        Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Bird;
+                        Colour = ManaColour.Green;
+                        Rarity = CardRarities.Token;
+                        CastingCost = new ManaSet();
+
+                        Attack = 2;
+                        Health = 1;
+
+                        KeywordAbilities[KeywordAbilityNames.Flying] = true;
                     } break;
 
                 default:
@@ -1036,6 +1374,26 @@ namespace CardKartShared.GameState
         Hero,
     }
 
+    public enum CreatureTypes
+    {
+        None, 
+
+        Zombie,
+        Human,
+        Insect,
+        Spider,
+        Goblin,
+        Warrior,
+        Elemental,
+        Beast,
+        Wizard,
+        Artificer,
+        Spy,
+        Hunter,
+        Bird,
+
+    }
+
     public enum CardTemplates
     {
         None,
@@ -1058,6 +1416,17 @@ namespace CardKartShared.GameState
         ScribeMagi,
         Unmake,
         HorsemanOfDeath,
+        SquireToken1,
+        CallToArms,
+        ExiledScientist,
+        InsectToken1,
+        SilvervenomSpider,
+        Eliminate,
+        Inspiration,
+        CourtInformant,
+        BattlehardenedMage,
+        ArcticWatchman,
+        HawkToken1,
 
         HeroTest,
     }
@@ -1070,5 +1439,7 @@ namespace CardKartShared.GameState
         Uncommon,
         Rare,
         Legendary,
+
+        Token,
     }
 }

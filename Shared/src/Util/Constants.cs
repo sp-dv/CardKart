@@ -42,6 +42,7 @@ namespace CardKartShared.Util
                 case CardRarities.Uncommon: { return Color.Blue; }
                 case CardRarities.Rare: { return Color.Purple; }
                 case CardRarities.Legendary: { return Color.DarkOrange; }
+                case CardRarities.Token: { return Color.Black; }
             }
 
             throw new NotImplementedException();

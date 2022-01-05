@@ -62,7 +62,15 @@ namespace CardKartClient.GUI.Components
                     Card.CastingCost.ToColourArray()
                     .Select(colour => Constants.PaletteColor(colour)).ToArray();
                 RarityColor = Constants.RarityColor(Card.Rarity);
-                TypeString = Card.Type.ToString();
+
+                if (Card.Type == CardTypes.Creature)
+                {
+                    TypeString = Card.CreatureType.ToString();
+                }
+                else
+                {
+                    TypeString = Card.Type.ToString();
+                }
 
                 BreadTextPanel.Text = Card.BreadText;
                 if (Card.BreadText.Length < 60)

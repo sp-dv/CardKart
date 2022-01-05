@@ -32,7 +32,7 @@ namespace CardKartClient.GUI
                 Window.Load += (_, __) => re.Set();
                 Window.Closed += (_, __) =>
                     { CardKartClient.Controller.HandleWindowClosed(); };
-                Window.Run(100, 0);
+                Window.Run(100, 30);
             }).Start();
             re.Wait();
         }

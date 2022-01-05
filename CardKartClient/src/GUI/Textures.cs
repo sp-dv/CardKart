@@ -34,6 +34,17 @@ namespace CardKartClient.GUI
         public static Texture Unmake1;
         public static Texture HorsemanOfDeath1;
         public static Texture Logo1stEdition;
+        public static Texture CallToArms1;
+        public static Texture SquireToken1;
+        public static Texture InsectToken1;
+        public static Texture ExiledScientist1;
+        public static Texture Eliminate1;
+        public static Texture SilvervenomSpider1;
+        public static Texture Inspiration1;
+        public static Texture CourtInformant1;
+        public static Texture BattlehardenedMage1;
+        public static Texture ArcticWatchman1;
+        public static Texture HawkToken1;
 
 
         public static void LoadTextures()
@@ -66,6 +77,18 @@ namespace CardKartClient.GUI
             Unmake1 = TextureLoader.CreateTexture(Properties.Resources.unmake1);
             HorsemanOfDeath1 = TextureLoader.CreateTexture(Properties.Resources.horsemanofdeath1);
             Logo1stEdition = TextureLoader.CreateTexture(Properties.Resources.logo1e);
+            CallToArms1 = TextureLoader.CreateTexture(Properties.Resources.calltoarms1);
+            SquireToken1 = TextureLoader.CreateTexture(Properties.Resources.squiretoken1);
+            ExiledScientist1 = TextureLoader.CreateTexture(Properties.Resources.exiledscientist1);
+            InsectToken1 = TextureLoader.CreateTexture(Properties.Resources.insect1);
+            Eliminate1 = TextureLoader.CreateTexture(Properties.Resources.eliminate1);
+            SilvervenomSpider1 = TextureLoader.CreateTexture(Properties.Resources.silvervenomspider1);
+            Inspiration1 = TextureLoader.CreateTexture(Properties.Resources.inspiration1);
+            CourtInformant1 = TextureLoader.CreateTexture(Properties.Resources.courtinformant1);
+            BattlehardenedMage1 = TextureLoader.CreateTexture(Properties.Resources.battlehardenedmage1);
+            ArcticWatchman1 = TextureLoader.CreateTexture(Properties.Resources.arctichunter1);
+            HawkToken1 = TextureLoader.CreateTexture(Properties.Resources.hawktoken1);
+
         }
 
         public static Texture Portraits(CardTemplates template)
@@ -91,6 +114,17 @@ namespace CardKartClient.GUI
                 case CardTemplates.ScribeMagi: { return ScribeMagi1; }
                 case CardTemplates.Unmake: { return Unmake1; }
                 case CardTemplates.HorsemanOfDeath: { return HorsemanOfDeath1; }
+                case CardTemplates.CallToArms: { return CallToArms1; }
+                case CardTemplates.SquireToken1: { return SquireToken1; }
+                case CardTemplates.ExiledScientist: { return ExiledScientist1; }
+                case CardTemplates.InsectToken1: { return InsectToken1; }
+                case CardTemplates.Eliminate: { return Eliminate1; }
+                case CardTemplates.SilvervenomSpider: { return SilvervenomSpider1; }
+                case CardTemplates.Inspiration: { return Inspiration1; }
+                case CardTemplates.CourtInformant: { return CourtInformant1; }
+                case CardTemplates.BattlehardenedMage: { return BattlehardenedMage1; }
+                case CardTemplates.ArcticWatchman: { return ArcticWatchman1; }
+                case CardTemplates.HawkToken1: { return HawkToken1; }
                 default: { return NoPortait; }
             }
         }
