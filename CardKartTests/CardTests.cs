@@ -22,11 +22,7 @@ namespace CardKartTests
                 Assert.AreNotEqual(CardTypes.None, card.Type);
                 Assert.AreNotEqual(CardRarities.None, card.Rarity);
 
-                if (card.Type == CardTypes.Hero)
-                {
-
-                }
-                else
+                if (card.Type != CardTypes.Hero)
                 {
                     Assert.IsNotNull(card.CastingCost);
                 }

@@ -16,8 +16,12 @@ namespace CardKartClient
                 Logging.AddConsoleLogger();
             }
 
+            Logging.Log(
+                LogLevel.Info,
+                $"Starting CardKart version {Constants.Version}");
+
             Server = new ServerConnection();
-            Server.Connect();
+            if (!Server.Connect()) { return; }
 
             GUI = new GUIController();
 

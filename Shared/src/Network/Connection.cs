@@ -2,6 +2,7 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 
@@ -100,13 +101,15 @@ namespace CardKartShared.Network
 
     public class Server
     {
-        private int Port;
-        private string Address;
+        private string Address { get; }
+        private int Port { get; }
+        public RSAParameters PublicKey { get; }
 
-        public Server(int port, string address)
+        public Server(string address, int port, RSAParameters publicKey)
         {
-            Port = port;
             Address = address;
+            Port = port;
+            PublicKey = publicKey;
         }
 
         public void Host(Action<Connection, TcpClient> connectedCallback)

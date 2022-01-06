@@ -14,7 +14,7 @@ namespace CardKartShared.Util
 
             foreach (var logger in Loggers)
             {
-                logger.Log($"{timestamp} ({levelString}): {message}");
+                logger.Log(level, $"{timestamp} ({levelString}): {message}");
             }
         }
 
@@ -36,14 +36,29 @@ namespace CardKartShared.Util
 
     interface Logger
     {
-        void Log(string message);
+        void Log(LogLevel level, string message);
     }
 
     class ConsoleLogger : Logger
     {
-        public void Log(string message)
+        public void Log(LogLevel level, string message)
         {
+            Console.ForegroundColor = new Func<ConsoleColor>(() =>
+            {
+                switch (level)
+                {
+                    case LogLevel.Debug: return ConsoleColor.Green;
+                    case LogLevel.Info: return ConsoleColor.Cyan;
+                    case LogLevel.Warning: return ConsoleColor.Yellow;
+                    case LogLevel.Error: return ConsoleColor.Red;
+
+                    default: return ConsoleColor.White;
+                }
+            })();
+            
             Console.WriteLine(message);
+
+            Console.ForegroundColor = ConsoleColor.White;
         }
     }
 }

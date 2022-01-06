@@ -12,10 +12,6 @@ namespace CardKartClient
 
         public void Startup()
         {
-            Logging.Log(
-                LogLevel.Info,
-                $"Starting CardKart version {Constants.Version}");
-
             CardKartClient.GUI.OpenWindow();
 
             CardKartClient.GUI.TransitionToScene(new LoginScene());

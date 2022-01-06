@@ -15,10 +15,11 @@ namespace CardKartServer
         private List<Client> ConnectedClients = new List<Client>();
         private Dictionary<string, Client> LoggedInClients = new Dictionary<string, Client>();
 
+
         public void AddConnection(Connection clientConnection)
         {
             var client = new Client(clientConnection);
-            if (client.Handshake())
+            if (client.ServersideHandshake())
             {
                 ConnectedClients.Add(client);
                 client.Connection.Closed += () => RemoveClient(client);
@@ -109,7 +110,7 @@ namespace CardKartServer
             };
         }
 
-        public bool Handshake()
+        public bool ServersideHandshake()
         {
             var handshakeMessageRaw = Connection.ReceiveMessage();
 
@@ -119,7 +120,7 @@ namespace CardKartServer
                     new GenericResponseMessage(GenericResponseMessage.Codes.Error,
                     "First message must be handshake.").Encode());
                 Logging.Log(
-                    LogLevel.Debug,
+                    LogLevel.Info,
                     "Received intial message which wasn't a handshake.");
 
                 return false;
@@ -128,35 +129,42 @@ namespace CardKartServer
             var handshakeMessage = new HandshakeMessage();
             handshakeMessage.Decode(handshakeMessageRaw);
 
+            var response = new HandshakeResponse();
+
             if (handshakeMessage.VersionString != Constants.Version)
             {
-                Connection.SendMessage(
-                    new GenericResponseMessage(GenericResponseMessage.Codes.Error,
-                    $"Outdated version. Current version is {Constants.Version}").Encode());
                 Logging.Log(
-                    LogLevel.Debug,
+                    LogLevel.Info,
                     $"Outdated version connected. Version: {handshakeMessage.VersionString}");
-                return false;
-            }
 
-            try
-            {
-                var text = RSAEncryption.RSADecrypt(handshakeMessage.MagicBytes);
-                var magic = JsonConvert.DeserializeObject<Magic>(text);
-                var encryptionSuite = new EncryptionSuite(magic.AesParams);
-
-                var response = new HandshakeResponse();
-                response.MagicBytes = encryptionSuite.Encrypt(magic.Nonce);
+                response.Error = $"Outdated version. Current version is {Constants.Version}";
                 Connection.SendMessage(response.Encode());
-
-                Connection.EncryptionSuite = encryptionSuite;
-
-                return true;
-            }
-            catch (Exception ex)
-            {
                 return false;
             }
+
+            var text = RSAEncryption.RSADecrypt(handshakeMessage.MagicBytes, CardKartServer.ServerKey);
+
+            // User doesn't have the right public key.
+            if (text == null) 
+            {
+                Logging.Log(
+                    LogLevel.Info,
+                    "Received handshake with wrong public key.");
+
+                response.Error = $"Wrong public key.";
+                Connection.SendMessage(response.Encode());
+                return false;
+            } 
+
+            var magic = JsonConvert.DeserializeObject<Magic>(text);
+            var encryptionSuite = new EncryptionSuite(magic.AesParams);
+
+            response.MagicBytes = encryptionSuite.Encrypt(magic.Nonce);
+            Connection.SendMessage(response.Encode());
+
+            Connection.EncryptionSuite = encryptionSuite;
+
+            return true;
         }
 
         public void LogIn(LoginInfoEntry entry)
