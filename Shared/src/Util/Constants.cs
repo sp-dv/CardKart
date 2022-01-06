@@ -10,7 +10,7 @@ namespace CardKartShared.Util
     public static class Constants
     {
         // Last release: 0.0.1
-        public const string Version = "0.0.0";
+        public const string Version = "0.0.2";
         public static bool IsDevVersion = false;
 
         private static RSAParameters DebugPublicKey => 
