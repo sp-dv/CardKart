@@ -20,6 +20,7 @@ namespace CardKartServer
             catch
             {
                 Logging.Log(LogLevel.Error, "Configuration error: invalid DB file path.");
+                return;
             }
 
             Users.Load(LiteDB.GetCollection<UserEntry>("users"));
