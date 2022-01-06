@@ -9,8 +9,9 @@ namespace CardKartShared.Util
 {
     public static class Constants
     {
-        public const string Version = "0.0.1";
-        public static bool IsDevVersion = false;
+        // Last release: 0.0.1
+        public const string Version = "0.0.0";
+        public static bool IsDevVersion = true;
 
         private static RSAParameters DebugPublicKey =>
             JsonConvert.DeserializeObject<RSAParameters>("{\"D\":null,\"DP\":null,\"DQ\":null,\"Exponent\":\"AQAB\",\"InverseQ\":null,\"Modulus\":\"qIsOn6mUS08MDm2MNngj9UN1ZqM5bqKbic4nRBSrt4FkzE5vxv7gFlRW0t6phBvrlTBcGpYWxput6PMHJQ2zHzgPnOt9kgHKUy/Oh44p7IqeYoGKmSBDeUfw1vr6+kCRmBXSUVxug9RcRgnT1daVClCaKsLs/zTNosVlgx17RgU=\",\"P\":null,\"Q\":null}");
