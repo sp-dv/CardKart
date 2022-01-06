@@ -1,7 +1,9 @@
 ﻿using CardKartShared.GameState;
 using CardKartShared.Network;
+using Newtonsoft.Json;
 using System;
 using System.Drawing;
+using System.Security.Cryptography;
 
 namespace CardKartShared.Util
 {
@@ -10,11 +12,17 @@ namespace CardKartShared.Util
         public const string Version = "0.0.0";
         public static bool IsDevVersion = true;
 
+        private static RSAParameters DebugPublicKey =>
+            JsonConvert.DeserializeObject<RSAParameters>("{\"D\":null,\"DP\":null,\"DQ\":null,\"Exponent\":\"AQAB\",\"InverseQ\":null,\"Modulus\":\"qIsOn6mUS08MDm2MNngj9UN1ZqM5bqKbic4nRBSrt4FkzE5vxv7gFlRW0t6phBvrlTBcGpYWxput6PMHJQ2zHzgPnOt9kgHKUy/Oh44p7IqeYoGKmSBDeUfw1vr6+kCRmBXSUVxug9RcRgnT1daVClCaKsLs/zTNosVlgx17RgU=\",\"P\":null,\"Q\":null}");
+
+        private static RSAParameters NewKey => 
+            JsonConvert.DeserializeObject<RSAParameters>("{\"D\":null,\"DP\":null,\"DQ\":null,\"Exponent\":\"AQAB\",\"InverseQ\":null,\"Modulus\":\"2W9/TpmnOQ+asG9TSNW1SqSGGlW4dS+IA+zWoLd132Q4kZiOtRFyJOjs9xNIhjaKL956Xpn7XyspgPrv6nAdLQJ9nuEjguxJsZ3jNb9FcHkOeJPCfQp28Pb0jkDqOXXnO060kHPARcbY97geeL2TOST4C0HWX++Aib8U+vAVva0=\",\"P\":null,\"Q\":null}");
+
         public static Server CurrentServer => DebugServer;
         public static readonly Server ProductionServer
-            = new Server(4444, "78.138.17.232");
+            = new Server("78.138.17.232", 4444, DebugPublicKey);
         public static readonly Server DebugServer
-            = new Server(4444, "localhost");
+            = new Server("localhost", 4444, NewKey);
 
         public static GUIConstants GUI { get; } = new GUIConstants();
 

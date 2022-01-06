@@ -19,13 +19,14 @@ namespace CardKartClient
         public bool Connect()
         {
             Connection = Constants.CurrentServer.Connect();
+            var publicKey = Constants.CurrentServer.PublicKey;
 
             var magic = new Magic();
             var encryptionSuite = new EncryptionSuite(magic.AesParams);
 
             var handshakeMessage = new HandshakeMessage();
             handshakeMessage.VersionString = Constants.Version;
-            handshakeMessage.MagicBytes = RSAEncryption.RSAEncrypt(JsonConvert.SerializeObject(magic));
+            handshakeMessage.MagicBytes = RSAEncryption.RSAEncrypt(JsonConvert.SerializeObject(magic), publicKey);
             Connection.SendMessage(handshakeMessage.Encode());
 
             var responseRaw = Connection.ReceiveMessage();
@@ -35,6 +36,7 @@ namespace CardKartClient
 
             if (response.Error != null)
             {
+                Logging.Log(LogLevel.Warning, $"Failed to connect to server with reason: {response.Error}");
                 return false;
             }
             if (response.MagicBytes == null)
@@ -52,6 +54,7 @@ namespace CardKartClient
                 if (magic.Nonce[i] != decryptedNonce[i]) { return false; }
             }
 
+            Logging.Log(LogLevel.Info, "Successfully connected to server.");
 
             Connection.EncryptionSuite = encryptionSuite;
 

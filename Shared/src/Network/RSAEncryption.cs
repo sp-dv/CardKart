@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using CardKartShared.Util;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +10,15 @@ namespace CardKartShared.Network
 {
     public static class RSAEncryption
     {
-        private static RSAParameters PublicKey { get; } = JsonConvert.DeserializeObject<RSAParameters>("{\"D\":null,\"DP\":null,\"DQ\":null,\"Exponent\":\"AQAB\",\"InverseQ\":null,\"Modulus\":\"qIsOn6mUS08MDm2MNngj9UN1ZqM5bqKbic4nRBSrt4FkzE5vxv7gFlRW0t6phBvrlTBcGpYWxput6PMHJQ2zHzgPnOt9kgHKUy/Oh44p7IqeYoGKmSBDeUfw1vr6+kCRmBXSUVxug9RcRgnT1daVClCaKsLs/zTNosVlgx17RgU=\",\"P\":null,\"Q\":null}");
-        private static RSAParameters PrivateKey { get; set; }
+        //private static RSAParameters PublicKey { get; set; } = JsonConvert.DeserializeObject<RSAParameters>("{\"D\":null,\"DP\":null,\"DQ\":null,\"Exponent\":\"AQAB\",\"InverseQ\":null,\"Modulus\":\"qIsOn6mUS08MDm2MNngj9UN1ZqM5bqKbic4nRBSrt4FkzE5vxv7gFlRW0t6phBvrlTBcGpYWxput6PMHJQ2zHzgPnOt9kgHKUy/Oh44p7IqeYoGKmSBDeUfw1vr6+kCRmBXSUVxug9RcRgnT1daVClCaKsLs/zTNosVlgx17RgU=\",\"P\":null,\"Q\":null}");
+        //private static RSAParameters PrivateKey { get; set; }
 
-        private static void GenerateKeys()
+        /// <summary>
+        /// Generates a RSA key pair for client/server handshake encryption.
+        /// To use the keys run 'JsonConvert.DeserializeObject<RSAParameters>(keyString)'
+        /// </summary>
+        /// <returns>(PrivateKeyString, PublicKeyString)</returns>
+        public static (string, string) GenerateKeys()
         {
             RSACryptoServiceProvider rsaSP1 = new RSACryptoServiceProvider();
 
@@ -21,19 +27,18 @@ namespace CardKartShared.Network
             var pubKey = rsaSP1.ExportParameters(false);
             var pubKeyString = JsonConvert.SerializeObject(pubKey);
 
-            privKey = JsonConvert.DeserializeObject<RSAParameters>(privKeyString);
-            pubKey = JsonConvert.DeserializeObject<RSAParameters>(pubKeyString);
+            return (privKeyString, pubKeyString);
         }
 
         public static void LoadPrivateKey(RSAParameters key)
         {
-            PrivateKey = key;
+            //PrivateKey = key;
         }
 
         private const int MaxRSABlockSize = 86;
         private const int RSAOutputBlockSize = 128;
 
-        public static byte[] RSAEncrypt(string plainText)
+        public static byte[] RSAEncrypt(string plainText, RSAParameters publicKey)
         {
             var dataToEncrypt = Encoding.UTF8.GetBytes(plainText);
             try
@@ -41,7 +46,7 @@ namespace CardKartShared.Network
                 List<byte> encryptedData = new List<byte>(); ;
                 using (RSACryptoServiceProvider RSA = new RSACryptoServiceProvider())
                 {
-                    RSA.ImportParameters(PublicKey);
+                    RSA.ImportParameters(publicKey);
 
                     int i = 0;
                     while (i < dataToEncrypt.Length)
@@ -61,14 +66,14 @@ namespace CardKartShared.Network
             }
         }
 
-        public static string RSADecrypt(byte[] dataToDecrypt)
+        public static string RSADecrypt(byte[] dataToDecrypt, RSAParameters privateKey)
         {
             try
             {
                 List<byte> decryptedData = new List<byte>();
                 using (RSACryptoServiceProvider RSA = new RSACryptoServiceProvider())
                 {
-                    RSA.ImportParameters(PrivateKey);
+                    RSA.ImportParameters(privateKey);
 
                     int i = 0;
                     while (i < dataToDecrypt.Length)
@@ -83,8 +88,7 @@ namespace CardKartShared.Network
             }
             catch (CryptographicException e)
             {
-                Console.WriteLine(e.ToString());
-
+                Logging.Log(LogLevel.Error, $"Error during RSA decryption.");
                 return null;
             }
         }
