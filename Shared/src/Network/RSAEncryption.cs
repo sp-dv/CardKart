@@ -30,11 +30,6 @@ namespace CardKartShared.Network
             return (privKeyString, pubKeyString);
         }
 
-        public static void LoadPrivateKey(RSAParameters key)
-        {
-            //PrivateKey = key;
-        }
-
         private const int MaxRSABlockSize = 86;
         private const int RSAOutputBlockSize = 128;
 

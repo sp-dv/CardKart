@@ -13,7 +13,14 @@ namespace CardKartServer
 
         public static void Load()
         {
-            LiteDB = new LiteDatabase(@"./MyData.db");
+            try
+            {
+                LiteDB = new LiteDatabase(CardKartServer.Config.DBFilePath);
+            }
+            catch
+            {
+                Logging.Log(LogLevel.Error, "Configuration error: invalid DB file path.");
+            }
 
             Users.Load(LiteDB.GetCollection<UserEntry>("users"));
             LoginInfo.Load(LiteDB.GetCollection<LoginInfoEntry>("loginInfo"));
