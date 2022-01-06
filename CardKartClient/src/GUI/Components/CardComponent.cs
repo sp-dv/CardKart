@@ -73,13 +73,13 @@ namespace CardKartClient.GUI.Components
                 }
 
                 BreadTextPanel.Text = Card.BreadText;
-                if (Card.BreadText.Length < 60)
+                if (Card.BreadText.Length < 80)
                 {
-                    BreadTextPanel.Font = Fonts.CardFont10;
+                    BreadTextPanel.Font = Fonts.BreadTextFont10;
                 }
                 else
                 {
-                    BreadTextPanel.Font = Fonts.CardFont8;
+                    BreadTextPanel.Font = Fonts.BreadTextFont8;
                 }
                 BreadTextPanel.Layout();
             }
@@ -94,7 +94,7 @@ namespace CardKartClient.GUI.Components
             ImageWidth = 0.182f;
             ImageHeight = 0.23f;
 
-            NameInsetX = 0.01f;
+            NameInsetX = 0.095f;
             NameInsetY = 0.51f;
 
             AttackInsetX = 0.0155f;
@@ -138,7 +138,8 @@ namespace CardKartClient.GUI.Components
                 X + NameInsetX, 
                 Y + NameInsetY, 
                 Card.Name.Length < 100 ? Fonts.CardFont10 : Fonts.CardFont8, 
-                Fonts.MainRenderOptions);
+                Fonts.MainRenderOptions,
+                QuickFont.QFontAlignment.Centre);
 
             drawAdapter.DrawText(
                 TypeString,
@@ -191,12 +192,8 @@ namespace CardKartClient.GUI.Components
 
             if (MouseIsInComponent)
             {
-                drawAdapter.DrawRectange(X, Y, X + Width, Y + Height, Color.White);
+                drawAdapter.DrawRectangle(X, Y, X + Width, Y + Height, Color.White);
             }
-        }
-
-        protected override void MouseEntered(GLCoordinate location)
-        {
         }
     }
 }

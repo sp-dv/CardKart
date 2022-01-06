@@ -4,6 +4,7 @@ using SGL;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using static CardKartClient.GUI.Scenes.GameScene;
 
 namespace CardKartClient.GUI.Components
 {
@@ -11,6 +12,8 @@ namespace CardKartClient.GUI.Components
     {
         public delegate void CardClickedHandler(CardComponent card);
         public event CardClickedHandler CardClicked;
+
+        public event RequestInfoDisplayHandler RequestInfoDisplay;
 
         public ShowCardsPanel(IEnumerable<CardTemplates> templates)
         {
@@ -33,6 +36,8 @@ namespace CardKartClient.GUI.Components
                 component.X = X + 0.01f;
                 component.Y = y0 - i * 0.05f;
                 component.Clicked += () => CardClicked?.Invoke(component);
+                component.MouseEnteredEvent += () => RequestInfoDisplay?.Invoke(card);
+                component.MouseExitedEvent += () => RequestInfoDisplay?.Invoke(null);
             }
 
             var closeButton = new SmartTextPanel();

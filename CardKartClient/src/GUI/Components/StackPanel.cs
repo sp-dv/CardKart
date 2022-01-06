@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using static CardKartClient.GUI.Scenes.GameScene;
 
 namespace CardKartClient.GUI.Components
 {
@@ -13,7 +14,6 @@ namespace CardKartClient.GUI.Components
     {
         // Absolutely repulsive hack to get card to draw on top.
         private CardComponent Top;
-        private CardComponent PrevTop;
 
         private CastingStack Stack;
 
@@ -23,6 +23,8 @@ namespace CardKartClient.GUI.Components
         public delegate void AbilityClickedHandler(AbilityCastingContext context);
         public event AbilityClickedHandler AbilityClicked;
 
+        public event RequestInfoDisplayHandler RequestInfoDisplay;
+
         public StackPanel(CastingStack stack)
         {
             Width = 0.24f;
@@ -30,6 +32,7 @@ namespace CardKartClient.GUI.Components
 
             Stack = stack;
             Stack.StackChanged += Update;
+
         }
 
         private void Update(AbilityCastingContext[] contexts)
@@ -41,7 +44,6 @@ namespace CardKartClient.GUI.Components
             var y0 = Y + Height - cardHeight;
 
             Top = null;
-            PrevTop = null;
             TargetsUpdated?.Invoke(null, null);
 
             var cards = contexts.Select(context => context.Card).ToArray();
@@ -51,7 +53,7 @@ namespace CardKartClient.GUI.Components
                 Components.Clear();
                 for (int i = 0; i < cards.Length; i++)
                 {
-                    int stackIndex = i;//cards.Length - i - 1;
+                    int stackIndex = i;
 
                     var component =
                         new CardComponent(cards[stackIndex]);
@@ -61,37 +63,22 @@ namespace CardKartClient.GUI.Components
                     component.Clicked += () => { 
                         AbilityClicked?.Invoke(contexts[stackIndex]);
                     };
-                    component.MouseMovedEvent += () =>
+                    component.MouseEnteredEvent += () =>
                     {
-                        // This depends on components being iterated in reverse order and
-                        // the bottom most card having the MouseMovedEvent fire first.
-                        if (Top == null)
-                        {
-                            Top = component;
-                            if (PrevTop != component)
-                            {
-                                // Synthetic mouse entered...
-                                var targets = Stack.GetTargetIDs(stackIndex);
-                                TargetsUpdated?.Invoke(component, targets);
-                            }
-                        }
+                        var targets = Stack.GetTargetIDs(stackIndex);
+                        TargetsUpdated?.Invoke(component, targets);
+                        RequestInfoDisplay?.Invoke(component.Card);
+                        Top = component;
                     };
                     component.MouseExitedEvent += () =>
                     {
-                        if (PrevTop == component)
-                        {
-                            PrevTop = null;
-                            From = null;
-                            To = null;
-                            TargetsUpdated?.Invoke(null, null);
-                        }
+                        Top = null;
+                        RequestInfoDisplay?.Invoke(null);
+                        TargetsUpdated?.Invoke(null, null);
                     };
                 }
             }
         }
-
-        private GLCoordinate From;
-        private GLCoordinate[] To;
 
         public override void Draw(DrawAdapter drawAdapter)
         {
@@ -101,10 +88,6 @@ namespace CardKartClient.GUI.Components
 
                 lock (Components)
                 {
-                    if (Top == null && PrevTop != null)
-                    {
-                        Top = PrevTop;
-                    }
                     foreach (var child in Components)
                     {
                         if (child != Top) { child.Draw(drawAdapter); }
@@ -113,8 +96,6 @@ namespace CardKartClient.GUI.Components
                     {
                         Top.Draw(drawAdapter);
                     }
-                    PrevTop = Top;
-                    Top = null;
                 }
             }
         }

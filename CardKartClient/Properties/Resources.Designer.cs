@@ -103,6 +103,26 @@ namespace CardKartClient.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap buttonnext1 {
+            get {
+                object obj = ResourceManager.GetObject("buttonnext1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap buttonprev1 {
+            get {
+                object obj = ResourceManager.GetObject("buttonprev1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap calltoarms1 {
             get {
                 object obj = ResourceManager.GetObject("calltoarms1", resourceCulture);
@@ -126,6 +146,16 @@ namespace CardKartClient.Properties {
         internal static System.Drawing.Bitmap courtinformant1 {
             get {
                 object obj = ResourceManager.GetObject("courtinformant1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap deckeditorbg1 {
+            get {
+                object obj = ResourceManager.GetObject("deckeditorbg1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

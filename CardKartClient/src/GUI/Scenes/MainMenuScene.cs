@@ -22,7 +22,7 @@ namespace CardKartClient.GUI.Scenes
             Components.Add(debug);
 
 
-#if true
+#if false
             StartGameButton = new SmartTextPanel();
             StartGameButton.X = 0.1f;
             StartGameButton.Y = 0.0f;

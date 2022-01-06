@@ -20,6 +20,17 @@ namespace CardKartShared.GameState
 
         public CastingStack CastingStack { get; } = new CastingStack();
 
+        private Random RNG = new Random(420);
+
+        public int End { get; private set; }
+
+        // End 0 - Turn 1
+        // End 1 - Turn 1
+        // End 2 - Turn 2
+        // End 3 - Turn 2
+        // End 4 - Turn 3
+        public int Turn => (End / 2) + 1;
+
         public IEnumerable<Token> AllTokens =>
             Player1.Battlefield
             .Concat(Player2.Battlefield)
@@ -137,6 +148,11 @@ namespace CardKartShared.GameState
             }
         }
 
+        public void ShuffleDeck(Player player)
+        {
+            player.Deck.Shuffle(RNG);
+        }
+
         public void DrawCards(Player player, int cardCount)
         {
             Trigger(new DrawTrigger(player, cardCount));
@@ -239,6 +255,7 @@ namespace CardKartShared.GameState
 
         public void SetTime(GameTime time)
         {
+            if (time == GameTime.StartOfTurn) { End++; }
             Trigger(new GameTimeTrigger(time, ActivePlayer));
         }
 

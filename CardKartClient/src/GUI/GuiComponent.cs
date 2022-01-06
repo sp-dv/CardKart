@@ -69,43 +69,64 @@ namespace CardKartClient.GUI
             return location.InBounds(X, Y, X + Width, Y + Height);
         }
 
-        public void HandleMouseMove(GLCoordinate location)
+        public void HandleMouseMove(GLCoordinate location, bool root)
         {
-            bool rt;
-            if (ComponentRectangleContains(location))
+            // Ugly dupe to make root component events fire.
+            // Since we fire events for children from the parent (to ensure exit gets called
+            // before enter) this has to be done explicitly for root components.
+            // It's ugly but it just werks.
+            if (root)
             {
-                if (!MouseIsInComponent) 
-                { 
-                    MouseEntered(location);
-                    MouseEnteredEvent?.Invoke();
+                if (ComponentRectangleContains(location))
+                {
+                    if (!MouseIsInComponent)
+                    {
+                        MouseEnteredEvent?.Invoke();
+                    }
+                    MouseIsInComponent = true;
+                    MouseMovedEvent?.Invoke();
                 }
+                else
+                {
+                    if (MouseIsInComponent)
+                    {
+                        MouseExitedEvent?.Invoke();
+                    }
+                    MouseIsInComponent = false;
+                }
+            }
 
-                MouseIsInComponent = true;
-                MouseMoved(location);
-                MouseMovedEvent?.Invoke();
-            }
-            else
-            {
-                if (MouseIsInComponent) { MouseExited(location); }
-                MouseIsInComponent = false;
-                MouseExitedEvent?.Invoke();
-            }
+            GuiComponent hit = null;
 
             foreach (var child in Components.Reverse<GuiComponent>())
             {
-                child.HandleMouseMove(location);
+                child.HandleMouseMove(hit == null ? location : null, false);
+
+                
+                if (hit == null && child.ComponentRectangleContains(location)) 
+                {
+                    hit = child;
+                }
+                else
+                {
+                    if (child.MouseIsInComponent)
+                    {
+                        child.MouseIsInComponent = false;
+                        child.MouseExitedEvent?.Invoke();
+                    }
+                }
             }
-        }
 
-        protected virtual void MouseMoved(GLCoordinate location)
-        {
-        }
-
-        protected virtual void MouseEntered(GLCoordinate location)
-        {
-        }
-        protected virtual void MouseExited(GLCoordinate location)
-        {
+            // Ensure entered event is always invoked after exited events.
+            if (hit != null)
+            {
+                if (!hit.MouseIsInComponent)
+                {
+                    hit.MouseIsInComponent = true;
+                    hit.MouseEnteredEvent?.Invoke();
+                }
+                hit.MouseMovedEvent?.Invoke();
+            }
         }
     }
 }

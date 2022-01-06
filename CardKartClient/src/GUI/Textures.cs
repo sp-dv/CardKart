@@ -45,6 +45,9 @@ namespace CardKartClient.GUI
         public static Texture BattlehardenedMage1;
         public static Texture ArcticWatchman1;
         public static Texture HawkToken1;
+        public static Texture ButtonNext1;
+        public static Texture ButtonPrev1;
+        public static Texture DeckEditorBG1;
 
 
         public static void LoadTextures()
@@ -88,7 +91,9 @@ namespace CardKartClient.GUI
             BattlehardenedMage1 = TextureLoader.CreateTexture(Properties.Resources.battlehardenedmage1);
             ArcticWatchman1 = TextureLoader.CreateTexture(Properties.Resources.arctichunter1);
             HawkToken1 = TextureLoader.CreateTexture(Properties.Resources.hawktoken1);
-
+            ButtonNext1 = TextureLoader.CreateTexture(Properties.Resources.buttonnext1);
+            ButtonPrev1 = TextureLoader.CreateTexture(Properties.Resources.buttonprev1);
+            DeckEditorBG1 = TextureLoader.CreateTexture(Properties.Resources.deckeditorbg1);
         }
 
         public static Texture Portraits(CardTemplates template)

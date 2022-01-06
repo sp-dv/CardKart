@@ -46,6 +46,7 @@ namespace CardKartClient
                 1,
                 null);
             CardKartClient.GUI.TransitionToScene(new GameScene(ActiveGame));
+            ActiveGame.LoadDeckDelegate = () => User.LoadDeck();
             ActiveGame.Start();
         }
 

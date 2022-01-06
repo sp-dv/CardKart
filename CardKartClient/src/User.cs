@@ -12,9 +12,8 @@ namespace CardKartClient
     {
         public static string Username { get; set; }
 
-        public static void SaveDeck(IEnumerable<Card> DeckCards)
+        public static void SaveDeck(Deck deck)
         {
-            var deck = new Deck(DeckCards.Select(card => card.Template).ToArray());
             var deckString = JsonConvert.SerializeObject(deck);
             File.WriteAllText("./a.ckd", deckString);
         }

@@ -130,6 +130,12 @@
   <data name="button1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\button1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="buttonnext1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\buttonnext1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="buttonprev1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\buttonprev1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="calltoarms1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\calltoarms1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -138,6 +144,9 @@
   </data>
   <data name="courtinformant1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\courtinformant1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="deckeditorbg1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\deckeditorbg1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="eliminate1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\eliminate.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>

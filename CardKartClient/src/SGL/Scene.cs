@@ -12,24 +12,30 @@ namespace SGL
         {
             lock (Components)
             {
+                PreDraw(drawAdapter);
+
                 foreach (var component in Components)
                 {
                     component.Draw(drawAdapter);
                 }
 
-                DrawPost(drawAdapter);
+                PostDraw(drawAdapter);
             }
         }
 
-        protected virtual void DrawPost(DrawAdapter drawAdapter)
+        protected virtual void PreDraw(DrawAdapter drawAdapter)
         {
         }
 
-        public void HandleKeyDown(KeyboardKeyEventArgs e)
+        protected virtual void PostDraw(DrawAdapter drawAdapter)
         {
         }
 
-        public void HandleKeyUp(KeyboardKeyEventArgs e)
+        public virtual void HandleKeyDown(KeyboardKeyEventArgs e)
+        {
+        }
+
+        public virtual void HandleKeyUp(KeyboardKeyEventArgs e)
         {
         }
 
@@ -48,9 +54,10 @@ namespace SGL
 
         public void HandleMouseMove(GLCoordinate location)
         {
+            // Reverse seems unneccesary.
             for (int i = Components.Count - 1; i >= 0; i--)
             {
-                Components[i].HandleMouseMove(location);
+                Components[i].HandleMouseMove(location, true);
             }
         }
     }

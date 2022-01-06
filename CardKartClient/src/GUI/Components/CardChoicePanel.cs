@@ -3,12 +3,15 @@ using SGL;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using static CardKartClient.GUI.Scenes.GameScene;
 
 namespace CardKartClient.GUI.Components
 {
     internal class CardChoicePanel : GuiComponent
     {
         public event HandComponent.CardClickedHandler CardClicked;
+
+        public event RequestInfoDisplayHandler RequestInfoDisplay;
 
         public CardChoicePanel()
         {
@@ -40,7 +43,9 @@ namespace CardKartClient.GUI.Components
                 component.X = X + 0.01f;
                 component.Y = y0 - i * 0.05f;
                 component.Clicked += () => CardClicked?.Invoke(component);
-                
+                component.MouseEnteredEvent += () => RequestInfoDisplay?.Invoke(card);
+                component.MouseExitedEvent += () => RequestInfoDisplay?.Invoke(null);
+
                 i++;
             }
         }

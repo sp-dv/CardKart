@@ -79,7 +79,7 @@ namespace SGL
             GL.End();
         }
 
-        public void DrawRectange(float x0, float y0, float x1, float y1, Color c)
+        public void DrawRectangle(float x0, float y0, float x1, float y1, Color c)
         {
             GL.Color4(c);
 

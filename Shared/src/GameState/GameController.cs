@@ -91,12 +91,14 @@ namespace CardKartShared.GameState
             }
 
             GameState.LoadDecks(player1Deck, player2Deck);
+            GameState.ShuffleDeck(GameState.Player1);
+            GameState.ShuffleDeck(GameState.Player2);
 
             GameState.ResetMana(GameState.Player1);
             GameState.ResetMana(GameState.Player2);
 
-            GameState.DrawCards(GameState.Player1, 3);
-            GameState.DrawCards(GameState.Player2, 3);
+            GameState.DrawCards(GameState.Player1, 4);
+            GameState.DrawCards(GameState.Player2, 4);
         }
 
         private void GameLoop()
@@ -127,8 +129,11 @@ namespace CardKartShared.GameState
             }
             EnforceGameRules(true);
 
-            GameState.DrawCards(ActivePlayer, 1);
-            EnforceGameRules(true);
+            if (GameState.End != 0)
+            {
+                GameState.DrawCards(ActivePlayer, 1);
+                EnforceGameRules(true);
+            }
 
             ManaColour colour;
             if (ActivePlayer == Hero)

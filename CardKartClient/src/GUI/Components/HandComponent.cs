@@ -1,9 +1,8 @@
 ﻿using CardKartShared.GameState;
 using SGL;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Text;
+using static CardKartClient.GUI.Scenes.GameScene;
 
 namespace CardKartClient.GUI.Components
 {
@@ -15,6 +14,8 @@ namespace CardKartClient.GUI.Components
 
         public delegate void CardClickedHandler(CardComponent cardComponent);
         public event CardClickedHandler CardClicked;
+
+        public event RequestInfoDisplayHandler RequestInfoDisplay;
 
         public HandComponent(Pile hand)
         {
@@ -44,6 +45,8 @@ namespace CardKartClient.GUI.Components
                     cardComponent.X = X + i * cardComponent.Width;
                     cardComponent.Y = Y + PaddingY;
                     cardComponent.Clicked += () => CardClicked?.Invoke(cardComponent);
+                    cardComponent.MouseEnteredEvent += () => RequestInfoDisplay?.Invoke(card);
+                    cardComponent.MouseExitedEvent += () => RequestInfoDisplay?.Invoke(null);
                 }
             }
         }

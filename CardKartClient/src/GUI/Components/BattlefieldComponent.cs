@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using static CardKartClient.GUI.Scenes.GameScene;
 
 namespace CardKartClient.GUI.Components
 {
@@ -16,10 +17,12 @@ namespace CardKartClient.GUI.Components
         public delegate void TokenClickedHandler(Token token);
         public event TokenClickedHandler TokenClicked;
 
+        public event RequestInfoDisplayHandler RequestInfoDisplay; 
+
         public BattlefieldComponent(Pile battlefield)
         {
-            Width = 1.1f;
-            Height = 0.56f;
+            Width = 1.15f;
+            Height = 0.2f;
 
             Battlefield = battlefield;
             Battlefield.PileChanged += Layout;
@@ -62,9 +65,11 @@ namespace CardKartClient.GUI.Components
                 {
                     var card = cards[i];
                     var tokenComponent = new TokenComponent(card);
-                    tokenComponent.X = X + i * tokenComponent.Width;
-                    tokenComponent.Y = Y;
+                    tokenComponent.X = X + i * (tokenComponent.Width + 0.01f);
+                    tokenComponent.Y = Y + 0.01f;
                     tokenComponent.Clicked += () => { TokenClicked?.Invoke(card.Token); };
+                    tokenComponent.MouseEnteredEvent += () => RequestInfoDisplay?.Invoke(card);
+                    tokenComponent.MouseExitedEvent += () => RequestInfoDisplay?.Invoke(null);
 
                     Components.Add(tokenComponent);
                 }

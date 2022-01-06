@@ -79,6 +79,19 @@ namespace CardKartShared.GameState
             return Cards.Reverse<Card>().Take(count).ToArray();
         }
 
+        public void Shuffle(Random RNG)
+        {
+            int n = Cards.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = RNG.Next(n + 1);
+                Card value = Cards[k];
+                Cards[k] = Cards[n];
+                Cards[n] = value;
+            }
+        }
+
         public IEnumerator<Card> GetEnumerator()
         {
             return Cards.GetEnumerator();

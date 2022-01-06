@@ -16,6 +16,7 @@ namespace CardKartShared.Util
         public static readonly Server DebugServer
             = new Server(4444, "localhost");
 
+        public static GUIConstants GUI { get; } = new GUIConstants();
 
         public static Color PaletteColor(ManaColour colour)
         {
@@ -47,5 +48,70 @@ namespace CardKartShared.Util
 
             throw new NotImplementedException();
         }
+
+        public static string KeywordExplanation(KeywordAbilityNames ability)
+        {
+            switch (ability)
+            {
+                case KeywordAbilityNames.Bloodlust: { return "Creatures with Bloodlust don't suffer from summoning sickness"; }
+                case KeywordAbilityNames.Vigilance: { return "Creatures with Vigilance don't exhaust when attacking"; }
+                case KeywordAbilityNames.Flying: { return "Creatures with Flying can only be blocked by creatures with Flying or Range"; }
+                case KeywordAbilityNames.Range: { return "Creatures with Range can block creatures with Flying"; }
+                default: return "";
+            }
+        }
+
+        public static int MaxCountByRarity(CardRarities rarity)
+        {
+            switch (rarity)
+            {
+                case CardRarities.Common: return 4;
+                case CardRarities.Uncommon: return 3;
+                case CardRarities.Rare: return 2;
+                case CardRarities.Legendary: return 1;
+                default: return 0;
+            }
+        }
+    }
+
+    public class GUIConstants
+    {
+        /*  Reuse me daddy
+        
+        public float A => 0.0f;
+        public float B => 0.0f;
+        public float C => 0.0f;
+        public float D => 0.0f;
+        public float E => 0.0f;
+        public float F => 0.0f;
+        public float G => 0.0f;
+        public float H => 0.0f;
+        public float I => 0.0f;
+        public float J => 0.0f;
+
+         */
+
+        public float DeckPanelX => -0.95f;
+        public float DeckPanelY => -0.65f;
+        public float DeckPanelWidth => 0.35f;
+        public float DeckPanelHeight => 1.5f;
+
+
+        public float A => 0.02f;
+        public float B => 0.079f;
+
+
+        public float C => 0.02f;
+        public float D => 1.39f;
+
+        public float E => 0.06f;
+
+        public float F => 0.17f;
+        public float G => 0.060f;
+        
+        public float H => 0.31f;
+        public float I => 0.05f;
+        public float J => 0.0f;
+
     }
 }

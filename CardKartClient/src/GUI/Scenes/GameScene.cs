@@ -1,5 +1,6 @@
 ﻿using CardKartClient.GUI.Components;
 using CardKartShared.GameState;
+using OpenTK.Input;
 using SGL;
 using System.Collections.Generic;
 using System.Drawing;
@@ -24,8 +25,12 @@ namespace CardKartClient.GUI.Scenes
         public PileDisplayPanel HeroGraveyardDisplay;
         public PileDisplayPanel VillainGraveyardDisplay;
 
+        public CardInfoPanel CardInfoPanel;
+
         private GLCoordinate StackFrom;
         private GLCoordinate[] StackTo;
+
+        public delegate void RequestInfoDisplayHandler(Card card);
 
         public GameScene(GameController gameController)
         {
@@ -44,28 +49,32 @@ namespace CardKartClient.GUI.Scenes
                     GameObjectClicked(cardComponent.Card);
                 }
             };
+            HeroHandPanel.RequestInfoDisplay += card => CardInfoPanel.SetCard(card);
             Components.Add(HeroHandPanel);
 
             HeroBattlefieldPanel = new BattlefieldComponent(hero.Battlefield);
             HeroBattlefieldPanel.X = -0.2f;
-            HeroBattlefieldPanel.Y = -0.2f;
+            HeroBattlefieldPanel.Y = -0.05f;
             HeroBattlefieldPanel.TokenClicked +=
                 token => GameObjectClicked(token);
+            HeroBattlefieldPanel.RequestInfoDisplay += card => CardInfoPanel.SetCard(card);
             Components.Add(HeroBattlefieldPanel);
 
 
             VillainBattlefieldPanel = new BattlefieldComponent(villain.Battlefield);
             VillainBattlefieldPanel.X = -0.2f;
-            VillainBattlefieldPanel.Y = 0.4f;
+            VillainBattlefieldPanel.Y = 0.45f;
             VillainBattlefieldPanel.TokenClicked += 
                 token => GameObjectClicked(token);
+            VillainBattlefieldPanel.RequestInfoDisplay += card => CardInfoPanel.SetCard(card);
             Components.Add(VillainBattlefieldPanel);
 
             StackPanel = new StackPanel(gameController.GameState.CastingStack);
-            StackPanel.X = -0.95f;
-            StackPanel.Y = -0.5f;
+            StackPanel.X = -0.565f;
+            StackPanel.Y = -0.35f;
             StackPanel.TargetsUpdated += UpdateStackTargetLines;
             StackPanel.AbilityClicked += CastingContextClicked;
+            StackPanel.RequestInfoDisplay += card => CardInfoPanel.SetCard(card);
             Components.Add(StackPanel);
 
             CardChoicePanel = new CardChoicePanel();
@@ -78,11 +87,12 @@ namespace CardKartClient.GUI.Scenes
             };
             CardChoicePanel.X = StackPanel.X;
             CardChoicePanel.Y = StackPanel.Y;
+            CardChoicePanel.RequestInfoDisplay += card => CardInfoPanel.SetCard(card);
             Components.Add(CardChoicePanel);
 
             ChooserPanel = new ChooserPanel(gameController.ChoiceHelper);
-            ChooserPanel.X = -0.7f;
-            ChooserPanel.Y = -0.15f;
+            ChooserPanel.X = -0.65f;
+            ChooserPanel.Y = -0.85f;
             ChooserPanel.Layout();
             ChooserPanel.OptionClicked += OptionChoiceClicked;
             ChooserPanel.AbilityClicked += AbilityChoiceClicked;
@@ -90,30 +100,40 @@ namespace CardKartClient.GUI.Scenes
             Components.Add(ChooserPanel);
 
             HeroPanel = new PlayerPanel(hero);
-            HeroPanel.X = -0.95f;
-            HeroPanel.Y = -0.8f;
+            HeroPanel.X = 0.05f;
+            HeroPanel.Y = -0.3f;
             HeroPanel.PlayerPortraitClicked += player => GameObjectClicked(player);
             HeroPanel.Layout();
             Components.Add(HeroPanel);
 
             VillainPanel = new PlayerPanel(villain);
-            VillainPanel.X = -0.95f;
-            VillainPanel.Y = 0.6f;
+            VillainPanel.X = 0.05f;
+            VillainPanel.Y = 0.7f;
             VillainPanel.PlayerPortraitClicked += player => GameObjectClicked(player);
             VillainPanel.Layout();
             Components.Add(VillainPanel);
 
             HeroGraveyardDisplay = new PileDisplayPanel(hero.Graveyard);
+            HeroGraveyardDisplay.X = -0.5f;
             HeroPanel.GraveyardButton.Clicked += () => { HeroGraveyardDisplay.Visible ^= true; };
             HeroGraveyardDisplay.Visible = false;
             HeroGraveyardDisplay.CardClicked += cardComponent => GameObjectClicked(cardComponent.Card);
+            HeroGraveyardDisplay.RequestInfoDisplay += card => CardInfoPanel.SetCard(card);
             Components.Add(HeroGraveyardDisplay);
 
             VillainGraveyardDisplay = new PileDisplayPanel(villain.Graveyard);
+            VillainGraveyardDisplay.X = -0.5f;
             VillainPanel.GraveyardButton.Clicked += () => { VillainGraveyardDisplay.Visible ^= true; };
             VillainGraveyardDisplay.Visible = false;
             VillainGraveyardDisplay.CardClicked += cardComponent => GameObjectClicked(cardComponent.Card);
+            VillainGraveyardDisplay.RequestInfoDisplay += card => CardInfoPanel.SetCard(card);
             Components.Add(VillainGraveyardDisplay);
+
+            CardInfoPanel = new CardInfoPanel();
+            CardInfoPanel.X = -0.98f;
+            CardInfoPanel.Y = -0.4f;
+
+            Components.Add(CardInfoPanel);
 
             CombatAnimator = new CombatAnimator(
                 HeroBattlefieldPanel,
@@ -195,7 +215,7 @@ namespace CardKartClient.GUI.Scenes
             GameController.ChoiceHelper.PlayerChoiceSaxophone.Play(new PlayerChoiceStruct(context));
         }
 
-        protected override void DrawPost(DrawAdapter drawAdapter)
+        protected override void PostDraw(DrawAdapter drawAdapter)
         {
             if (StackFrom != null && StackTo != null)
             {
@@ -203,6 +223,14 @@ namespace CardKartClient.GUI.Scenes
                 {
                     drawAdapter.DrawLine(StackFrom.X, StackFrom.Y, location.X, location.Y, Color.Black);
                 }
+            }
+        }
+
+        public override void HandleKeyDown(KeyboardKeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                CardKartClient.Controller.ToMainMenu();
             }
         }
     }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CardKartShared.Util;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -39,10 +40,13 @@ namespace CardKartShared.GameState
         public ManaSet CastingCost;
 
         public string BreadText { get; }
+        public string BreadTextLong { get; }
 
         public Card(CardTemplates template)
         {
             Template = template;
+
+            string flavourText = null;
 
             // Switch of death.
             switch (Template)
@@ -410,6 +414,8 @@ namespace CardKartShared.GameState
                                 }
                             }
                         };
+
+                        flavourText = "\"He makes the finest bombs I've seen in my life.\" -- Ali Arbas";
                     } break;
 
                 case CardTemplates.CrystalizedGeyser:
@@ -894,6 +900,12 @@ namespace CardKartShared.GameState
                                 EnactResolveChoices = context => {
                                     context.GameState.SummonToken(CardTemplates.SquireToken1, context.CastingPlayer);
                                     context.GameState.SummonToken(CardTemplates.SquireToken1, context.CastingPlayer);
+                                    context.GameState.SummonToken(CardTemplates.SquireToken1, context.CastingPlayer);
+                                    context.GameState.SummonToken(CardTemplates.SquireToken1, context.CastingPlayer);
+                                    context.GameState.SummonToken(CardTemplates.SquireToken1, context.CastingPlayer);
+                                    context.GameState.SummonToken(CardTemplates.SquireToken1, context.CastingPlayer);
+                                    context.GameState.SummonToken(CardTemplates.SquireToken1, context.CastingPlayer);
+                                    context.GameState.SummonToken(CardTemplates.SquireToken1, context.CastingPlayer);
                                 }
                             }
                         };
@@ -1202,20 +1214,41 @@ namespace CardKartShared.GameState
                 Auras = new Aura[0];
             }
 
-            var breadTextBuilder = new StringBuilder();
+            var breadTextBuilderBase = new StringBuilder();
             foreach (var ability in Abilities)
             {
-                if (ability.BreadText != null) { breadTextBuilder.AppendLine(ability.BreadText); }
+                if (ability.BreadText != null) { breadTextBuilderBase.AppendLine(ability.BreadText); }
             }
             foreach (var aura in Auras)
             {
-                if (aura.BreadText != null) { breadTextBuilder.Append(aura.BreadText); }
+                if (aura.BreadText != null) { breadTextBuilderBase.Append(aura.BreadText); }
             }
+
+            var breadTextBuilderShort = new StringBuilder();
             foreach (var keywordAbility in KeywordAbilities.GetAbilities())
             {
-                breadTextBuilder.AppendLine(keywordAbility.ToString());
+                breadTextBuilderShort.AppendLine(keywordAbility.ToString());
             }
-            BreadText = breadTextBuilder.ToString();
+
+            BreadText = breadTextBuilderBase.ToString() + breadTextBuilderShort.ToString();
+
+            var breadTextBuilderLong = new StringBuilder();
+            foreach (var keywordAbility in KeywordAbilities.GetAbilities())
+            {
+                breadTextBuilderLong.Append(keywordAbility.ToString());
+                breadTextBuilderLong.Append(" (");
+                breadTextBuilderLong.Append(Constants.KeywordExplanation(keywordAbility));
+                breadTextBuilderLong.AppendLine(")");
+
+            }
+
+            if (flavourText != null)
+            {
+                breadTextBuilderLong.AppendLine();
+                breadTextBuilderLong.AppendLine(flavourText);
+            }
+
+            BreadTextLong = breadTextBuilderBase.ToString() + breadTextBuilderLong.ToString();
         }
 
         public Ability[] GetUsableAbilities(AbilityCastingContext context)
