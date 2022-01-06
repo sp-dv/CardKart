@@ -11,11 +11,7 @@ namespace CardKartClient
 
         static void Main(string[] args)
         {
-            if (Constants.IsDevVersion)
-            {
-                Logging.AddConsoleLogger();
-            }
-
+            Logging.AddConsoleLogger();
             Logging.Log(
                 LogLevel.Info,
                 $"Starting CardKart version {Constants.Version}");
