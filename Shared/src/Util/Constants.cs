@@ -11,16 +11,15 @@ namespace CardKartShared.Util
     {
         // Last release: 0.0.2
         public const string Version = "0.0.0";
-        public static bool IsDevVersion = true;
+        public static bool IsReleaseVersion = false;
 
         private static RSAParameters DebugPublicKey => 
             JsonConvert.DeserializeObject<RSAParameters>("{\"D\":null,\"DP\":null,\"DQ\":null,\"Exponent\":\"AQAB\",\"InverseQ\":null,\"Modulus\":\"xt0Ce6WPiB2C9hFlRANg7cV96tYb/6QwC3zQaleQZUuchwnhIlMFWgKVECfUfGTXu/UrPa0JeG6kyJQycXnYJYTc6PO08I5BxuFfRR1rNcWmM3pWidJhTuFPgv0G+1J+elsGfS4K641OI+ZNgw/V1Hq1bZOl3XXKWKaWLOFvsKE=\",\"P\":null,\"Q\":null}");
-
-
         private static RSAParameters ProductionKey => 
             JsonConvert.DeserializeObject<RSAParameters>("{\"D\":null,\"DP\":null,\"DQ\":null,\"Exponent\":\"AQAB\",\"InverseQ\":null,\"Modulus\":\"4XELOaR99v2T9GjQ4g8CFTWwvvBF5zBcl+LIpw7W3usK9sfI7xSxh689Te+ltRnRD0NNiV5hNCqdFRbc2ycwhSdSeCAw3C7QgjVGooVq0h9FKJgraXi+ksIdpiko3CBB9XFsHtNM2W5uxSpcCJpLpObprSDHtkVBdK0vknLgyDU=\",\"P\":null,\"Q\":null}");
         
-        public static Server CurrentServer => IsDevVersion ? DebugServer : ProductionServer;
+        public static Server CurrentServer => IsReleaseVersion ? ProductionServer : DebugServer;
+
         public static readonly Server ProductionServer
             = new Server("78.138.17.232", 4444, ProductionKey);
         public static readonly Server DebugServer
