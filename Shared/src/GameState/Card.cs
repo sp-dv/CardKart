@@ -136,7 +136,7 @@ namespace CardKartShared.GameState
                         Rarity = CardRarities.Legendary;
                         CastingCost = new ManaSet();
 
-                        Health = 2;
+                        Health = 20;
                     } break;
 
                 case CardTemplates.DepravedBloodhound:
@@ -900,12 +900,6 @@ namespace CardKartShared.GameState
                                 EnactResolveChoices = context => {
                                     context.GameState.SummonToken(CardTemplates.SquireToken1, context.CastingPlayer);
                                     context.GameState.SummonToken(CardTemplates.SquireToken1, context.CastingPlayer);
-                                    context.GameState.SummonToken(CardTemplates.SquireToken1, context.CastingPlayer);
-                                    context.GameState.SummonToken(CardTemplates.SquireToken1, context.CastingPlayer);
-                                    context.GameState.SummonToken(CardTemplates.SquireToken1, context.CastingPlayer);
-                                    context.GameState.SummonToken(CardTemplates.SquireToken1, context.CastingPlayer);
-                                    context.GameState.SummonToken(CardTemplates.SquireToken1, context.CastingPlayer);
-                                    context.GameState.SummonToken(CardTemplates.SquireToken1, context.CastingPlayer);
                                 }
                             }
                         };
@@ -1001,7 +995,7 @@ namespace CardKartShared.GameState
                         Type = CardTypes.Scroll;
                         Colour = ManaColour.Black;
                         Rarity = CardRarities.Common;
-                        CastingCost = new ManaSet(ManaColour.Black);
+                        CastingCost = new ManaSet(ManaColour.Black, ManaColour.Black, ManaColour.Colourless);
 
                         Abilities = new[] {
                             new Ability {
@@ -1146,7 +1140,7 @@ namespace CardKartShared.GameState
                         CreatureType = CreatureTypes.Hunter;
                         Colour = ManaColour.Green;
                         Rarity = CardRarities.Uncommon;
-                        CastingCost = new ManaSet(ManaColour.Green);
+                        CastingCost = new ManaSet(ManaColour.Green, ManaColour.Green, ManaColour.Colourless);
 
                         Attack = 2;
                         Health = 3;

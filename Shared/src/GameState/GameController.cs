@@ -291,7 +291,7 @@ namespace CardKartShared.GameState
                 defenders = new List<(Token, Token)>();
                 while (true)
                 {
-                    ChoiceHelper.Text = "Choose a defender.";
+                    ChoiceHelper.Text = "Choose a blocker.";
                     ChoiceHelper.ShowOk = true;
                     var defender = ChoiceHelper.ChooseToken(token => 
                     token.TokenOf.Controller == Hero &&
@@ -319,10 +319,11 @@ namespace CardKartShared.GameState
                         continue;
                     }
 
-                    ChoiceHelper.Text = "Choose a defender.";
+                    ChoiceHelper.Text = "Choose a creature to block.";
                     ChoiceHelper.ShowCancel = true;
-                    var blocked = ChoiceHelper.ChooseToken(
-                        token => token.TokenOf.Controller == Villain &&
+                    var blocked = ChoiceHelper.ChooseToken(token => 
+                        attackers.Contains(token) && 
+                        token.TokenOf.Controller == Villain &&
                         defender.CanBlockToken(token));
 
                     if (blocked == null) { continue; }
@@ -400,6 +401,8 @@ namespace CardKartShared.GameState
                         ChoiceHelper.ShowPass = true;
                         var card = ChoiceHelper.ChooseCard(card =>
                         {
+                            if (card == null) { return false; } // This happened somehow.
+
                             var abilities = card.GetUsableAbilities(context);
                             if (abilities.Length > 0) { return true; }
 
