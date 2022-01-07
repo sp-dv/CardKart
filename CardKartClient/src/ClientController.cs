@@ -36,22 +36,10 @@ namespace CardKartClient
             ActiveGame.StartGame();
         }
 
-        public void StartFakeGame()
-        {
-            ActiveGame = new GameController(
-                0,
-                1,
-                419, 
-                null);
-            CardKartClient.GUI.TransitionToScene(new GameScene(ActiveGame));
-            ActiveGame.LoadDeckDelegate = () => User.LoadDeck();
-            ActiveGame.StartGame();
-        }
-
         public void EndGame(int gameID, int winnerIndex, GameEndedReasons reason)
         {
-            var winner = winnerIndex == 1 ? ActiveGame.GameState.Player1 : ActiveGame.GameState.Player1;
-            ActiveGame.EndGame(winner, reason);
+            ActiveGame.EndGame(winnerIndex, reason);
+            ActiveGame = null;
             CardKartClient.GUI.TransitionToScene(new GameEndedScene(reason.ToString()));
         }
 

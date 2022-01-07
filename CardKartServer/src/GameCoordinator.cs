@@ -60,6 +60,17 @@ namespace CardKartServer
         {
             ActiveGames.Remove(gameID);
         }
+
+        public void SurrenderGame(Client client, int gameID)
+        {
+            var game = ActiveGames.GetValueOrDefault(gameID);
+            if (game == null) 
+            {
+                Logging.Log(LogLevel.Warning, $"{client.Username} just tried to surrender a game they are not playing. (id: {gameID})");
+                return; 
+            }
+            game.Surrender(client);
+        }
     }
 
     class GameInstance
@@ -95,14 +106,6 @@ namespace CardKartServer
 
             Player1.Connection.SendMessage(startGameMessageA.Encode());
             Player2.Connection.SendMessage(startGameMessageB.Encode());
-
-            
-            new Thread(() =>
-            {
-                Thread.Sleep(5000);
-                GameController.EndGame(GameController.GameState.Player1, GameEndedReasons.Surrender);
-            }).Start();
-            
         }
 
         public void Start()
@@ -148,6 +151,15 @@ namespace CardKartServer
 
             var to = OtherClient(from);
             to.Connection.SendMessage(message);
+        }
+
+        public void Surrender(Client surrenderer)
+        {
+            int winnerIndex = 0;
+            if (surrenderer == Player1) { winnerIndex = 2; }
+            if (surrenderer == Player2) { winnerIndex = 1; }
+
+            GameController.EndGame(winnerIndex, GameEndedReasons.Surrender);
         }
 
         private Client OtherClient(Client client)

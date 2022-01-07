@@ -89,6 +89,13 @@ namespace CardKartClient
             return WaitForGenericResponse();
         }
 
+        public void SurrenderGame(int gameID)
+        {
+            var message = new SurrenderGameMessage();
+            message.GameID = gameID;
+            Connection.SendMessage(message);
+        }
+
         #region Ugly game synch hack functions
         public ClientSideGameSynchronizer CreateGameChoiceSynchronizer(int gameID)
         {

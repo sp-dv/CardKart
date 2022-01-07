@@ -90,6 +90,13 @@ namespace CardKartServer
 
                     } break;
 
+                case MessageTypes.SurrenderGameMessage:
+                    {
+                        var surrenderMessage = new SurrenderGameMessage();
+                        surrenderMessage.Decode(rawMessage);
+
+                        CardKartServer.GameCoordinator.SurrenderGame(client, surrenderMessage.GameID);
+                    } break;
             }
         }
     }

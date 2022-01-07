@@ -75,17 +75,17 @@ namespace CardKartShared.GameState
             LoopThread.Start();
         }
 
-        public void EndGame(Player winner, GameEndedReasons reason)
+        public void EndGame(int winnerIndex, GameEndedReasons reason)
         {
             lock (GameEndLock)
             {
-                if (GameHasEnded) { Logging.Log(LogLevel.Debug, "XD"); return; }
+                if (GameHasEnded) { return; }
             
                 GameHasEnded = true;
                 LoopThread.Interrupt();
                 LoopThread = null;
                 
-                GameEnded?.Invoke(winner.Index, reason);
+                GameEnded?.Invoke(winnerIndex, reason);
             }
         }
 
@@ -547,11 +547,11 @@ namespace CardKartShared.GameState
         {
             if (GameState.Player1.CurrentHealth <= 0)
             {
-                EndGame(GameState.Player2, GameEndedReasons.Health);
+                EndGame(2, GameEndedReasons.Health);
             }
             if (GameState.Player2.CurrentHealth <= 0)
             {
-                EndGame(GameState.Player1, GameEndedReasons.Health);
+                EndGame(1, GameEndedReasons.Health);
             }
 
             foreach (var token in GameState.AllTokens)

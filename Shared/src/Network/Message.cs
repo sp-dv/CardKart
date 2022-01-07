@@ -45,6 +45,7 @@ namespace CardKartShared.Network
         StartGameMessage,
         GameChoiceMessage,
         GameEndedMessage,
+        SurrenderGameMessage,
 
         GenericResponse,
 

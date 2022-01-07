@@ -1,5 +1,6 @@
 ﻿using CardKartClient.GUI.Components;
 using CardKartShared.GameState;
+using CardKartShared.Util;
 using OpenTK.Input;
 using SGL;
 using System.Collections.Generic;
@@ -26,6 +27,8 @@ namespace CardKartClient.GUI.Scenes
         public PileDisplayPanel VillainGraveyardDisplay;
 
         public CardInfoPanel CardInfoPanel;
+
+        public SmartTextPanel SurrenderButton;
 
         private GLCoordinate StackFrom;
         private GLCoordinate[] StackTo;
@@ -132,8 +135,19 @@ namespace CardKartClient.GUI.Scenes
             CardInfoPanel = new CardInfoPanel();
             CardInfoPanel.X = -0.98f;
             CardInfoPanel.Y = -0.4f;
-
             Components.Add(CardInfoPanel);
+
+            SurrenderButton = new SmartTextPanel();
+            SurrenderButton.X = -0.95f;
+            SurrenderButton.Y = 0.7f;
+            SurrenderButton.Text = "Surrender";
+            SurrenderButton.BackgroundColor = Color.Silver;
+            SurrenderButton.Alignment = QuickFont.QFontAlignment.Centre;
+            SurrenderButton.Layout();
+            SurrenderButton.Clicked += () => CardKartClient.Server.SurrenderGame(gameController.GameID);
+            Components.Add(SurrenderButton);
+
+
 
             CombatAnimator = new CombatAnimator(
                 HeroBattlefieldPanel,
