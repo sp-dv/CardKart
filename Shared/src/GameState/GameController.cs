@@ -63,12 +63,10 @@ namespace CardKartShared.GameState
                 {
                     GameLoop();
                 }
-                catch (ThreadInterruptedException ex)
+                catch (ThreadInterruptedException)
                 {
-                    Logging.Log(LogLevel.Debug, "LoopThread caught exception");
+                    // Game was ended.
                 }
-                
-                Logging.Log(LogLevel.Debug, "LoopThread terminated");
             });
         }
 
@@ -81,14 +79,13 @@ namespace CardKartShared.GameState
         {
             lock (GameEndLock)
             {
-                if (GameHasEnded) { return; }
+                if (GameHasEnded) { Logging.Log(LogLevel.Debug, "XD"); return; }
             
                 GameHasEnded = true;
                 LoopThread.Interrupt();
                 LoopThread = null;
                 
                 GameEnded?.Invoke(winner.Index, reason);
-                Logging.Log(LogLevel.Debug, "ended game");
             }
         }
 
@@ -269,25 +266,8 @@ namespace CardKartShared.GameState
 
             List<(Token, Token)> defenders;
 
-            if (ActivePlayer == Hero)
-            {
-                ChoiceHelper.ShowText("Opponent is blocking.");
-                var choice = GameChoiceSynchronizer.ReceiveChoice();
-                ChoiceHelper.ResetGUIOptions();
-
-                var blockerIDs = choice.Arrays["_blockers"];
-                var blockedIDs = choice.Arrays["_blockeds"];
-                if (blockerIDs.Length != blockedIDs.Length) { throw new NotImplementedException(); }
-
-                defenders = new List<(Token, Token)>();
-                for (int i = 0; i < blockerIDs.Length; i++)
-                {
-                    var blocker = GameState.GetByID(blockerIDs[i]) as Token;
-                    var blocked = GameState.GetByID(blockedIDs[i]) as Token;
-                    defenders.Add((blocker, blocked));
-                }
-            }
-            else
+            
+            if (ActivePlayer == Villain)
             {
                 defenders = new List<(Token, Token)>();
                 while (true)
@@ -345,8 +325,26 @@ namespace CardKartShared.GameState
                 choice.Arrays["_blockeds"] = blockedIDs;
                 GameChoiceSynchronizer.SendChoice(choice);
             }
+            else
+            {
+                ChoiceHelper.ShowText("Opponent is blocking.");
+                var choice = GameChoiceSynchronizer.ReceiveChoice();
+                ChoiceHelper.ResetGUIOptions();
 
-            RedrawAttackerAnimations(attackers.ToArray(), defenders.ToArray());
+                var blockerIDs = choice.Arrays["_blockers"];
+                var blockedIDs = choice.Arrays["_blockeds"];
+                if (blockerIDs.Length != blockedIDs.Length) { throw new NotImplementedException(); }
+
+                defenders = new List<(Token, Token)>();
+                for (int i = 0; i < blockerIDs.Length; i++)
+                {
+                    var blocker = GameState.GetByID(blockerIDs[i]) as Token;
+                    var blocked = GameState.GetByID(blockedIDs[i]) as Token;
+                    defenders.Add((blocker, blocked));
+                }
+            }
+
+            RedrawAttackerAnimations?.Invoke(attackers.ToArray(), defenders.ToArray());
             EnforceGameRules(true);
 
             var unblockedAttackers = attackers.ToList();
@@ -383,7 +381,7 @@ namespace CardKartShared.GameState
 
             EnforceGameRules(true);
 
-            RedrawAttackerAnimations(null, null);
+            RedrawAttackerAnimations?.Invoke(null, null);
         }
 
         private AbilityCastingContext Priority(Player castingPlayer)
@@ -468,7 +466,6 @@ namespace CardKartShared.GameState
 
         private void showcontext(AbilityCastingContext context)
         {
-            return;
             foreach (var asd in context.Choices.Singletons)
             {
                 Logging.Log(LogLevel.Debug, $"{asd.Key} = {asd.Value}");
@@ -494,43 +491,27 @@ namespace CardKartShared.GameState
                 var card = context.Card;
                 var ability = context.Ability;
 
-                Logging.Log(LogLevel.Debug, "IN");
-                showcontext(context);
 
                 if (context.CastingPlayer == Hero)
                 {
                     ability.MakeResolveChoicesCastingPlayer(context);
                     GameChoiceSynchronizer.SendChoice(context.Choices);
-                    Logging.Log(LogLevel.Debug, "A");
-                showcontext(context);
                 }
                 else
                 {
                     context.Choices = GameChoiceSynchronizer.ReceiveChoice();
-                    Logging.Log(LogLevel.Debug, "RA");
-                    showcontext(context);
-
                 }
 
                 if (context.CastingPlayer == Villain)
                 {
                     ability.MakeResolveChoicesNonCastingPlayer(context);
                     GameChoiceSynchronizer.SendChoice(context.Choices);
-                    Logging.Log(LogLevel.Debug, "B");
-                showcontext(context);
                 }
                 else
                 {
                     context.Choices = GameChoiceSynchronizer.ReceiveChoice();
-                    Logging.Log(LogLevel.Debug, "RB");
-                    showcontext(context);
 
                 }
-
-                Logging.Log(LogLevel.Debug, "OUT");
-                showcontext(context);
-
-
 
                 ability.EnactResolveChoices(context);
 

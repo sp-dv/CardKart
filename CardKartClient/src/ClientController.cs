@@ -22,7 +22,7 @@ namespace CardKartClient
             if (ActiveGame != null)
             {
                 Logging.Log(
-                    LogLevel.Debug, 
+                    LogLevel.Warning, 
                     "Starting game with a game already active.");
             }
 
@@ -50,9 +50,9 @@ namespace CardKartClient
 
         public void EndGame(int gameID, int winnerIndex, GameEndedReasons reason)
         {
-            // Find some way to end the game from the outside please.
-            ActiveGame = null;
-            CardKartClient.GUI.TransitionToScene(new GameEndedScene());
+            var winner = winnerIndex == 1 ? ActiveGame.GameState.Player1 : ActiveGame.GameState.Player1;
+            ActiveGame.EndGame(winner, reason);
+            CardKartClient.GUI.TransitionToScene(new GameEndedScene(reason.ToString()));
         }
 
         public void HandleWindowClosed()

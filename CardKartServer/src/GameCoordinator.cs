@@ -96,13 +96,13 @@ namespace CardKartServer
             Player1.Connection.SendMessage(startGameMessageA.Encode());
             Player2.Connection.SendMessage(startGameMessageB.Encode());
 
-            /*
+            
             new Thread(() =>
             {
                 Thread.Sleep(5000);
-                GameController.EndGame();
+                GameController.EndGame(GameController.GameState.Player1, GameEndedReasons.Surrender);
             }).Start();
-            */
+            
         }
 
         public void Start()
@@ -125,7 +125,7 @@ namespace CardKartServer
 
         public void HandleGameChoiceMessage(GameChoiceMessage message, Client from)
         {
-            /*
+#if false
             var v = from == Player1 ? 1 : 2;
             Logging.Log(LogLevel.Debug, $"{v}");
             foreach (var asd in message.Choices.Singletons)
@@ -142,7 +142,8 @@ namespace CardKartServer
                 if (sb.Length >= 2) { sb.Length -= 2; } // Trim trailing ', '.
                 Logging.Log(LogLevel.Debug, $"{asd.Key} = [{sb}]");
             }
-            */
+#endif
+
             Saxophone.Play(message.Choices);
 
             var to = OtherClient(from);
@@ -151,8 +152,9 @@ namespace CardKartServer
 
         private Client OtherClient(Client client)
         {
-            if (client == Player1) return Player2;
-            if (client == Player2) return Player1;
+            if (client == Player1) { return Player2; }
+            if (client == Player2) { return Player1; }
+
             throw new ThisShouldNeverHappen();
         }
     }
