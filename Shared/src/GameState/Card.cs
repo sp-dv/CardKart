@@ -938,8 +938,8 @@ namespace CardKartShared.GameState
                                 },
 
                                 EnactResolveChoices = context => {
+                                    if (context.CastingPlayer.Deck.Count == 0) { return; }
                                     var topCard = context.CastingPlayer.Deck.Peek(1).ElementAtOrDefault(0);
-                                    if (topCard == null) { return; }
 
                                     context.ChoiceHelper.ShowCards(new []{topCard});
 
