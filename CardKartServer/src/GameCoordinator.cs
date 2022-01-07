@@ -70,7 +70,7 @@ namespace CardKartServer
 
         private GameController GameController;
 
-        private PublicSaxophone<GameChoice> Saxophone;
+        private PrivateSaxophone<GameChoice> Saxophone;
 
         public GameInstance(Client player1, Client player2, int gameID, int rngSeed)
         {
@@ -88,7 +88,7 @@ namespace CardKartServer
             startGameMessageB.PlayerIndex = 2;
             startGameMessageB.RNGSeed = rngSeed;
 
-            Saxophone = new PublicSaxophone<GameChoice>();
+            Saxophone = new PrivateSaxophone<GameChoice>();
             GameController = new GameController(gameID, 0, rngSeed, new ServerObserverGameSynchronizer(Saxophone));
 
             GameController.GameEnded += End;
@@ -159,9 +159,9 @@ namespace CardKartServer
 
     class ServerObserverGameSynchronizer : GameChoiceSynchronizer
     {
-        public PublicSaxophone<GameChoice> Saxophone;
+        public PrivateSaxophone<GameChoice> Saxophone;
 
-        public ServerObserverGameSynchronizer(PublicSaxophone<GameChoice> saxophone)
+        public ServerObserverGameSynchronizer(PrivateSaxophone<GameChoice> saxophone)
         {
             Saxophone = saxophone;
         }

@@ -11,10 +11,10 @@ namespace CardKartClient
     internal class ServerConnection
     {
         private Connection Connection;
-        private PublicSaxophone<RawMessage> RequestResponseSaxophone 
-            = new PublicSaxophone<RawMessage>();
-        private PublicSaxophone<GameChoiceMessage> GameChoiceMessageSaxophone
-            = new PublicSaxophone<GameChoiceMessage>();
+        private PrivateSaxophone<RawMessage> RequestResponseSaxophone 
+            = new PrivateSaxophone<RawMessage>();
+        private PrivateSaxophone<GameChoiceMessage> GameChoiceMessageSaxophone
+            = new PrivateSaxophone<GameChoiceMessage>();
 
         public bool Connect()
         {
@@ -166,11 +166,11 @@ namespace CardKartClient
     internal class ClientSideGameSynchronizer : GameChoiceSynchronizer
     {
         public int GameID;
-        public PublicSaxophone<GameChoiceMessage> Saxophone;
+        public PrivateSaxophone<GameChoiceMessage> Saxophone;
 
         public ClientSideGameSynchronizer(
             int gameID, 
-            PublicSaxophone<GameChoiceMessage> saxophone)
+            PrivateSaxophone<GameChoiceMessage> saxophone)
         {
             GameID = gameID;
             Saxophone = saxophone;

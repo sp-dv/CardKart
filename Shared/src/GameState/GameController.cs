@@ -733,8 +733,8 @@ namespace CardKartShared.GameState
 
     public  class ChoiceHelper
     {
-        public PublicSaxophone<PlayerChoiceStruct> PlayerChoiceSaxophone { get; }
-            = new PublicSaxophone<PlayerChoiceStruct>();
+        public PrivateSaxophone<PlayerChoiceStruct> PlayerChoiceSaxophone { get; }
+            = new PrivateSaxophone<PlayerChoiceStruct>();
 
 
         // Remember to reset these in ResetGUIOptions.
