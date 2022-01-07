@@ -474,25 +474,35 @@ namespace CardKartShared.GameState
                 var card = context.Card;
                 var ability = context.Ability;
 
+                Logging.Log(LogLevel.Debug, "IN");
+
                 if (context.CastingPlayer == Hero)
                 {
                     ability.MakeResolveChoicesCastingPlayer(context);
                     GameChoiceSynchronizer.SendChoice(context.Choices);
+                    Logging.Log(LogLevel.Debug, "A");
                 }
                 else
                 {
                     context.Choices = GameChoiceSynchronizer.ReceiveChoice();
+                    Logging.Log(LogLevel.Debug, "RA");
+
                 }
 
                 if (context.CastingPlayer == Villain)
                 {
                     ability.MakeResolveChoicesNonCastingPlayer(context);
                     GameChoiceSynchronizer.SendChoice(context.Choices);
+                    Logging.Log(LogLevel.Debug, "B");
                 }
                 else
                 {
                     context.Choices = GameChoiceSynchronizer.ReceiveChoice();
+                    Logging.Log(LogLevel.Debug, "RB");
+
                 }
+
+                Logging.Log(LogLevel.Debug, "OUT");
 
                 ability.EnactResolveChoices(context);
 

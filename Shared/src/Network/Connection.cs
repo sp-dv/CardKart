@@ -17,6 +17,8 @@ namespace CardKartShared.Network
         public delegate void OnCloseHander();
         public event OnCloseHander Closed;
 
+        private const bool LogMessages = false;
+
         public EncryptionSuite EncryptionSuite { get; set; }
 
 
@@ -46,6 +48,8 @@ namespace CardKartShared.Network
                     if (bodyReadCount != bodyBuffer.Length) { throw new Exception(); }
                     if (EncryptionSuite != null) { bodyBuffer = EncryptionSuite.Decrypt(bodyBuffer);}
                     var bodyString = RawEncoding.GetString(bodyBuffer);
+
+                    if (LogMessages) { Logging.Log(LogLevel.Debug, $"Received message of type <{(MessageTypes)messageType}>."); }
 
                     return new RawMessage((MessageTypes)messageType, bodyBuffer);
                 }
@@ -83,6 +87,8 @@ namespace CardKartShared.Network
                     Stream.Write(bodyLengthBytes, 0, bodyLengthBytes.Length);
                     Stream.Write(messageTypeBytes, 0, messageTypeBytes.Length);
                     Stream.Write(messageBodyBytes, 0, messageBodyBytes.Length);
+
+                    if (LogMessages) { Logging.Log(LogLevel.Debug, $"Sent message of type <{message.MessageType}>."); }
                 }
                 catch (Exception)
                 {
