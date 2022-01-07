@@ -60,7 +60,7 @@ namespace CardKartClient
 
             new Thread(() =>
             {
-                while (true)
+                while (!Connection.IsClosed)
                 {
                     HandleIncomingMessage(Connection.ReceiveMessage());
                 }

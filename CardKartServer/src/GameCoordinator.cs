@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using CardKartShared.GameState;
 using CardKartShared.Util;
 using System.Threading;
+using System.Text;
 
 namespace CardKartServer
 {
@@ -124,6 +125,24 @@ namespace CardKartServer
 
         public void HandleGameChoiceMessage(GameChoiceMessage message, Client from)
         {
+            /*
+            var v = from == Player1 ? 1 : 2;
+            Logging.Log(LogLevel.Debug, $"{v}");
+            foreach (var asd in message.Choices.Singletons)
+            {
+                Logging.Log(LogLevel.Debug, $"{asd.Key} = {asd.Value}");
+            }
+            foreach (var asd in message.Choices.Arrays)
+            {
+                var sb = new StringBuilder();
+                foreach (var i in asd.Value)
+                {
+                    sb.Append(i.ToString() + ", ");
+                }
+                if (sb.Length >= 2) { sb.Length -= 2; } // Trim trailing ', '.
+                Logging.Log(LogLevel.Debug, $"{asd.Key} = [{sb}]");
+            }
+            */
             Saxophone.Play(message.Choices);
 
             var to = OtherClient(from);

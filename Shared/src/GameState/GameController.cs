@@ -3,6 +3,7 @@ using CardKartShared.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 
 namespace CardKartShared.GameState
@@ -465,6 +466,25 @@ namespace CardKartShared.GameState
             }
         }
 
+        private void showcontext(AbilityCastingContext context)
+        {
+            return;
+            foreach (var asd in context.Choices.Singletons)
+            {
+                Logging.Log(LogLevel.Debug, $"{asd.Key} = {asd.Value}");
+            }
+            foreach (var asd in context.Choices.Arrays)
+            {
+                var sb = new StringBuilder();
+                foreach (var i in asd.Value)
+                {
+                    sb.Append(i.ToString() + ", ");
+                }
+                if (sb.Length >= 2) { sb.Length -= 2; } // Trim trailing ', '.
+                Logging.Log(LogLevel.Debug, $"{asd.Key} = [{sb}]");
+            }
+        }
+
         private void ResolveStack()
         {
             while (GameState.CastingStack.Count > 0)
@@ -475,17 +495,20 @@ namespace CardKartShared.GameState
                 var ability = context.Ability;
 
                 Logging.Log(LogLevel.Debug, "IN");
+                showcontext(context);
 
                 if (context.CastingPlayer == Hero)
                 {
                     ability.MakeResolveChoicesCastingPlayer(context);
                     GameChoiceSynchronizer.SendChoice(context.Choices);
                     Logging.Log(LogLevel.Debug, "A");
+                showcontext(context);
                 }
                 else
                 {
                     context.Choices = GameChoiceSynchronizer.ReceiveChoice();
                     Logging.Log(LogLevel.Debug, "RA");
+                    showcontext(context);
 
                 }
 
@@ -494,15 +517,20 @@ namespace CardKartShared.GameState
                     ability.MakeResolveChoicesNonCastingPlayer(context);
                     GameChoiceSynchronizer.SendChoice(context.Choices);
                     Logging.Log(LogLevel.Debug, "B");
+                showcontext(context);
                 }
                 else
                 {
                     context.Choices = GameChoiceSynchronizer.ReceiveChoice();
                     Logging.Log(LogLevel.Debug, "RB");
+                    showcontext(context);
 
                 }
 
                 Logging.Log(LogLevel.Debug, "OUT");
+                showcontext(context);
+
+
 
                 ability.EnactResolveChoices(context);
 
