@@ -11,7 +11,7 @@ namespace CardKartServer
 
             Constants.DebugServer.Host((connection, client) =>
             {
-                Logging.Log(LogLevel.Debug, $"{client.Client.RemoteEndPoint} connected.");
+                Logging.Log(LogLevel.Info, $"{client.Client.RemoteEndPoint} connected.");
                 CardKartServer.ClientHandler.AddConnection(connection);
             });
         }

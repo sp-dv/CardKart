@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using CardKartShared.Util;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,7 +23,9 @@ namespace CardKartServer
         {
             try
             {
-                return JsonConvert.DeserializeObject<ServerConfiguration>(File.ReadAllText(ConfigFilePath));
+                var rt = JsonConvert.DeserializeObject<ServerConfiguration>(File.ReadAllText(ConfigFilePath));
+                Logging.Log(LogLevel.Info, "Configuration loaded.");
+                return rt;
             }
             catch
             {

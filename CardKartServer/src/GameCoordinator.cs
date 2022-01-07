@@ -1,21 +1,26 @@
-﻿using CardKartShared.GameState;
-using CardKartShared.Network;
+﻿using CardKartShared.Network;
 using CardKartShared.Network.Messages;
-using CardKartShared.Util;
+using CardKartShared;
 using System;
+using System.Collections.Generic;
+using CardKartShared.GameState;
+using CardKartShared.Util;
+using System.Threading;
 
 namespace CardKartServer
 {
     internal class GameCoordinator
     {
         private Client Queued;
-        private RunningGame ActiveGame;
+
+        private Dictionary<int, GameInstance> ActiveGames = new Dictionary<int, GameInstance>();
+
+        private int GameIDCounter;
+        private Random RNGSeedGenerator = new Random();
 
         public void JoinQueue(Client queuer)
         {
-            Logging.Log(LogLevel.Debug, "Queued");
-
-            if (Queued == null)
+            if (Queued == null || !Queued.IsLoggedIn)
             {
                 Queued = queuer;
             }
@@ -28,47 +33,128 @@ namespace CardKartServer
 
         public void HandleMessage(Client client, RawMessage choices)
         {
-            var game = ActiveGame;
+            var message = new GameChoiceMessage();
+            message.Decode(choices);
 
-            if (client == game.Player1)
+            var gameID = message.GameID;
+
+            if (!ActiveGames.ContainsKey(gameID))
             {
-                game.Player2.Connection.SendMessage(choices);
+                throw new ThisShouldNeverHappen();
             }
-            else if (client == game.Player2)
-            {
-                game.Player1.Connection.SendMessage(choices);
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
+
+            ActiveGames[gameID].HandleGameChoiceMessage(message, client);
         }
 
         private void StartGame(Client clientA, Client clientB)
         {
-            ActiveGame = new RunningGame();
-            var gameID = 70;
+            var gameID = GameIDCounter++;
+            var rngSeed = RNGSeedGenerator.Next();
+            var newGame = new GameInstance(clientA, clientB, gameID, rngSeed);
+            ActiveGames[gameID] = newGame;
+            newGame.Start();
+        }
 
-            var startGameMessageA = new StartGameMessage();
-            startGameMessageA.GameID = gameID;
-            startGameMessageA.PlayerIndex = 1;
-            ActiveGame.Player1 = clientA;
-            clientA.Connection.SendMessage(startGameMessageA.Encode());
-
-            var startGameMessageB = new StartGameMessage();
-            startGameMessageB.GameID = gameID;
-            startGameMessageB.PlayerIndex = 2;
-            ActiveGame.Player2 = clientB;
-            clientB.Connection.SendMessage(startGameMessageB.Encode());
+        public void EndGame(int gameID)
+        {
+            ActiveGames.Remove(gameID);
         }
     }
 
-    class RunningGame
+    class GameInstance
     {
         public int GameID;
         public Client Player1;
         public Client Player2;
+
+        private GameController GameController;
+
+        private PublicSaxophone<GameChoice> Saxophone;
+
+        public GameInstance(Client player1, Client player2, int gameID, int rngSeed)
+        {
+            GameID = gameID;
+            Player1 = player1;
+            Player2 = player2;
+
+            var startGameMessageA = new StartGameMessage();
+            startGameMessageA.GameID = gameID;
+            startGameMessageA.PlayerIndex = 1;
+            startGameMessageA.RNGSeed = rngSeed;
+
+            var startGameMessageB = new StartGameMessage();
+            startGameMessageB.GameID = gameID;
+            startGameMessageB.PlayerIndex = 2;
+            startGameMessageB.RNGSeed = rngSeed;
+
+            Saxophone = new PublicSaxophone<GameChoice>();
+            GameController = new GameController(gameID, 0, rngSeed, new ServerObserverGameSynchronizer(Saxophone));
+
+            GameController.GameEnded += End;
+
+            Player1.Connection.SendMessage(startGameMessageA.Encode());
+            Player2.Connection.SendMessage(startGameMessageB.Encode());
+
+            /*
+            new Thread(() =>
+            {
+                Thread.Sleep(5000);
+                GameController.EndGame();
+            }).Start();
+            */
+        }
+
+        public void Start()
+        {
+            GameController.StartGame();
+        }
+
+        private void End(int winnerIndex, GameEndedReasons reason)
+        {
+            var message = new GameEndedMessage();
+            message.GameID = GameID;
+            message.Reason = reason;
+            message.WinnerIndex = winnerIndex;
+
+            Player1.Connection.SendMessage(message);
+            Player2.Connection.SendMessage(message);
+
+            CardKartServer.GameCoordinator.EndGame(GameID);
+        }
+
+        public void HandleGameChoiceMessage(GameChoiceMessage message, Client from)
+        {
+            Saxophone.Play(message.Choices);
+
+            var to = OtherClient(from);
+            to.Connection.SendMessage(message);
+        }
+
+        private Client OtherClient(Client client)
+        {
+            if (client == Player1) return Player2;
+            if (client == Player2) return Player1;
+            throw new ThisShouldNeverHappen();
+        }
     }
 
+    class ServerObserverGameSynchronizer : GameChoiceSynchronizer
+    {
+        public PublicSaxophone<GameChoice> Saxophone;
 
+        public ServerObserverGameSynchronizer(PublicSaxophone<GameChoice> saxophone)
+        {
+            Saxophone = saxophone;
+        }
+
+        public GameChoice ReceiveChoice()
+        {
+            return Saxophone.Listen();
+        }
+
+        public void SendChoice(GameChoice choice)
+        {
+            throw new ThisShouldNeverHappen("Server should never send choices.");
+        }
+    }
 }

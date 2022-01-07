@@ -17,7 +17,7 @@ namespace CardKartClient
             CardKartClient.GUI.TransitionToScene(new LoginScene());
         }
 
-        public void StartGame(int gameID, int heroIndex)
+        public void StartGame(int gameID, int heroIndex, int rngSeed)
         {
             if (ActiveGame != null)
             {
@@ -28,11 +28,12 @@ namespace CardKartClient
 
             ActiveGame = new GameController(
                 gameID, 
-                heroIndex, 
+                heroIndex,
+                rngSeed,
                 CardKartClient.Server.CreateGameChoiceSynchronizer(gameID));
             ActiveGame.LoadDeckDelegate = () => User.LoadDeck();
             CardKartClient.GUI.TransitionToScene(new GameScene(ActiveGame));
-            ActiveGame.Start();
+            ActiveGame.StartGame();
         }
 
         public void StartFakeGame()
@@ -40,10 +41,18 @@ namespace CardKartClient
             ActiveGame = new GameController(
                 0,
                 1,
+                419, 
                 null);
             CardKartClient.GUI.TransitionToScene(new GameScene(ActiveGame));
             ActiveGame.LoadDeckDelegate = () => User.LoadDeck();
-            ActiveGame.Start();
+            ActiveGame.StartGame();
+        }
+
+        public void EndGame(int gameID, int winnerIndex, GameEndedReasons reason)
+        {
+            // Find some way to end the game from the outside please.
+            ActiveGame = null;
+            CardKartClient.GUI.TransitionToScene(new GameEndedScene());
         }
 
         public void HandleWindowClosed()

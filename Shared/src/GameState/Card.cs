@@ -136,7 +136,7 @@ namespace CardKartShared.GameState
                         Rarity = CardRarities.Legendary;
                         CastingCost = new ManaSet();
 
-                        Health = 27;
+                        Health = 2;
                     } break;
 
                 case CardTemplates.DepravedBloodhound:

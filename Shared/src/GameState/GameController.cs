@@ -27,15 +27,23 @@ namespace CardKartShared.GameState
         public delegate void RedrawAttackerAnimationsHandler(Token[] attackers, (Token, Token)[] defenders);
         public event RedrawAttackerAnimationsHandler RedrawAttackerAnimations;
 
+        public delegate void GameEndedHandler(int winnerIndex, GameEndedReasons reason);
+        public event GameEndedHandler GameEnded;
+
+        private Thread LoopThread;
+        private bool GameHasEnded;
+        private object GameEndLock = new object();
+
         public GameController(
             int gameID,
             int heroIndex,
+            int rngSeed,
             GameChoiceSynchronizer gameChoiceSynchronizer)
         {
             GameChoiceSynchronizer = gameChoiceSynchronizer;
 
             GameID = gameID;
-            GameState = new GameState();
+            GameState = new GameState(rngSeed);
 
             if (heroIndex == 1)
             {
@@ -48,21 +56,44 @@ namespace CardKartShared.GameState
                 Villain = GameState.Player1;
             }
 
+            LoopThread = new Thread(() =>
+            {
+                try
+                {
+                    GameLoop();
+                }
+                catch (ThreadInterruptedException ex)
+                {
+                    Logging.Log(LogLevel.Debug, "LoopThread caught exception");
+                }
+                
+                Logging.Log(LogLevel.Debug, "LoopThread terminated");
+            });
         }
 
-        public void Start()
+        public void StartGame()
         {
-            new Thread(() =>
+            LoopThread.Start();
+        }
+
+        public void EndGame(Player winner, GameEndedReasons reason)
+        {
+            lock (GameEndLock)
             {
-                GameSetup();
-                GameLoop();
-            }).Start();
+                if (GameHasEnded) { return; }
+            
+                GameHasEnded = true;
+                LoopThread.Interrupt();
+                LoopThread = null;
+                
+                GameEnded?.Invoke(winner.Index, reason);
+                Logging.Log(LogLevel.Debug, "ended game");
+            }
         }
 
         private void GameSetup()
         {
             ChoiceHelper.ResetGUIOptions();
-
 
             Deck player1Deck;
             Deck player2Deck;
@@ -73,21 +104,26 @@ namespace CardKartShared.GameState
                 var choices = new GameChoice();
                 choices.Arrays["deck"] = player1Deck.CardTemplates.Select(template => (int)template).ToArray();
                 GameChoiceSynchronizer.SendChoice(choices);
-
-                var player2Choices = GameChoiceSynchronizer.ReceiveChoice();
-                var player2Templates = player2Choices.Arrays["deck"].Select(i => (CardTemplates)i).ToArray();
-                player2Deck = new Deck(player2Templates);
             }
             else
             {
                 var player1Choices = GameChoiceSynchronizer.ReceiveChoice();
                 var player1Templates = player1Choices.Arrays["deck"].Select(i => (CardTemplates)i).ToArray();
                 player1Deck = new Deck(player1Templates);
+            }
 
+            if (Hero == GameState.Player2)
+            {
                 player2Deck = LoadDeckDelegate();
                 var choices = new GameChoice();
                 choices.Arrays["deck"] = player2Deck.CardTemplates.Select(template => (int)template).ToArray();
                 GameChoiceSynchronizer.SendChoice(choices);
+            }
+            else
+            {
+                var player2Choices = GameChoiceSynchronizer.ReceiveChoice();
+                var player2Templates = player2Choices.Arrays["deck"].Select(i => (CardTemplates)i).ToArray();
+                player2Deck = new Deck(player2Templates);
             }
 
             GameState.LoadDecks(player1Deck, player2Deck);
@@ -103,6 +139,8 @@ namespace CardKartShared.GameState
 
         private void GameLoop()
         {
+            GameSetup();
+
             while (true)
             {
                 GameState.SetTime(GameTime.StartOfTurn);
@@ -205,7 +243,7 @@ namespace CardKartShared.GameState
                         attackers.Add(choice);
                     }
 
-                    RedrawAttackerAnimations(attackers.ToArray(), null);
+                    RedrawAttackerAnimations?.Invoke(attackers.ToArray(), null);
                 }
                 var attackerIDs = attackers.Select(token => token.ID).ToArray();
                 var attackersChoice = new GameChoice();
@@ -222,10 +260,8 @@ namespace CardKartShared.GameState
                 attackers =
                     attackerIDs.Select(id => GameState.GetByID(id) as Token).ToList();
             }
-
-
             
-            RedrawAttackerAnimations(attackers.ToArray(), null);
+            RedrawAttackerAnimations?.Invoke(attackers.ToArray(), null);
             EnforceGameRules(true);
 
             if (attackers.Count == 0) { return; }
@@ -343,8 +379,6 @@ namespace CardKartShared.GameState
                 }
             }
 
-            Thread.Sleep(1000);
-
             EnforceGameRules(true);
 
             RedrawAttackerAnimations(null, null);
@@ -432,8 +466,6 @@ namespace CardKartShared.GameState
         {
             while (GameState.CastingStack.Count > 0)
             {
-                Thread.Sleep(1000);
-
                 var context = GameState.CastingStack.Pop();
 
                 var card = context.Card;
@@ -443,15 +475,20 @@ namespace CardKartShared.GameState
                 {
                     ability.MakeResolveChoicesCastingPlayer(context);
                     GameChoiceSynchronizer.SendChoice(context.Choices);
-
-                    context.Choices = GameChoiceSynchronizer.ReceiveChoice();
                 }
                 else
                 {
                     context.Choices = GameChoiceSynchronizer.ReceiveChoice();
+                }
 
+                if (context.CastingPlayer == Villain)
+                {
                     ability.MakeResolveChoicesNonCastingPlayer(context);
                     GameChoiceSynchronizer.SendChoice(context.Choices);
+                }
+                else
+                {
+                    context.Choices = GameChoiceSynchronizer.ReceiveChoice();
                 }
 
                 ability.EnactResolveChoices(context);
@@ -486,6 +523,15 @@ namespace CardKartShared.GameState
 
         private void EnforceGameRules(bool resolveStack)
         {
+            if (GameState.Player1.CurrentHealth <= 0)
+            {
+                EndGame(GameState.Player2, GameEndedReasons.Health);
+            }
+            if (GameState.Player2.CurrentHealth <= 0)
+            {
+                EndGame(GameState.Player1, GameEndedReasons.Health);
+            }
+
             foreach (var token in GameState.AllTokens)
             {
                 token.AuraModifiers.Reset();
@@ -644,7 +690,7 @@ namespace CardKartShared.GameState
 
     
 
-    public class ChoiceHelper
+    public  class ChoiceHelper
     {
         public PublicSaxophone<PlayerChoiceStruct> PlayerChoiceSaxophone { get; }
             = new PublicSaxophone<PlayerChoiceStruct>();
@@ -825,7 +871,7 @@ namespace CardKartShared.GameState
         public void ShowText(string text)
         {
             Text = text;
-            RequestGUIUpdate();
+            RequestGUIUpdate?.Invoke();
         }
 
         public void ShowCards(IEnumerable<Card> cards)
@@ -852,5 +898,12 @@ namespace CardKartShared.GameState
     {
         StartOfTurn,
         EndOfTurn,
+    }
+
+    public enum GameEndedReasons
+    {
+        Health,
+        Deck,
+        Surrender,
     }
 }

@@ -35,6 +35,8 @@ namespace CardKartServer
             {
                 LoggedInClients.Remove(client.UserID);
             }
+
+            client.LogOut();
         }
 
         public void HandleMessage(Client client, RawMessage rawMessage)
@@ -171,6 +173,12 @@ namespace CardKartServer
         {
             Username = entry.Username;
             UserID = entry.UserID;
+        }
+
+        public void LogOut()
+        {
+            Username = null;
+            UserID = null;
         }
 
         public void StartListening()

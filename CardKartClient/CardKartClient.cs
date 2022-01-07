@@ -1,5 +1,7 @@
 ﻿using CardKartClient.GUI;
 using CardKartShared.Util;
+using System.Threading;
+using System;
 
 namespace CardKartClient
 {

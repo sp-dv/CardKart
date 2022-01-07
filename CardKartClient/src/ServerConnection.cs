@@ -127,7 +127,8 @@ namespace CardKartClient
                         startGameMessage.Decode(rawMessage);
                         CardKartClient.Controller.StartGame(
                             startGameMessage.GameID, 
-                            startGameMessage.PlayerIndex);
+                            startGameMessage.PlayerIndex,
+                            startGameMessage.RNGSeed);
                     }break;
 
                 case MessageTypes.GenericResponse:
@@ -140,6 +141,16 @@ namespace CardKartClient
                         var gameChoiceMessage = new GameChoiceMessage();
                         gameChoiceMessage.Decode(rawMessage);
                         GameChoiceMessageSaxophone.Play(gameChoiceMessage);
+                    } break;
+
+                case MessageTypes.GameEndedMessage:
+                    {
+                        var gameEndedMessage = new GameEndedMessage();
+                        gameEndedMessage.Decode(rawMessage);
+                        CardKartClient.Controller.EndGame(
+                            gameEndedMessage.GameID, 
+                            gameEndedMessage.WinnerIndex, 
+                            gameEndedMessage.Reason);
                     } break;
 
                 default:
@@ -162,7 +173,7 @@ namespace CardKartClient
             PublicSaxophone<GameChoiceMessage> saxophone)
         {
             GameID = gameID;
-            this.Saxophone = saxophone;
+            Saxophone = saxophone;
         }
 
         public GameChoice ReceiveChoice()

@@ -8,6 +8,8 @@ namespace CardKartShared.GameState
 {
     public class Player : GameObject
     {
+        public int Index { get; set; }
+
         public Pile Hand { get; } = new Pile(PileLocation.Hand);
         public Pile Deck { get; } = new Pile(PileLocation.Deck);
         public Pile Battlefield { get; } = new Pile(PileLocation.Battlefield);

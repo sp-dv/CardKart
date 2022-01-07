@@ -20,15 +20,10 @@ namespace CardKartShared.GameState
 
         public CastingStack CastingStack { get; } = new CastingStack();
 
-        private Random RNG = new Random(420);
+        private Random RNG;
 
         public int End { get; private set; }
 
-        // End 0 - Turn 1
-        // End 1 - Turn 1
-        // End 2 - Turn 2
-        // End 3 - Turn 2
-        // End 4 - Turn 3
         public int Turn => (End / 2) + 1;
 
         public IEnumerable<Token> AllTokens =>
@@ -42,15 +37,21 @@ namespace CardKartShared.GameState
         public List<(Trigger, TriggeredAbility)> PendingTriggersPlayer2 { get; } =
             new List<(Trigger, TriggeredAbility)>();
 
-        public GameState()
+
+
+        public GameState(int rngSeed)
         {
+            RNG = new Random(rngSeed);
+
             // An ID of 0 is invalid so just make lookups return null.
             GameObjects.Add(null);
 
             Player1 = new Player();
+            Player1.Index = 1;
             AddGameObject(Player1);
 
             Player2 = new Player();
+            Player2.Index = 2;
             AddGameObject(Player2);
 
             Player1.Opponent = Player2;

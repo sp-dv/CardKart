@@ -6,6 +6,7 @@ namespace CardKartShared.Network.Messages
     {
         public int GameID;
         public int PlayerIndex;
+        public int RNGSeed;
 
         public void Decode(RawMessage message)
         {
@@ -13,6 +14,7 @@ namespace CardKartShared.Network.Messages
 
             GameID = decoder.DecodeInt();
             PlayerIndex = decoder.DecodeInt();
+            RNGSeed = decoder.DecodeInt();
         }
 
         public RawMessage Encode()
@@ -21,6 +23,7 @@ namespace CardKartShared.Network.Messages
 
             encoder.EncodeInt(GameID);
             encoder.EncodeInt(PlayerIndex);
+            encoder.EncodeInt(RNGSeed);
 
             return new RawMessage(MessageTypes.StartGameMessage, encoder.Bytes);
         }
