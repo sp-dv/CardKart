@@ -30,9 +30,11 @@ namespace CardKartShared.GameState
 
         public bool IsHero => TokenOf.IsHero;
         public bool IsCreature => TokenOf.Type == CardTypes.Creature;
+        public bool IsRelic => TokenOf.Type == CardTypes.Relic;
         public bool CanAttack => !Exhausted;
         public bool CanBlock => !Exhausted;
         public bool IsValid => TokenOf != null;
+        public bool IsDead => IsCreature && CurrentHealth <= 0;
 
         public TriggeredAbility[] TriggeredAbilities;
         private KeywordAbilityContainer KeywordAbilities;

@@ -139,6 +139,12 @@
   <data name="calltoarms1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\calltoarms1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="conflagrate1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\conflagrate1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="controlboar1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\controlboar1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="counterspell1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\counterspell1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -147,6 +153,9 @@
   </data>
   <data name="deckeditorbg1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\deckeditorbg1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="deepseamermaid1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\deepseamermaid1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="eliminate1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\eliminate.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -163,6 +172,9 @@
   <data name="frame1_spell" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\frame1_spell.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="ghosttoken1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ghosttoken1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="goblin1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\goblin1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -171,6 +183,9 @@
   </data>
   <data name="graveyard1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\graveyard1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="hauntedchapel1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\hauntedchapel1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="hawktoken1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\hawktoken.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -208,11 +223,23 @@
   <data name="noportrait" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\noportrait.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="overcharge1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\overcharge1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="rapture1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\rapture1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="regeneratingzombie1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\regeneratingzombie1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="savinggrace1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\savinggrace1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="scribemagi1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\scribemagi1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="seblastian1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\seblastian1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="silvervenomspider1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\silvervenomspider1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -228,6 +255,9 @@
   </data>
   <data name="token1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\token1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="tokenrelic1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\tokenrelic1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="unmake1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\unmake1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>

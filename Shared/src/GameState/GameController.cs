@@ -572,7 +572,7 @@ namespace CardKartShared.GameState
             foreach (var card in
                 GameState.Player1.Battlefield.Concat(GameState.Player2.Battlefield))
             {
-                if (card.Token.CurrentHealth <= 0)
+                if (card.Token != null && card.Token.IsDead)
                 {
                     deadCards.Add(card);
                 }

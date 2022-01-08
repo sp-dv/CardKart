@@ -66,6 +66,7 @@ namespace CardKartShared.Util
                 case KeywordAbilityNames.Vigilance: { return "Creatures with Vigilance don't exhaust when attacking"; }
                 case KeywordAbilityNames.Flying: { return "Creatures with Flying can only be blocked by creatures with Flying or Range"; }
                 case KeywordAbilityNames.Range: { return "Creatures with Range can block creatures with Flying"; }
+                case KeywordAbilityNames.Reinforcement: { return "Creatures with Reinforcement can be cast whenever you can cast a scroll."; }
                 default: return "";
             }
         }

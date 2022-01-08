@@ -48,6 +48,16 @@ namespace CardKartClient.GUI
         public static Texture ButtonNext1;
         public static Texture ButtonPrev1;
         public static Texture DeckEditorBG1;
+        public static Texture SavingGrace1;
+        public static Texture DeepSeaMermaid1;
+        public static Texture Conflagrate1;
+        public static Texture Rapture1;
+        public static Texture Overcharge1;
+        public static Texture ControlBoar1;
+        public static Texture Seblastian1;
+        public static Texture TokenRelic1;
+        public static Texture HauntedChapel1;
+        public static Texture GhostToken1;
 
 
         public static void LoadTextures()
@@ -94,6 +104,17 @@ namespace CardKartClient.GUI
             ButtonNext1 = TextureLoader.CreateTexture(Properties.Resources.buttonnext1);
             ButtonPrev1 = TextureLoader.CreateTexture(Properties.Resources.buttonprev1);
             DeckEditorBG1 = TextureLoader.CreateTexture(Properties.Resources.deckeditorbg1);
+            SavingGrace1 = TextureLoader.CreateTexture(Properties.Resources.savinggrace1);
+            DeepSeaMermaid1 = TextureLoader.CreateTexture(Properties.Resources.deepseamermaid1);
+            Conflagrate1 = TextureLoader.CreateTexture(Properties.Resources.conflagrate1);
+            Rapture1 = TextureLoader.CreateTexture(Properties.Resources.rapture1);
+            Overcharge1 = TextureLoader.CreateTexture(Properties.Resources.overcharge1);
+            ControlBoar1 = TextureLoader.CreateTexture(Properties.Resources.controlboar1);
+            Seblastian1 = TextureLoader.CreateTexture(Properties.Resources.seblastian1);
+            TokenRelic1 = TextureLoader.CreateTexture(Properties.Resources.tokenrelic1);
+            HauntedChapel1 = TextureLoader.CreateTexture(Properties.Resources.hauntedchapel1);
+            GhostToken1 = TextureLoader.CreateTexture(Properties.Resources.ghosttoken1);
+
         }
 
         public static Texture Portraits(CardTemplates template)
@@ -130,6 +151,15 @@ namespace CardKartClient.GUI
                 case CardTemplates.BattlehardenedMage: { return BattlehardenedMage1; }
                 case CardTemplates.ArcticWatchman: { return ArcticWatchman1; }
                 case CardTemplates.HawkToken1: { return HawkToken1; }
+                case CardTemplates.SavingGrace: { return SavingGrace1; }
+                case CardTemplates.DeepSeaMermaid: { return DeepSeaMermaid1; }
+                case CardTemplates.Conflagrate: { return Conflagrate1; }
+                case CardTemplates.Rapture: { return Rapture1; }
+                case CardTemplates.Overcharge: { return Overcharge1; }
+                case CardTemplates.ControlBoar: { return ControlBoar1; }
+                case CardTemplates.Seblastian: { return Seblastian1; }
+                case CardTemplates.HauntedChapel: { return HauntedChapel1; }
+                case CardTemplates.GhostToken1: { return GhostToken1; }
                 default: { return NoPortait; }
             }
         }

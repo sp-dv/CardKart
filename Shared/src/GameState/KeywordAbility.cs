@@ -54,5 +54,6 @@ namespace CardKartShared.GameState
         Vigilance, 
         Flying,
         Range,
+        Reinforcement,
     }
 }

@@ -216,7 +216,7 @@ namespace CardKartShared.GameState
                 to.Add(card);
             }
 
-            Trigger(new MoveTrigger(card, card.Pile, to));
+            Trigger(new MoveTrigger(card, from, to));
         }
 
         public void DealDamage(Card source, Token target, int amount)

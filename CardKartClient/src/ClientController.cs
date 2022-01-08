@@ -1,4 +1,5 @@
 ﻿using CardKartClient.GUI.Scenes;
+using CardKartShared;
 using CardKartShared.GameState;
 using CardKartShared.Network.Messages;
 using CardKartShared.Util;
@@ -38,8 +39,11 @@ namespace CardKartClient
 
         public void EndGame(int gameID, int winnerIndex, GameEndedReasons reason)
         {
+            if (ActiveGame.GameID != gameID) { throw new ThisShouldNeverHappen(); }
+
             ActiveGame.EndGame(winnerIndex, reason);
             ActiveGame = null;
+
             CardKartClient.GUI.TransitionToScene(new GameEndedScene(reason.ToString()));
         }
 

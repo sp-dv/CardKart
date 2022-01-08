@@ -15,6 +15,7 @@ namespace CardKartShared.GameState
         public Pile Battlefield { get; } = new Pile(PileLocation.Battlefield);
         public Pile Graveyard { get; } = new Pile(PileLocation.Graveyard);
         public Pile Stack { get; } = new Pile(PileLocation.Stack);
+        public Pile Banished { get; } = new Pile(PileLocation.Banished);
 
         public ManaSet CurrentMana { get; } = new ManaSet();
         public ManaSet MaxMana { get; } = new ManaSet();
@@ -22,6 +23,7 @@ namespace CardKartShared.GameState
         public int CurrentHealth => HeroCard.Token.CurrentHealth;
 
         public Card HeroCard { get; set; }
+        public Token HeroToken => HeroCard.Token;
 
         public Player Opponent { get; set; }
 

@@ -81,11 +81,31 @@ namespace CardKartShared.GameState
                             ManaColour.Black, 
                             ManaColour.Black);
 
-                        Attack = 1;
-                        Health = 4;
+                        Attack = 2;
+                        Health = 3;
 
                         Abilities = new Ability[] {
                             GenericCreatureCast(),
+                            new TriggeredAbility {
+                                BreadText = $"Whenever a creature dies; {Name} gets +0/+1",
+                                IsTriggeredBy = AnyCreatureDies,
+                                MakeCastChoices = context => {
+                                    if (Token == null) { return false; } // Paranoia. 'Should' never happen.
+                                    // Do this to ensure fizzling
+                                    context.SetToken("t", Token);
+                                    return true;
+                                },
+                                EnactResolveChoices = context => {
+                                    var token = context.GetToken("t");
+                                    if (!token.IsValid) { return; }
+
+                                    token.Auras.Add(new Aura
+                                    {
+                                        ApplyAura = (token, _) => token.AuraModifiers.Health += 1,
+                                        IsCancelledBy = (_, token, __) => false
+                                    });
+                                }
+                            }
                         };
                     } break;
 
@@ -122,6 +142,7 @@ namespace CardKartShared.GameState
                                 EnactResolveChoices = context =>
                                 {
                                     var target = context.GetToken("!target");
+                                    if (!target.IsValid) { return; }
                                     context.GameState.DealDamage(this, target, 2);
                                 }
                             }
@@ -136,7 +157,7 @@ namespace CardKartShared.GameState
                         Rarity = CardRarities.Legendary;
                         CastingCost = new ManaSet();
 
-                        Health = 2;
+                        Health = 20;
                     } break;
 
                 case CardTemplates.DepravedBloodhound:
@@ -186,7 +207,7 @@ namespace CardKartShared.GameState
                         Type = CardTypes.Creature;
                         CreatureType = CreatureTypes.Warrior;
                         Colour = ManaColour.White;
-                        Rarity = CardRarities.Uncommon;
+                        Rarity = CardRarities.Rare;
                         CastingCost = new ManaSet(ManaColour.White, ManaColour.White, ManaColour.Colourless);
 
                         Attack = 2;
@@ -254,6 +275,8 @@ namespace CardKartShared.GameState
                                 EnactResolveChoices = context =>
                                 {
                                     var target = context.GetToken("!target");
+                                    if (!target.IsValid) { return; }
+
                                     target.Auras.Add(new Aura
                                     {
                                         ApplyAura = (token, gameState) =>
@@ -410,6 +433,7 @@ namespace CardKartShared.GameState
                                 EnactResolveChoices = context =>
                                 {
                                     var target = context.GetToken("!target");
+                                    if (!target.IsValid) { return; }
                                     context.GameState.DealDamage(this, target, 1);
                                 }
                             }
@@ -483,6 +507,7 @@ namespace CardKartShared.GameState
                                 EnactResolveChoices = context =>
                                 {
                                     var target = context.GetToken("!target");
+                                    if (target.IsValid)
                                     context.GameState.DealDamage(this, target, 2);
                                 }
                             }
@@ -727,6 +752,7 @@ namespace CardKartShared.GameState
                                 EnactResolveChoices = context =>
                                 {
                                     var target = context.GetToken("!target");
+                                    if (!target.IsValid) { return; }
                                     context.GameState.DealDamage(this, target, 4);
                                 }
                             }
@@ -808,6 +834,7 @@ namespace CardKartShared.GameState
                                 EnactResolveChoices = context =>
                                 {
                                     var target = context.GetToken("!target");
+                                    if (!target.IsValid) { return; }
                                     context.GameState.MoveCard(target.TokenOf, target.TokenOf.Owner.Hand);
                                 }
                             }
@@ -852,7 +879,9 @@ namespace CardKartShared.GameState
                                     return true;
                                 },
                                 EnactResolveChoices = context => {
-                                    context.GameState.MoveCard(context.GetToken("!target").TokenOf, context.CastingPlayer.Graveyard);
+                                    var target = context.GetToken("!target");
+                                    if (!target.IsValid) { return; }
+                                    context.GameState.MoveCard(target.TokenOf, context.CastingPlayer.Graveyard);
                                 },
                             },
                         };
@@ -920,7 +949,7 @@ namespace CardKartShared.GameState
                         Abilities = new[] {
                             GenericCreatureCast(),
                             new TriggeredAbility{
-                                BreadText = $"At the start of your turn reveal the top card of your deck. If you reveal a scroll or a sorcery; destroy {Name} and summon a 3/2 Insect token with Flying.",
+                                BreadText = $"At the start of your turn reveal the top card of your deck. If you reveal a scroll or a sorcery; destroy {Name} and summon a Purple 3/2 Insect token with Flying.",
                                 IsTriggeredBy = trigger => {
                                     if (trigger is GameTimeTrigger)
                                     {
@@ -1149,18 +1178,7 @@ namespace CardKartShared.GameState
                             GenericCreatureCast(),
                             new TriggeredAbility {
                                 BreadText = $"When {Name} enters the battlefield; summon a Green 2/1 Hawk token with flying.",
-                                IsTriggeredBy = trigger => {
-                                    if (trigger is MoveTrigger)
-                                    {
-                                        var moveTrigger = trigger as MoveTrigger;
-                                        if (moveTrigger.Card == this && moveTrigger.To.Location == PileLocation.Battlefield)
-                                        {
-                                            return true;
-                                        }
-                                    }
-
-                                    return false;
-                                },
+                                IsTriggeredBy = BattlecryTrigger,
                                 EnactResolveChoices = context => {
                                     context.GameState.SummonToken(CardTemplates.HawkToken1, Owner);
                                 }
@@ -1183,6 +1201,258 @@ namespace CardKartShared.GameState
 
                         KeywordAbilities[KeywordAbilityNames.Flying] = true;
                     } break;
+
+                case CardTemplates.SavingGrace:
+                    {
+                        Name = "Saving Grace";
+                        Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Angel;
+                        Colour = ManaColour.White;
+                        Rarity = CardRarities.Rare;
+                        CastingCost = new ManaSet(ManaColour.White, ManaColour.White, ManaColour.White, ManaColour.Colourless);
+
+                        Attack = 2;
+                        Health = 4;
+
+                        KeywordAbilities[KeywordAbilityNames.Reinforcement] = true;
+
+                        Abilities = new Ability[] {
+                            GenericCreatureCast(),
+                            new TriggeredAbility {
+                                BreadText = $"When {Name} enters the battlefield; you may remove a non-Angel creature you control from the game then return it to the battlefield.",
+                                IsTriggeredBy = BattlecryTrigger,
+                                MakeCastChoices = context => {
+                                    if (context.CastingPlayer.Battlefield.Where(card => card.CreatureType != CreatureTypes.Angel).Count() == 0) { return false; }
+
+                                    context.ChoiceHelper.Text = "Choose a creature to bounce.";
+                                    context.ChoiceHelper.ShowCancel = true;
+                                    var choice = context.ChoiceHelper.ChooseToken(token => token.TokenOf.CreatureType != CreatureTypes.Angel);
+                                    if (choice == null) { return false; }
+
+                                    context.SetToken("!bounce", choice);
+                                    return true;
+                                },
+                                EnactResolveChoices = context => {
+                                    if (!context.Choices.Singletons.ContainsKey("!bounce")) { return; }
+                                    var bounce = context.GetToken("!bounce");
+                                    var card = bounce.TokenOf;
+                                    if (card == null) { return; }
+
+                                    context.GameState.MoveCard(card, card.Owner.Banished);
+                                    context.GameState.MoveCard(card, card.Owner.Battlefield);
+                                }
+                            }
+                        };
+
+                    } break;
+
+                case CardTemplates.DeepSeaMermaid:
+                    {
+                        Name = "Deep Sea Mermaid";
+                        Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Mermaid;
+                        Colour = ManaColour.Blue;
+                        Rarity = CardRarities.Common;
+                        CastingCost = new ManaSet(ManaColour.Blue, ManaColour.Colourless);
+
+                        Attack = 1;
+                        Health = 1;
+
+                        Abilities = new Ability[] {
+                            GenericCreatureCast(),
+                            new TriggeredAbility{
+                                BreadText = $"When {Name} enters the battlefield; draw a card.",
+                                IsTriggeredBy = BattlecryTrigger,
+                                EnactResolveChoices = context => {
+                                    context.GameState.DrawCards(context.CastingPlayer, 1);
+                                }
+                            }
+                        };
+
+                    } break;
+
+                case CardTemplates.Conflagrate:
+                    {
+                        Name = "Conflagrate";
+                        Type = CardTypes.Channel;
+                        Colour = ManaColour.Red;
+                        Rarity = CardRarities.Uncommon;
+                        CastingCost = new ManaSet(ManaColour.Red, ManaColour.Red);
+
+                        Abilities = new Ability[] {
+                            new Ability {
+                                MoveToStackOnCast = true,
+                                BreadText = "Deal 2 damage to all creatures.",
+                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost, context) && ChannelsAreCastable(context),
+                                MakeCastChoices = context => {
+                                    return GenericPayManaChoice(CastingCost, context);
+                                },
+                                EnactCastChoices = context => {
+                                    GenericPayManaEnact(context);
+                                },
+                                EnactResolveChoices = context => {
+                                    var tokens = context.GameState.AllTokens.Where(token => token.IsCreature).ToArray();
+                                    foreach (var token in tokens) 
+                                    {
+                                        context.GameState.DealDamage(this, token, 2);
+                                    }
+                                }
+                                
+                            }
+                        };
+
+                    } break;
+
+                case CardTemplates.Rapture:
+                    {
+                        Name = "Rapture";
+                        Type = CardTypes.Channel;
+                        Colour = ManaColour.White;
+                        Rarity = CardRarities.Rare;
+                        CastingCost = new ManaSet(ManaColour.White, ManaColour.White, ManaColour.Colourless, ManaColour.Colourless);
+
+                        Abilities = new Ability[] {
+                            new Ability {
+                                MoveToStackOnCast = true,
+                                BreadText = "Remove all creatures on the battlefield from the game.",
+                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost, context) && ChannelsAreCastable(context),
+                                MakeCastChoices = context => {
+                                    return GenericPayManaChoice(CastingCost, context);
+                                },
+                                EnactCastChoices = context => {
+                                    GenericPayManaEnact(context);
+                                },
+                                EnactResolveChoices = context => {
+                                    var tokens = context.GameState.AllTokens.Where(token => token.IsCreature).ToArray();
+                                    foreach (var token in tokens)
+                                    {
+                                        if (!token.IsValid) { continue; }
+                                        context.GameState.MoveCard(token.TokenOf, token.TokenOf.Owner.Banished);
+                                    }
+                                }
+
+                            }
+                        };
+
+                    } break;
+
+                case CardTemplates.Overcharge:
+                    {
+                        Name = "Overcharge";
+                        Type = CardTypes.Scroll;
+                        Colour = ManaColour.Red;
+                        Rarity = CardRarities.Common;
+                        CastingCost = new ManaSet(ManaColour.Red, ManaColour.Colourless);
+
+                        Abilities = new[] {
+                            new Ability {
+                                MoveToStackOnCast = true,
+                                BreadText = "Deal 3 damage to target creature and 2 damage to its controller.",
+
+                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost, context),
+                                MakeCastChoices = context => {
+                                    var payment = MakePayManaChoice(CastingCost, context, context.CastingPlayer);
+                                    if (payment == null) { return false; }
+
+                                    context.ChoiceHelper.Text = $"Choose a target for {Name}.";
+                                    context.ChoiceHelper.ShowCancel = true;
+                                    var target = context.ChoiceHelper.ChooseToken(token => token.IsCreature);
+                                    if (target == null) { return false; }
+
+                                    context.SetManaSet("manacost", payment);
+                                    context.SetToken("!target", target);
+                                    return true;
+                                },
+                                EnactCastChoices = context => GenericPayManaEnact(context),
+                                EnactResolveChoices = context =>
+                                {
+                                    var target = context.GetToken("!target");
+                                    if (!target.IsValid) { return; }
+
+                                    context.GameState.DealDamage(this, target, 3);
+                                    context.GameState.DealDamage(this, target.Controller.HeroToken, 2);
+                                }
+                            }
+                        };
+                    } break;
+
+                case CardTemplates.ControlBoar:
+                    {
+                        Name = "Control Boar";
+                        Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Mechanical;
+                        Colour = ManaColour.Colourless;
+                        Rarity = CardRarities.Common;
+                        CastingCost = new ManaSet(ManaColour.Colourless);
+
+                        Attack = 1;
+                        Health = 1;
+
+                        Abilities = new[] {
+                            GenericCreatureCast(),
+                        };
+                        KeywordAbilities[KeywordAbilityNames.Bloodlust] = true;
+                    } break;
+
+                case CardTemplates.Seblastian:
+                    {
+                        Name = "Seblastian";
+                        Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Human;
+                        Colour = ManaColour.Red;
+                        Rarity = CardRarities.Legendary;
+                        CastingCost = new ManaSet(ManaColour.Red, ManaColour.Red, ManaColour.Red);
+
+                        Attack = 4;
+                        Health = 2;
+
+                        Abilities = new[] {
+                            GenericCreatureCast(),
+                            new TriggeredAbility {
+                                BreadText = $"When {Name} dies; deal 4 damage to your opponent.",
+                                IsTriggeredBy = DeathrattleTrigger,
+                                EnactResolveChoices = context => {
+                                    context.GameState.DealDamage(this, context.CastingPlayer.Opponent.HeroToken, 4);
+                                }
+                            }
+                        };
+                    } break;
+
+                case CardTemplates.HauntedChapel:
+                    {
+                        Name = "Haunted Chapel";
+                        Type = CardTypes.Relic;
+                        Colour = ManaColour.Mixed;
+                        Rarity = CardRarities.Rare;
+                        CastingCost = new ManaSet(ManaColour.Black, ManaColour.White, ManaColour.Colourless);
+
+                        Abilities = new[] {
+                            GenericCreatureCast(),
+                            new TriggeredAbility {
+                                BreadText = "Whenever a creature dies; summon a White 1/1 Ghost token with Flying.",
+                                IsTriggeredBy = AnyCreatureDies,
+                                EnactResolveChoices = context => {
+                                    context.GameState.SummonToken(CardTemplates.GhostToken1, context.CastingPlayer);
+                                }
+                            }
+                        };
+                    } break;
+
+                case CardTemplates.GhostToken1:
+                    {
+                        Name = "Ghost";
+                        Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Spirit;
+                        Colour = ManaColour.White;
+                        Rarity = CardRarities.Token;
+                        CastingCost = new ManaSet();
+
+                        Attack = 1;
+                        Health = 1;
+
+                        KeywordAbilities[KeywordAbilityNames.Flying] = true;
+                    } break;
+
 
                 default:
                     {
@@ -1261,7 +1531,49 @@ namespace CardKartShared.GameState
             throw new NotImplementedException();
         }
 
-#region Helper Functions
+        #region Helper Functions
+
+        private bool BattlecryTrigger(Trigger trigger)
+        {
+            if (trigger is MoveTrigger)
+            {
+                var moveTrigger = trigger as MoveTrigger;
+                if (moveTrigger.Card == this && moveTrigger.To.Location == PileLocation.Battlefield)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool DeathrattleTrigger(Trigger trigger)
+        {
+            if (trigger is MoveTrigger)
+            {
+                var moveTrigger = trigger as MoveTrigger;
+                if (moveTrigger.Card == this && moveTrigger.To.Location == PileLocation.Graveyard && moveTrigger.From.Location == PileLocation.Battlefield)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool AnyCreatureDies(Trigger trigger)
+        {
+            if (trigger is MoveTrigger)
+            {
+                var moveTrigger = trigger as MoveTrigger;
+                if (moveTrigger.To.Location == PileLocation.Graveyard && moveTrigger.From.Location == PileLocation.Battlefield)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         private ManaSet MakePayManaChoice(ManaSet cost, AbilityCastingContext context, Player player)
         {
@@ -1337,6 +1649,7 @@ namespace CardKartShared.GameState
         }
         private bool ChannelsAreCastable(AbilityCastingContext context)
         {
+            if (KeywordAbilities[KeywordAbilityNames.Reinforcement]) { return true; }
             if (context.GameState.ActivePlayer != context.CastingPlayer) { return false; }
             if (context.GameState.CastingStack.Count > 0) { return false; }
 
@@ -1418,6 +1731,11 @@ namespace CardKartShared.GameState
         Spy,
         Hunter,
         Bird,
+        Angel,
+        Mermaid,
+        Fish,
+        Mechanical,
+        Spirit,
 
     }
 
@@ -1454,6 +1772,15 @@ namespace CardKartShared.GameState
         BattlehardenedMage,
         ArcticWatchman,
         HawkToken1,
+        SavingGrace,
+        DeepSeaMermaid,
+        Conflagrate,
+        Rapture,
+        Overcharge,
+        ControlBoar,
+        Seblastian,
+        HauntedChapel,
+        GhostToken1,
 
         HeroTest,
     }

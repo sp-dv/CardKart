@@ -16,6 +16,8 @@ namespace CardKartClient.GUI.Components
         private Color PaletteColor;
         public Color? HighlightColor;
 
+        private Texture FrameTexture;
+
         public TokenComponent(Card card)
         {
             Card = card;
@@ -32,6 +34,7 @@ namespace CardKartClient.GUI.Components
             {
                 PortraitTexture = Textures.Portraits(Card.Template);
                 PaletteColor = Constants.PaletteColor(Card.Colour);
+                FrameTexture = Card.Token.IsRelic ? Textures.TokenRelic1 : Textures.Token1;
             }
         }
 
@@ -49,7 +52,7 @@ namespace CardKartClient.GUI.Components
                 Y, 
                 X + Width, 
                 Y + Height, 
-                Textures.Token1, 
+                FrameTexture, 
                 PaletteColor);
 
             if (HighlightColor.HasValue)
@@ -61,8 +64,11 @@ namespace CardKartClient.GUI.Components
             {
                 var token = Card.Token;
 
-                drawAdapter.DrawText(token.Attack.ToString(), X + 0.05f, Y + 0.053f, Fonts.MainFont10, Fonts.MainRenderOptions, QuickFont.QFontAlignment.Centre);
-                drawAdapter.DrawText(token.CurrentHealth.ToString(), X + 0.085f, Y + 0.053f, Fonts.MainFont10, Fonts.MainRenderOptions);
+                if (Card.Token.IsCreature)
+                {
+                    drawAdapter.DrawText(token.Attack.ToString(), X + 0.05f, Y + 0.053f, Fonts.MainFont10, Fonts.MainRenderOptions, QuickFont.QFontAlignment.Centre);
+                    drawAdapter.DrawText(token.CurrentHealth.ToString(), X + 0.085f, Y + 0.053f, Fonts.MainFont10, Fonts.MainRenderOptions);
+                }
 
                 if (token.Exhausted)
                 {

@@ -133,6 +133,26 @@ namespace CardKartClient.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap conflagrate1 {
+            get {
+                object obj = ResourceManager.GetObject("conflagrate1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap controlboar1 {
+            get {
+                object obj = ResourceManager.GetObject("controlboar1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap counterspell1 {
             get {
                 object obj = ResourceManager.GetObject("counterspell1", resourceCulture);
@@ -156,6 +176,16 @@ namespace CardKartClient.Properties {
         internal static System.Drawing.Bitmap deckeditorbg1 {
             get {
                 object obj = ResourceManager.GetObject("deckeditorbg1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap deepseamermaid1 {
+            get {
+                object obj = ResourceManager.GetObject("deepseamermaid1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -213,6 +243,16 @@ namespace CardKartClient.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ghosttoken1 {
+            get {
+                object obj = ResourceManager.GetObject("ghosttoken1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap goblin1 {
             get {
                 object obj = ResourceManager.GetObject("goblin1", resourceCulture);
@@ -236,6 +276,16 @@ namespace CardKartClient.Properties {
         internal static System.Drawing.Bitmap graveyard1 {
             get {
                 object obj = ResourceManager.GetObject("graveyard1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap hauntedchapel1 {
+            get {
+                object obj = ResourceManager.GetObject("hauntedchapel1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -363,6 +413,26 @@ namespace CardKartClient.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap overcharge1 {
+            get {
+                object obj = ResourceManager.GetObject("overcharge1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap rapture1 {
+            get {
+                object obj = ResourceManager.GetObject("rapture1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap regeneratingzombie1 {
             get {
                 object obj = ResourceManager.GetObject("regeneratingzombie1", resourceCulture);
@@ -373,9 +443,29 @@ namespace CardKartClient.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap savinggrace1 {
+            get {
+                object obj = ResourceManager.GetObject("savinggrace1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap scribemagi1 {
             get {
                 object obj = ResourceManager.GetObject("scribemagi1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap seblastian1 {
+            get {
+                object obj = ResourceManager.GetObject("seblastian1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -426,6 +516,16 @@ namespace CardKartClient.Properties {
         internal static System.Drawing.Bitmap token1 {
             get {
                 object obj = ResourceManager.GetObject("token1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap tokenrelic1 {
+            get {
+                object obj = ResourceManager.GetObject("tokenrelic1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
