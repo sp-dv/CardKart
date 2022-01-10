@@ -62,11 +62,13 @@ namespace CardKartShared.Util
         {
             switch (ability)
             {
-                case KeywordAbilityNames.Bloodlust: { return "Creatures with Bloodlust don't suffer from summoning sickness"; }
-                case KeywordAbilityNames.Vigilance: { return "Creatures with Vigilance don't exhaust when attacking"; }
-                case KeywordAbilityNames.Flying: { return "Creatures with Flying can only be blocked by creatures with Flying or Range"; }
-                case KeywordAbilityNames.Range: { return "Creatures with Range can block creatures with Flying"; }
-                case KeywordAbilityNames.Reinforcement: { return "Creatures with Reinforcement can be cast whenever you can cast a scroll."; }
+                case KeywordAbilityNames.Bloodlust: { return "Doesn't suffer from summoning sickness"; }
+                case KeywordAbilityNames.Vigilance: { return "Doesn't exhaust when attacking"; }
+                case KeywordAbilityNames.Flying: { return "Can only be blocked by creatures with Flying or Range"; }
+                case KeywordAbilityNames.Range: { return "Can block creatures with Flying"; }
+                case KeywordAbilityNames.Reinforcement: { return "Can be cast whenever you can cast a scroll"; }
+                case KeywordAbilityNames.Protected: { return "The next time this creature takes damage; prevent it"; }
+                case KeywordAbilityNames.Terrify: { return "Can only be blocked by creatures with a higher mana cost"; }
                 default: return "";
             }
         }

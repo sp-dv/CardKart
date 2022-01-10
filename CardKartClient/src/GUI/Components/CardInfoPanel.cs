@@ -72,19 +72,41 @@ namespace CardKartClient.GUI.Components
                 .Select(colour => Constants.PaletteColor(colour)).ToArray();
             RarityColor = Constants.RarityColor(card.Rarity);
 
-            if (card.Type == CardTypes.Creature)
+            if (card.Token != null && card.Token.IsValid)
             {
-                TypeString = card.CreatureType.ToString();
-                AttackString = card.Attack.ToString();
-                HealthString = card.Health.ToString();
+                var token = card.Token;
+                if (token.IsCreature)
+                {
+                    TypeString = token.TokenOf.CreatureType.ToString();
+                    AttackString = token.Attack.ToString();
+                    HealthString = token.CurrentHealth.ToString();
+                }
+                else
+                {
+                    TypeString = token.TokenOf.Type.ToString();
+                    AttackString = HealthString = null;
+                }
+
+                BreadTextPanel.Text = token.GenerateBreadText();
             }
             else
             {
-                TypeString = card.Type.ToString();
-                AttackString = HealthString = null;
+                if (card.Type == CardTypes.Creature)
+                {
+                    TypeString = card.CreatureType.ToString();
+                    AttackString = card.Attack.ToString();
+                    HealthString = card.Health.ToString();
+                }
+                else
+                {
+                    TypeString = card.Type.ToString();
+                    AttackString = HealthString = null;
+                }
+
+                BreadTextPanel.Text = card.BreadTextLong;
             }
 
-            BreadTextPanel.Text = card.BreadTextLong;
+            
             BreadTextPanel.Layout();
 
 

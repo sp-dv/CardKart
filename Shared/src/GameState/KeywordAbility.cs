@@ -55,5 +55,7 @@ namespace CardKartShared.GameState
         Flying,
         Range,
         Reinforcement,
+        Protected,
+        Terrify,
     }
 }

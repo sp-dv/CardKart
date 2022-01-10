@@ -23,7 +23,7 @@ namespace CardKartClient.GUI.Components
             Card = card;
 
             Width = 0.14f;
-            Height = 0.12f;
+            Height = 0.28f;
 
             Layout();
         }
@@ -42,9 +42,9 @@ namespace CardKartClient.GUI.Components
         {
             drawAdapter.DrawSprite(
                 X + 0.031f,
-                Y + 0.025f,
+                Y + 0.075f,
                 X + 0.105f,
-                Y + 0.108f,
+                Y + 0.248f,
                 PortraitTexture);
 
             drawAdapter.DrawSprite(
@@ -66,11 +66,33 @@ namespace CardKartClient.GUI.Components
 
                 if (Card.Token.IsCreature)
                 {
-                    drawAdapter.DrawText(token.Attack.ToString(), X + 0.05f, Y + 0.053f, Fonts.MainFont10, Fonts.MainRenderOptions, QuickFont.QFontAlignment.Centre);
-                    drawAdapter.DrawText(token.CurrentHealth.ToString(), X + 0.085f, Y + 0.053f, Fonts.MainFont10, Fonts.MainRenderOptions);
+                    drawAdapter.DrawText(
+                        token.Attack.ToString(), 
+                        X + 0.05f, 
+                        Y + 0.073f, 
+                        Fonts.MainFont10, 
+                        Fonts.MainRenderOptions, 
+                        QuickFont.QFontAlignment.Centre);
+
+                    drawAdapter.DrawText(
+                        token.CurrentHealth.ToString(), 
+                        X + 0.089f, 
+                        Y + 0.073f, 
+                        Fonts.MainFont10, 
+                        Fonts.MainRenderOptions,
+                        QuickFont.QFontAlignment.Centre);
                 }
 
-                if (token.Exhausted)
+                if (token.Stunned)
+                {
+                    drawAdapter.DrawSprite(
+                        X + Width / 2 - 0.05f,
+                        Y + Height - 0.1f,
+                        X + Width / 2 + 0.05f,
+                        Y + Height + 0.0f,
+                        Textures.CCC1);
+                }
+                else if (token.Exhausted)
                 {
                     drawAdapter.DrawSprite(
                         X + Width/2, 

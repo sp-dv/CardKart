@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CardKartShared.Util;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,10 +17,11 @@ namespace CardKartShared.GameState
         {
             get { return 
                     ExhaustedInternal || 
-                    (SummoningSick && !KeywordAbilities[KeywordAbilityNames.Bloodlust]); }
+                    (!IsRelic && SummoningSick && !KeywordAbilities[KeywordAbilityNames.Bloodlust]); }
             set { ExhaustedInternal = value; }
         }
         public bool SummoningSick;
+        public bool Stunned;
 
         public int DamageTaken;
         public int Attack => 
@@ -28,6 +30,7 @@ namespace CardKartShared.GameState
         public int CurrentHealth => 
              MaxHealth - DamageTaken;
 
+        public CreatureTypes CreatureType => TokenOf.CreatureType;
         public bool IsHero => TokenOf.IsHero;
         public bool IsCreature => TokenOf.Type == CardTypes.Creature;
         public bool IsRelic => TokenOf.Type == CardTypes.Relic;
@@ -37,7 +40,7 @@ namespace CardKartShared.GameState
         public bool IsDead => IsCreature && CurrentHealth <= 0;
 
         public TriggeredAbility[] TriggeredAbilities;
-        private KeywordAbilityContainer KeywordAbilities;
+        public KeywordAbilityContainer KeywordAbilities;
         public List<Aura> Auras;
 
         public AuraModifier AuraModifiers { get; } = new AuraModifier();
@@ -55,6 +58,7 @@ namespace CardKartShared.GameState
 
         public bool CanBlockToken(Token other) 
         {
+            if (other.HasKeywordAbility(KeywordAbilityNames.Terrify) && this.TokenOf.CastingCost.Size <= other.TokenOf.CastingCost.Size) { return false; }
             if (other.HasKeywordAbility(KeywordAbilityNames.Flying) && !this.HasKeywordAbility(KeywordAbilityNames.Range)) { return false; }
             return true;
         }
@@ -62,6 +66,43 @@ namespace CardKartShared.GameState
         public bool HasKeywordAbility(KeywordAbilityNames keyword)
         {
             return KeywordAbilities[keyword] || AuraModifiers.Keywords[keyword];
+        }
+
+        public string GenerateBreadText()
+        {
+            if (!IsValid) { return ""; }
+
+            var breadTextBuilder = new StringBuilder();
+
+            foreach (var keywordAbility in KeywordAbilities.GetAbilities())
+            {
+                breadTextBuilder.Append(keywordAbility.ToString());
+                breadTextBuilder.Append(" (");
+                breadTextBuilder.Append(Constants.KeywordExplanation(keywordAbility));
+                breadTextBuilder.AppendLine(")");
+            }
+
+            foreach (var ability in TokenOf.Abilities)
+            {
+                if (ability.BreadText != null)
+                {
+                    breadTextBuilder.AppendLine(ability.BreadText);
+                }
+            }
+            foreach (var aura in Auras)
+            {
+                if (aura.BreadText != null)
+                {
+                    breadTextBuilder.AppendLine(aura.BreadText);
+                }
+            }
+
+            if (Stunned)
+            {
+                breadTextBuilder.AppendLine("\nStunned (Doesn't exhaust at the start of its controllers turn)");
+            }
+
+            return breadTextBuilder.ToString();
         }
     }
 

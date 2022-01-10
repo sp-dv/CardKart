@@ -37,6 +37,7 @@ namespace CardKartShared.GameState
         public List<(Trigger, TriggeredAbility)> PendingTriggersPlayer2 { get; } =
             new List<(Trigger, TriggeredAbility)>();
 
+        public IEnumerable<Card> AllGraveyards => Player1.Graveyard.Concat(Player2.Graveyard);
 
 
         public GameState(int rngSeed)
@@ -149,6 +150,44 @@ namespace CardKartShared.GameState
             }
         }
 
+        public void CastAbility(AbilityCastingContext context)
+        {
+            if (!context.IsValid)
+            {
+                Logging.Log(LogLevel.Warning, "Tried to cast invalid context");
+                return;
+            }
+
+            CastingStack.Push(context);
+            if (context.Ability.MoveToStackOnCast)
+            {
+                MoveCard(context.Card, context.Card.Owner.Stack);
+            }
+
+            Trigger(new AbilityCastTrigger(context));
+        }
+
+        public void ResolveAbility(AbilityCastingContext context)
+        {
+            var ability = context.Ability;
+            var card = context.Card;
+
+            ability.Resolve(context);
+
+            if (ability.MoveToStackOnCast)
+            {
+                if (card.Type == CardTypes.Creature ||
+                    card.Type == CardTypes.Relic)
+                {
+                    MoveCard(card, card.Owner.Battlefield);
+                }
+                else
+                {
+                    MoveCard(card, card.Owner.Graveyard);
+                }
+            }
+        }
+
         public void ShuffleDeck(Player player)
         {
             player.Deck.Shuffle(RNG);
@@ -223,6 +262,12 @@ namespace CardKartShared.GameState
         {
             if (amount <= 0) { return; }
 
+            if (target.KeywordAbilities[KeywordAbilityNames.Protected])
+            {
+                target.KeywordAbilities[KeywordAbilityNames.Protected] = false;
+                return;
+            }
+
             target.DamageTaken += amount;
 
             if (target.TokenOf.IsHero)
@@ -231,6 +276,19 @@ namespace CardKartShared.GameState
             }
 
             Trigger(new DamageDoneTrigger(source, target, amount));
+        }
+
+        public void RestoreHealth(Card source, Token target, int amount)
+        {
+            if (amount <= 0) { return; }
+
+            target.DamageTaken -= amount;
+            if (target.DamageTaken < 0) { target.DamageTaken = 0; }
+
+            if (target.TokenOf.IsHero)
+            {
+                target.TokenOf.Owner.NotifyOfChange();
+            }
         }
 
         public void SummonToken(CardTemplates template, Player controller)
@@ -252,6 +310,17 @@ namespace CardKartShared.GameState
             {
                 MoveCard(counterspelledContext.Card, counterspelledContext.Card.Owner.Graveyard);
             }
+        }
+
+        public void ExhaustToken(Token exhaustee)
+        {
+            exhaustee.Exhausted = true;
+        }
+
+        public void StunToken(Token stunee)
+        {
+            stunee.Exhausted = true;
+            stunee.Stunned = true;
         }
 
         public void SetTime(GameTime time)
@@ -311,7 +380,7 @@ namespace CardKartShared.GameState
 
         public AbilityCastingContext Pop()
         {
-            var context = Contexts[Contexts.Count - 1];
+            var context = Peek();
             Contexts.RemoveAt(Contexts.Count - 1);
 
             StackChanged?.Invoke(Contexts.ToArray());
@@ -319,6 +388,10 @@ namespace CardKartShared.GameState
             return context;
         }
 
+        public AbilityCastingContext Peek()
+        {
+            return Contexts[Contexts.Count - 1];
+        }
         public bool Remove(AbilityCastingContext context)
         {
             var rt = Contexts.Remove(context);

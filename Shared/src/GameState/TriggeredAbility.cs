@@ -9,12 +9,18 @@ namespace CardKartShared.GameState
         public Func<Trigger, bool> IsTriggeredBy { get; set; } = trigger => false;
 
         public Action<Trigger, AbilityCastingContext> SaveTriggerInfo { get; set; } = (trigger, context) => {};
-
     }
 
-    public interface Trigger
+    public interface Trigger { }
+
+    public class AbilityCastTrigger : Trigger
     {
-        
+        public AbilityCastingContext Context { get; set; }
+
+        public AbilityCastTrigger(AbilityCastingContext context)
+        {
+            Context = context;
+        }
     }
 
     public class DamageDoneTrigger : Trigger

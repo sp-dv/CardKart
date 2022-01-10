@@ -14,12 +14,14 @@ namespace CardKartShared.GameState
 
         public Func<AbilityCastingContext, bool> IsCastable { get; set; } = context =>
         {
+            // Demand explicit conditions for casting.
             return false;
         };
 
         public Func<AbilityCastingContext, bool> MakeCastChoices { get; set; } = context =>
         {
-            return false;
+            // If we don't do anything in cast choices; it makes no sense to implement it just to return true.
+            return true;
         };
 
         public Action<AbilityCastingContext> EnactCastChoices { get; set; } = context =>
@@ -32,7 +34,7 @@ namespace CardKartShared.GameState
         public Action<AbilityCastingContext> MakeResolveChoicesNonCastingPlayer { get; set; } = context =>
         {
         };
-        public Action<AbilityCastingContext> EnactResolveChoices { get; set; } = context =>
+        public Action<AbilityCastingContext> Resolve { get; set; } = context =>
         {
         };
 
@@ -40,10 +42,16 @@ namespace CardKartShared.GameState
     }
     public class AbilityCastingContext
     {
+        private const string CastingPlayerKey = "_CastingPlayer";
+        private const string CardKey = "_Card";
+        private const string AbilityKey = "_Ability";
+
         public GameChoice Choices;
         public ChoiceHelper ChoiceHelper;
         public GameState GameState;
         public Player Hero;
+
+        public bool IsValid => HasCastingPlayer && HasCard && HasAbility;
 
 #region Synced
 
@@ -52,27 +60,27 @@ namespace CardKartShared.GameState
         public Player CastingPlayer
         {
             get => !HasCastingPlayer ? null : 
-                GameState.GetByID(Choices.Singletons["_CastingPlayer"]) as Player;
-            set => Choices.Singletons["_CastingPlayer"] = value.ID;
+                GameState.GetByID(Choices.Singletons[CastingPlayerKey]) as Player;
+            set => Choices.Singletons[CastingPlayerKey] = value.ID;
         }
         private bool HasCastingPlayer => 
-            Choices.Singletons.ContainsKey("_CastingPlayer");
+            Choices.Singletons.ContainsKey(CastingPlayerKey);
 
         public Card Card
         {
-            get => !HasCard ? null : GameState.GetByID(Choices.Singletons["_Card"]) as Card;
-            set => Choices.Singletons["_Card"] = value.ID;
+            get => !HasCard ? null : GameState.GetByID(Choices.Singletons[CardKey]) as Card;
+            set => Choices.Singletons[CardKey] = value.ID;
         }
         private bool HasCard =>
-            Choices.Singletons.ContainsKey("_Card");
+            Choices.Singletons.ContainsKey(CardKey);
 
         public Ability Ability
         {
-            get => !HasAbility ? null : Card.Abilities[Choices.Singletons["_Ability"]];
-            set => Choices.Singletons["_Ability"] = value.Card.IndexOfAbility(value);
+            get => !HasAbility ? null : Card.Abilities[Choices.Singletons[AbilityKey]];
+            set => Choices.Singletons[AbilityKey] = value.Card.IndexOfAbility(value);
         }
         private bool HasAbility =>
-            HasCard && Choices.Singletons.ContainsKey("_Ability");
+            HasCard && Choices.Singletons.ContainsKey(AbilityKey);
 
 #endregion
 
@@ -110,6 +118,11 @@ namespace CardKartShared.GameState
         public void SetManaSet(string key, ManaSet set)
         {
             Choices.Arrays[key] = set.ToInts();
+        }
+
+        public bool HasSingleton(string key)
+        {
+            return Choices.Singletons.ContainsKey(key);
         }
 
         public ManaSet GetManaSet(string key)

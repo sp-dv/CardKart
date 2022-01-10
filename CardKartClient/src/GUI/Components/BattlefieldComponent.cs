@@ -22,7 +22,7 @@ namespace CardKartClient.GUI.Components
         public BattlefieldComponent(Pile battlefield)
         {
             Width = 1.15f;
-            Height = 0.2f;
+            Height = 0.3f;
 
             Battlefield = battlefield;
             Battlefield.PileChanged += Layout;

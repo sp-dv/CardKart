@@ -160,8 +160,18 @@ namespace CardKartShared.GameState
         {
             foreach (var card in ActivePlayer.Battlefield)
             {
-                card.Token.Exhausted = false;
-                card.Token.SummoningSick = false;
+                var token = card.Token;
+
+                token.SummoningSick = false;
+
+                if (token.Stunned)
+                {
+                    token.Stunned = false;
+                }
+                else
+                {
+                    token.Exhausted = false;
+                }
             }
             EnforceGameRules(true);
 
@@ -275,8 +285,8 @@ namespace CardKartShared.GameState
                     ChoiceHelper.Text = "Choose a blocker.";
                     ChoiceHelper.ShowOk = true;
                     var defender = ChoiceHelper.ChooseToken(token => 
-                    token.TokenOf.Controller == Hero &&
-                    token.CanBlock);
+                        token.TokenOf.Controller == Hero &&
+                        token.CanBlock);
 
                     if (defender == null) { break; }
 
@@ -375,7 +385,7 @@ namespace CardKartShared.GameState
             {
                 if (!attacker.HasKeywordAbility(KeywordAbilityNames.Vigilance))
                 {
-                    attacker.Exhausted = true;
+                    GameState.ExhaustToken(attacker);
                 }
             }
 
@@ -450,12 +460,8 @@ namespace CardKartShared.GameState
 
                 ability.EnactCastChoices(context);
 
-                GameState.CastingStack.Push(context);
-                if (ability.MoveToStackOnCast)
-                {
-                    GameState.MoveCard(card, card.Owner.Stack);
-                }
-
+                GameState.CastAbility(context);
+                
                 return context;
             }
             else
@@ -464,29 +470,11 @@ namespace CardKartShared.GameState
             }
         }
 
-        private void showcontext(AbilityCastingContext context)
-        {
-            foreach (var asd in context.Choices.Singletons)
-            {
-                Logging.Log(LogLevel.Debug, $"{asd.Key} = {asd.Value}");
-            }
-            foreach (var asd in context.Choices.Arrays)
-            {
-                var sb = new StringBuilder();
-                foreach (var i in asd.Value)
-                {
-                    sb.Append(i.ToString() + ", ");
-                }
-                if (sb.Length >= 2) { sb.Length -= 2; } // Trim trailing ', '.
-                Logging.Log(LogLevel.Debug, $"{asd.Key} = [{sb}]");
-            }
-        }
-
         private void ResolveStack()
         {
             while (GameState.CastingStack.Count > 0)
             {
-                var context = GameState.CastingStack.Pop();
+                var context = GameState.CastingStack.Peek();
 
                 var card = context.Card;
                 var ability = context.Ability;
@@ -513,20 +501,9 @@ namespace CardKartShared.GameState
 
                 }
 
-                ability.EnactResolveChoices(context);
+                if (context != GameState.CastingStack.Pop()) { throw new ThisShouldNeverHappen(); }
 
-                if (ability.MoveToStackOnCast)
-                {
-                    if (card.Type == CardTypes.Creature ||
-                        card.Type == CardTypes.Relic)
-                    {
-                        GameState.MoveCard(card, card.Owner.Battlefield);
-                    }
-                    else
-                    {
-                        GameState.MoveCard(card, card.Owner.Graveyard);
-                    }
-                }
+                GameState.ResolveAbility(context);
 
                 EnforceGameRules(false);
             }
@@ -633,15 +610,23 @@ namespace CardKartShared.GameState
 
                 if (castingPlayer == Hero)
                 {
-                    ability.MakeCastChoices(context);
+                    // If MakeCastChoices returns false; fizzle the ability.
+                    if (!ability.MakeCastChoices(context))
+                    {
+                        context.Choices = new GameChoice();
+                    }
                     GameChoiceSynchronizer.SendChoice(context.Choices);
+
                 }
                 else
                 {
                     context.Choices = GameChoiceSynchronizer.ReceiveChoice();
                 }
 
-                GameState.CastingStack.Push(context);
+                if (context.IsValid)
+                {
+                    GameState.CastAbility(context);
+                }
             }
 
             if (resolveStack)
@@ -795,7 +780,8 @@ namespace CardKartShared.GameState
                 if (pcs.IsOptionChoice) { return true; }
                 if (pcs.GameObject is Token)
                 {
-                    return filter(pcs.GameObject as Token);
+                    var token = pcs.GameObject as Token;
+                    return token.IsValid && filter(token);
                 }
                 if (pcs.GameObject is Player)
                 {

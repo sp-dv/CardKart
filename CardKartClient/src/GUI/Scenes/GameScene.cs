@@ -66,7 +66,7 @@ namespace CardKartClient.GUI.Scenes
 
             VillainBattlefieldPanel = new BattlefieldComponent(villain.Battlefield);
             VillainBattlefieldPanel.X = -0.2f;
-            VillainBattlefieldPanel.Y = 0.45f;
+            VillainBattlefieldPanel.Y = 0.35f;
             VillainBattlefieldPanel.TokenClicked += 
                 token => GameObjectClicked(token);
             VillainBattlefieldPanel.RequestInfoDisplay += card => CardInfoPanel.SetCard(card);

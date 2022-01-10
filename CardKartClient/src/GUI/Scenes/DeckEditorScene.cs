@@ -79,7 +79,9 @@ namespace CardKartClient.GUI.Scenes
             AllCards = Enum.GetValues(typeof(CardTemplates)).Cast<CardTemplates>()
                 .Where(template => template != CardTemplates.None)
                 .Select(template => new Card(template))
-                .OrderBy(card => card.Colour).ThenBy(card => card.Name)
+                .OrderBy(card => card.Colour)
+                .ThenBy(card => card.CastingCost.Size)
+                .ThenBy(card => card.Name)
                 //.Where(card => !card.IsTokenCard)
                 .ToArray();
 
@@ -91,11 +93,11 @@ namespace CardKartClient.GUI.Scenes
 
             var cardComponentList = new List<ModifiableCardComponent>();
 
-            for (int i = 0; i < CardsPerRow; i++)
+            for (int j = 0; j < CardsPerColumn; j++)
             {
-                for (int j = 0; j < CardsPerColumn; j++)
+                for (int i = 0; i < CardsPerRow; i++)
                 {
-                    var ix = (i * CardsPerColumn) + j;
+                    var ix = i + (j * CardsPerRow);
                     var mc = new ModifiableCardComponent();
                     mc.X = -0.485f + (i * 0.23f);
                     mc.Y = -0.58f + ((CardsPerColumn - j - 1) * 0.55f); // Hack to get them to draw top to bottom...

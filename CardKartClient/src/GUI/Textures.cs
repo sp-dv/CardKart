@@ -58,6 +58,38 @@ namespace CardKartClient.GUI
         public static Texture TokenRelic1;
         public static Texture HauntedChapel1;
         public static Texture GhostToken1;
+        public static Texture PortalJumper1;
+        public static Texture PalaceGuard1;
+        public static Texture Darkness1;
+        public static Texture MistFiend1;
+        public static Texture HorsemanOfWar1;
+        public static Texture HorsemanOfFamine1;
+        public static Texture HorsemanOfPestilence1;
+        public static Texture GiantSeagull1;
+        public static Texture ClericMilitia1;
+        public static Texture ClericSwordmaster1;
+        public static Texture ClericChampion1;
+        public static Texture RisenAbomination1;
+        public static Texture Parthiax1;
+        public static Texture DruidOfTalAal1;
+        public static Texture MutatedLeech1;
+        public static Texture FuriousRuby1;
+        public static Texture Tantrum1;
+        public static Texture UnsettlingMox1;
+        public static Texture VibrantEmerald1;
+        public static Texture RadiantDiamond1;
+        public static Texture VolatileAmethyst1;
+        public static Texture HarmoniousSapphire1;
+        public static Texture AmalgamatedSlime1;
+        public static Texture SlimeToken1;
+        public static Texture RobotAnt1;
+        public static Texture ViciousTaskmaster1;
+        public static Texture Mechamancer1;
+        public static Texture ZapperVigilante1;
+        public static Texture KeeperOfCuriosities1;
+        public static Texture BeaconKeeper1;
+        public static Texture CCC1;
+        public static Texture Knock1;
 
 
         public static void LoadTextures()
@@ -114,7 +146,40 @@ namespace CardKartClient.GUI
             TokenRelic1 = TextureLoader.CreateTexture(Properties.Resources.tokenrelic1);
             HauntedChapel1 = TextureLoader.CreateTexture(Properties.Resources.hauntedchapel1);
             GhostToken1 = TextureLoader.CreateTexture(Properties.Resources.ghosttoken1);
+            PortalJumper1 = TextureLoader.CreateTexture(Properties.Resources.portaljumper1);
+            PalaceGuard1 = TextureLoader.CreateTexture(Properties.Resources.palaceguard1);
+            Darkness1 = TextureLoader.CreateTexture(Properties.Resources.darkness1);
+            MistFiend1 = TextureLoader.CreateTexture(Properties.Resources.mistfiend1);
+            HorsemanOfFamine1 = TextureLoader.CreateTexture(Properties.Resources.horsemanoffamine1);
+            HorsemanOfPestilence1 = TextureLoader.CreateTexture(Properties.Resources.horsemanofpestilence1);
+            HorsemanOfWar1 = TextureLoader.CreateTexture(Properties.Resources.horsemanofwar1);
+            GiantSeagull1 = TextureLoader.CreateTexture(Properties.Resources.giantseagull1);
+            ClericMilitia1 = TextureLoader.CreateTexture(Properties.Resources.clericmilitia1);
+            ClericSwordmaster1 = TextureLoader.CreateTexture(Properties.Resources.clericswordmaster1);
+            ClericChampion1 = TextureLoader.CreateTexture(Properties.Resources.clericchampion1);
+            RisenAbomination1 = TextureLoader.CreateTexture(Properties.Resources.risenabomination);
+            Parthiax1 = TextureLoader.CreateTexture(Properties.Resources.parthiax1);
+            DruidOfTalAal1 = TextureLoader.CreateTexture(Properties.Resources.druidoftalaal1);
+            MutatedLeech1 = TextureLoader.CreateTexture(Properties.Resources.mutatedleech1);
+            FuriousRuby1 = TextureLoader.CreateTexture(Properties.Resources.furiousruby1);
+            Tantrum1 = TextureLoader.CreateTexture(Properties.Resources.tantrum1);
+            UnsettlingMox1 = TextureLoader.CreateTexture(Properties.Resources.unsettlingmox1);
+            VibrantEmerald1 = TextureLoader.CreateTexture(Properties.Resources.vibrantemerald1);
+            RadiantDiamond1 = TextureLoader.CreateTexture(Properties.Resources.radiantdiamond1);
+            VolatileAmethyst1 = TextureLoader.CreateTexture(Properties.Resources.volatileamethyst1);
+            HarmoniousSapphire1 = TextureLoader.CreateTexture(Properties.Resources.harmonioussapphire1);
+            AmalgamatedSlime1 = TextureLoader.CreateTexture(Properties.Resources.amalgamatedslime1);
+            SlimeToken1 = TextureLoader.CreateTexture(Properties.Resources.slimetoken1);
+            RobotAnt1 = TextureLoader.CreateTexture(Properties.Resources.robotant1);
+            ViciousTaskmaster1 = TextureLoader.CreateTexture(Properties.Resources.vicioustaskmaster1);
+            Mechamancer1 = TextureLoader.CreateTexture(Properties.Resources.mechamancer1);
+            ZapperVigilante1 = TextureLoader.CreateTexture(Properties.Resources.zappervigilante1);
+            KeeperOfCuriosities1 = TextureLoader.CreateTexture(Properties.Resources.keeperofcuriosities1);
+            BeaconKeeper1 = TextureLoader.CreateTexture(Properties.Resources.beaconkeeper1);
+            CCC1 = TextureLoader.CreateTexture(Properties.Resources.ccc1);
+            Knock1 = TextureLoader.CreateTexture(Properties.Resources.telekenist1);
 
+            // = TextureLoader.CreateTexture(Properties.Resources.);
         }
 
         public static Texture Portraits(CardTemplates template)
@@ -160,6 +225,37 @@ namespace CardKartClient.GUI
                 case CardTemplates.Seblastian: { return Seblastian1; }
                 case CardTemplates.HauntedChapel: { return HauntedChapel1; }
                 case CardTemplates.GhostToken1: { return GhostToken1; }
+                case CardTemplates.PortalJumper: { return PortalJumper1; }
+                case CardTemplates.PalaceGuard: { return PalaceGuard1; }
+                case CardTemplates.Darkness: { return Darkness1; }
+                case CardTemplates.MistFiend: { return MistFiend1; }
+                case CardTemplates.HorsemanOfFamine: { return HorsemanOfFamine1; }
+                case CardTemplates.HorsemanOfPestilence: { return HorsemanOfPestilence1; }
+                case CardTemplates.HorsemanOfWar: { return HorsemanOfWar1; }
+                case CardTemplates.GiantSeagull: { return GiantSeagull1; }
+                case CardTemplates.ClericMilitia: { return ClericMilitia1; }
+                case CardTemplates.ClericSwordmaster: { return ClericSwordmaster1; }
+                case CardTemplates.ClericChampion: { return ClericChampion1; }
+                case CardTemplates.RisenAbomination: { return RisenAbomination1; }
+                case CardTemplates.Parthiax: { return Parthiax1; }
+                case CardTemplates.DruidOfTalAal: { return DruidOfTalAal1; }
+                case CardTemplates.MutatedLeech: { return MutatedLeech1; }
+                case CardTemplates.Tantrum: { return Tantrum1; }
+                case CardTemplates.FuriousRuby: { return FuriousRuby1; }
+                case CardTemplates.HarmoniousSapphire: { return HarmoniousSapphire1; }
+                case CardTemplates.VibrantEmerald: { return VibrantEmerald1; }
+                case CardTemplates.UnsettlingOnyx: { return UnsettlingMox1; }
+                case CardTemplates.RadiantDiamond: { return RadiantDiamond1; }
+                case CardTemplates.VolatileAmethyst: { return VolatileAmethyst1; }
+                case CardTemplates.AmalgamatedSlime: { return AmalgamatedSlime1; }
+                case CardTemplates.SlimeToken1: { return SlimeToken1; }
+                case CardTemplates.RobotAnt: { return RobotAnt1; }
+                case CardTemplates.ViciousTaskmaster: { return ViciousTaskmaster1; }
+                case CardTemplates.Mechamancer: { return Mechamancer1; }
+                case CardTemplates.ZapperVigilante: { return ZapperVigilante1; }
+                case CardTemplates.KeeperOfCuriosities: { return KeeperOfCuriosities1; }
+                case CardTemplates.BeaconKeeper: { return BeaconKeeper1; }
+                case CardTemplates.Knock: { return Knock1; }
                 default: { return NoPortait; }
             }
         }
