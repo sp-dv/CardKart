@@ -92,7 +92,7 @@ namespace CardKartClient.GUI.Components
                         Y + Height + 0.0f,
                         Textures.CCC1);
                 }
-                else if (token.Exhausted)
+                else if (token.IsExhausted)
                 {
                     drawAdapter.DrawSprite(
                         X + Width/2, 

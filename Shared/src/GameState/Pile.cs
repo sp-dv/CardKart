@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CardKartShared.Util;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -83,6 +84,16 @@ namespace CardKartShared.GameState
         {
             if (Cards.Count == 0) { return null; }
             return Cards.Last();
+        }
+
+        public void MoveToBottom(Card card)
+        {
+            if (!Cards.Remove(card))
+            {
+                Logging.Log(LogLevel.Warning, "Tried to move a card to the bottom of a pile it is not in.");
+                return;
+            }
+            Cards.Insert(0, card);
         }
 
         public void Shuffle(Random RNG)

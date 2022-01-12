@@ -57,5 +57,9 @@ namespace CardKartShared.GameState
         Reinforcement,
         Protected,
         Terrify,
+        Rampage,
+        Lifesteal,
+        Stoning,
+
     }
 }

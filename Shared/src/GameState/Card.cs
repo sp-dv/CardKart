@@ -123,7 +123,7 @@ namespace CardKartShared.GameState
                                 MoveToStackOnCast = true,
                                 BreadText = "Deal 2 damage to target creature or player.",
 
-                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost, context),
+                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost),
                                 MakeCastChoices = context => {
                                     var payment = MakePayManaChoice(CastingCost, context, context.CastingPlayer);
                                     if (payment == null) { return false; }
@@ -148,16 +148,7 @@ namespace CardKartShared.GameState
                         };
                     } break;
 
-                case CardTemplates.HeroTest:
-                    {
-                        Name = "Heromanx";
-                        Type = CardTypes.Hero;
-                        Colour = ManaColour.White;
-                        Rarity = CardRarities.Legendary;
-                        CastingCost = new ManaSet();
-
-                        Health = 20;
-                    } break;
+                
 
                 case CardTemplates.DepravedBloodhound:
                     {
@@ -249,7 +240,7 @@ namespace CardKartShared.GameState
                                 IsCastable =  context =>
                                 {
                                     return InHandAndOwned(context) &&
-                                        ManaCostIsPayable(CastingCost, context);
+                                        ManaCostIsPayable(CastingCost);
                                 },
                                 MakeCastChoices = context =>
                                 {
@@ -303,13 +294,13 @@ namespace CardKartShared.GameState
                             new Ability
                             {
                                 MoveToStackOnCast = true,
-                                BreadText = "Look at the top three cards of your deck. Choose a card and put it into your hand. Shuffle the others into your deck.",
+                                BreadText = "Look at the top three cards of your deck then put them back in any order.\nYou may shuffle your deck.\nDraw a card.",
                                 IsCastable = context =>
                                 {
                                     return
                                         InHandAndOwned(context) &&
                                         ChannelsAreCastable(context) &&
-                                        ManaCostIsPayable(CastingCost, context);
+                                        ManaCostIsPayable(CastingCost);
 
                                 },
                                 MakeCastChoices = context =>
@@ -328,15 +319,63 @@ namespace CardKartShared.GameState
                                 },
                                 MakeResolveChoicesCastingPlayer = context =>
                                 {
-                                    var options = context.CastingPlayer.Deck.Peek(3);
-                                    context.ChoiceHelper.Text = "Choose a card to draw.";
-                                    var choice = context.ChoiceHelper.ChooseCardFromOptions(options, card => true);
-                                    context.SetCard("target", choice);
+                                    var options = context.CastingPlayer.Deck.Peek(3).ToArray();
+                                    var optionsCount = options.Length;
+
+                                    var putback = new List<Card>();
+
+                                    while (true)
+                                    {
+                                        if (putback.Count == optionsCount) { break; }
+
+                                        if (putback.Count > 0) { context.ChoiceHelper.ShowCancel = true; }
+
+                                        context.ChoiceHelper.Text = "Choose card to put on top of your deck.";
+                                        var choice = context.ChoiceHelper.ChooseCardFromOptions(options, card => !putback.Contains(card));
+                                        if (choice == null)
+                                        {
+                                            putback.Clear();
+                                        }
+                                        else
+                                        {
+                                            putback.Add(choice);
+                                        }
+                                    }
+
+                                    context.ChoiceHelper.ShowYes = true;
+                                    context.ChoiceHelper.ShowNo = true;
+                                    context.ChoiceHelper.Text = "Shuffle your deck?";
+                                    var shuffleChoice = context.ChoiceHelper.ChooseOption();
+
+                                    if (shuffleChoice == OptionChoice.Yes)
+                                    {
+                                        context.SetArray("order", new int[0]);
+                                    }
+                                    else
+                                    {
+                                        var ids = putback.Select(card => card.ID).ToArray();
+                                        context.SetArray("order", ids);
+                                    }
                                 },
                                 Resolve = context =>
                                 {
-                                    var card = context.GetCard("target");
-                                    context.GameState.MoveCard(card, card.Owner.Hand);
+                                    var ids = context.GetArray("order");
+                                    if (ids.Length == 0)
+                                    {
+                                        context.GameState.ShuffleDeck(context.CastingPlayer);
+                                    }
+                                    else
+                                    {
+                                        var cards = ids.Select(id => context.GameState.GetByID(id) as Card);
+
+                                        foreach (var card in cards)
+                                        {
+                                            context.GameState.MoveCard(card, card.Owner.Banished);
+                                            context.GameState.MoveCard(card, card.Owner.Deck);
+                                        }
+                                    }
+
+                                    context.GameState.DrawCards(context.CastingPlayer, 1);
                                 }
                             }
                         };
@@ -360,7 +399,7 @@ namespace CardKartShared.GameState
                                 {
                                     return InHandAndOwned(context) &&
                                         ChannelsAreCastable(context) &&
-                                        ManaCostIsPayable(CastingCost, context);
+                                        ManaCostIsPayable(CastingCost);
                                 },
 
                                 MakeCastChoices = context =>
@@ -406,7 +445,7 @@ namespace CardKartShared.GameState
                             GenericCreatureOrRelicCast(),
                             new Ability {
                                 BreadText = "Exhaust: Deal 1 damage to target creature or player.",
-                                IsCastable = context => Location == PileLocation.Battlefield && !Token.Exhausted && context.CastingPlayer == Token.Controller,
+                                IsCastable = context => Location == PileLocation.Battlefield && !Token.IsExhausted && context.CastingPlayer == Token.Controller,
                                 MakeCastChoices = context => {
                                     context.ChoiceHelper.Text = "Choose a target for Throw Bomb.";
                                     context.ChoiceHelper.ShowCancel = true;
@@ -452,15 +491,15 @@ namespace CardKartShared.GameState
                                 BreadText = "Exhaust, Pay 1 blue mana: Draw a card.\n",
                                 IsCastable = context => 
                                     Location == PileLocation.Battlefield && 
-                                    !Token.Exhausted && 
+                                    !Token.IsExhausted && 
                                     context.CastingPlayer == Token.Controller &&
-                                    ManaCostIsPayable(abilityAManacost, context),
+                                    ManaCostIsPayable(abilityAManacost),
                                 MakeCastChoices = context => {
                                     return GenericPayManaChoice(abilityAManacost, context);
                                 },
                                 EnactCastChoices = context => {
                                     GenericPayManaEnact(context);
-                                    Token.Exhausted = true;
+                                    Token.IsExhausted = true;
                                     context.SetPlayer("drawer", context.CastingPlayer);
                                 },
                                 Resolve = context =>
@@ -473,9 +512,9 @@ namespace CardKartShared.GameState
                                 BreadText = "Exhaust, Pay 1 red mana: Deal 2 damage to target creature or player.",
                                 IsCastable = context => 
                                     Location == PileLocation.Battlefield && 
-                                    !Token.Exhausted && 
+                                    !Token.IsExhausted && 
                                     context.CastingPlayer == Token.Controller
-                                    && ManaCostIsPayable(abilityBManacost, context),
+                                    && ManaCostIsPayable(abilityBManacost),
                                 MakeCastChoices = context => {
                                     var payment = MakePayManaChoice(abilityBManacost, context, context.CastingPlayer);
                                     if (payment == null) { return false; }
@@ -491,7 +530,7 @@ namespace CardKartShared.GameState
                                 },
                                 EnactCastChoices = context => {
                                     MakePayManaChoice(context.GetManaSet("manacost"), context, context.CastingPlayer);
-                                    Token.Exhausted = true;
+                                    Token.IsExhausted = true;
                                 },
                                 Resolve = context =>
                                 {
@@ -527,7 +566,7 @@ namespace CardKartShared.GameState
                                     if (Location != PileLocation.Graveyard) { return false; }
                                     if (Owner != context.CastingPlayer) { return false; }
 
-                                    return ManaCostIsPayable(CastingCost, context) && ChannelsAreCastable(context);
+                                    return ManaCostIsPayable(CastingCost) && ChannelsAreCastable(context);
                                 },
 
                                 MakeCastChoices = context =>
@@ -555,7 +594,7 @@ namespace CardKartShared.GameState
                             new Ability{
                                 BreadText = "Look at target player's hand then draw a card.\n",
                                 MoveToStackOnCast = true,
-                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost, context),
+                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost),
                                 MakeCastChoices = context => {
                                     var manacost = MakePayManaChoice(CastingCost, context, context.CastingPlayer);
                                     if (manacost == null) { return false; }
@@ -621,7 +660,7 @@ namespace CardKartShared.GameState
                             new Ability{
                                 BreadText = "Counter target spell.",
                                 MoveToStackOnCast = true,
-                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost, context),
+                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost),
                                 MakeCastChoices = context => {
                                     var manacost = MakePayManaChoice(CastingCost, context, context.CastingPlayer);
                                     if (manacost == null) {return false; }
@@ -660,7 +699,7 @@ namespace CardKartShared.GameState
                             new Ability{
                                 BreadText = "Counter target spell unless it's owner pays 2 colorless mana.",
                                 MoveToStackOnCast = true,
-                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost, context),
+                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost),
                                 MakeCastChoices = context => {
                                     var manacost = MakePayManaChoice(CastingCost, context, context.CastingPlayer);
                                     if (manacost == null) {return false; }
@@ -715,7 +754,7 @@ namespace CardKartShared.GameState
                                 MoveToStackOnCast = true,
                                 BreadText = $"As an additional cost to casting {Name}; discard a card.\nDeal 4 damage to target creature.",
 
-                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost, context),
+                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost),
                                 MakeCastChoices = context => {
                                     var payment = MakePayManaChoice(CastingCost, context, context.CastingPlayer);
                                     if (payment == null) { return false; }
@@ -805,7 +844,7 @@ namespace CardKartShared.GameState
                                 MoveToStackOnCast = true,
                                 BreadText = "Return target creature to its owners hand.",
 
-                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost, context),
+                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost),
                                 MakeCastChoices = context => {
                                     var payment = MakePayManaChoice(CastingCost, context, context.CastingPlayer);
                                     if (payment == null) { return false; }
@@ -907,7 +946,7 @@ namespace CardKartShared.GameState
                                 IsCastable = context => {
                                     return InHandAndOwned(context) &&
                                         ChannelsAreCastable(context) &&
-                                        ManaCostIsPayable(CastingCost, context);
+                                        ManaCostIsPayable(CastingCost);
                                 },
                                 MakeCastChoices = context => {
                                     return GenericPayManaChoice(CastingCost, context);
@@ -938,7 +977,7 @@ namespace CardKartShared.GameState
                         Abilities = new[] {
                             GenericCreatureOrRelicCast(),
                             new TriggeredAbility{
-                                BreadText = $"At the start of your turn reveal the top card of your deck. If you reveal a scroll or a sorcery; destroy {Name} and summon a Purple 3/2 Insect token with Flying.",
+                                BreadText = $"At the start of your turn reveal the top card of your deck. If you reveal a scroll or a sorcery; destroy {Name} and summon a Purple 3/2 Mechanical token with Flying.",
                                 IsTriggeredBy = trigger => {
                                     if (trigger is GameTimeTrigger)
                                     {
@@ -963,7 +1002,7 @@ namespace CardKartShared.GameState
 
                                     if (topCard.Type == CardTypes.Scroll || topCard.Type == CardTypes.Channel)
                                     {
-                                        context.GameState.SummonToken(CardTemplates.InsectToken1, Token.Controller);
+                                        context.GameState.SummonToken(CardTemplates.MechanicalToken1, Token.Controller);
                                         context.GameState.MoveCard(this, Owner.Graveyard);
                                     }
                                 }
@@ -972,12 +1011,12 @@ namespace CardKartShared.GameState
                         };
                     } break;
 
-                case CardTemplates.InsectToken1:
+                case CardTemplates.MechanicalToken1:
                     {
-                        Name = "Insect";
+                        Name = "Mechanical";
                         Type = CardTypes.Creature;
                         Colour = ManaColour.Purple;
-                        CreatureType = CreatureTypes.Insect;
+                        CreatureType = CreatureTypes.Mechanical;
                         Rarity = CardRarities.Token;
                         CastingCost = new ManaSet();
 
@@ -1020,7 +1059,7 @@ namespace CardKartShared.GameState
                                 MoveToStackOnCast = true,
                                 BreadText = "Destroy target creature.",
 
-                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost, context),
+                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost),
                                 MakeCastChoices = context => {
                                     var payment = MakePayManaChoice(CastingCost, context, context.CastingPlayer);
                                     if (payment == null) { return false; }
@@ -1061,7 +1100,7 @@ namespace CardKartShared.GameState
 
                                 IsCastable = context => ChannelsAreCastable(context) && 
                                     InHandAndOwned(context) && 
-                                    ManaCostIsPayable(CastingCost, context),
+                                    ManaCostIsPayable(CastingCost),
 
                                 MakeCastChoices = context => {
                                     return GenericPayManaChoice(CastingCost, context);
@@ -1092,20 +1131,7 @@ namespace CardKartShared.GameState
                             GenericCreatureOrRelicCast(),
                             new TriggeredAbility {
                                 BreadText = $"Whenever {Name} deals damage to a player; draw a card.",
-                                IsTriggeredBy = trigger => {
-                                    if (trigger is DamageDoneTrigger)
-                                    {
-                                        var damageDoneTrigger = trigger as DamageDoneTrigger;
-
-                                        if (damageDoneTrigger.Source == this && damageDoneTrigger.Target.IsHero)
-                                        {
-                                            return true;
-                                        }
-                                    }
-                                    
-                                    return false;
-                                },
-
+                                IsTriggeredBy = ThisDealsDamageTrigger,
                                 Resolve = context => {
                                     context.GameState.DrawCards(context.CastingPlayer, 1);
                                 }
@@ -1272,7 +1298,7 @@ namespace CardKartShared.GameState
                             new Ability {
                                 MoveToStackOnCast = true,
                                 BreadText = "Deal 2 damage to all creatures.",
-                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost, context) && ChannelsAreCastable(context),
+                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost) && ChannelsAreCastable(context),
                                 MakeCastChoices = context => {
                                     return GenericPayManaChoice(CastingCost, context);
                                 },
@@ -1304,7 +1330,7 @@ namespace CardKartShared.GameState
                             new Ability {
                                 MoveToStackOnCast = true,
                                 BreadText = "Remove all creatures and relics on the battlefield from the game.",
-                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost, context) && ChannelsAreCastable(context),
+                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost) && ChannelsAreCastable(context),
                                 MakeCastChoices = context => {
                                     return GenericPayManaChoice(CastingCost, context);
                                 },
@@ -1338,7 +1364,7 @@ namespace CardKartShared.GameState
                                 MoveToStackOnCast = true,
                                 BreadText = "Deal 3 damage to target creature and 2 damage to its controller.",
 
-                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost, context),
+                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost),
                                 MakeCastChoices = context => {
                                     var payment = MakePayManaChoice(CastingCost, context, context.CastingPlayer);
                                     if (payment == null) { return false; }
@@ -1505,7 +1531,7 @@ namespace CardKartShared.GameState
                             new Ability{
                                 MoveToStackOnCast = true,
                                 BreadText = "Destroy all creatures.",
-                                IsCastable = context => InHandAndOwned(context) && ChannelsAreCastable(context) && ManaCostIsPayable(CastingCost, context),
+                                IsCastable = context => InHandAndOwned(context) && ChannelsAreCastable(context) && ManaCostIsPayable(CastingCost),
                                 MakeCastChoices = context => GenericPayManaChoice(CastingCost, context),
                                 EnactCastChoices = GenericPayManaEnact,
                                 Resolve = context => {
@@ -1748,7 +1774,7 @@ namespace CardKartShared.GameState
                             MoveToStackOnCast = true,
                             BreadText = "Destroy target relic.",
 
-                            IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost, context),
+                            IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost),
                             MakeCastChoices = context => {
                                 var payment = MakePayManaChoice(CastingCost, context, context.CastingPlayer);
                                 if (payment == null) { return false; }
@@ -1787,7 +1813,7 @@ namespace CardKartShared.GameState
 
                             new Ability {
                                 BreadText = "Exhaust, Pay 1 mana of any color: Gain 1 Red mana until the start of your next turn.",
-                                IsCastable = context => Location == PileLocation.Battlefield && !Token.Exhausted && context.CastingPlayer == Token.Controller,
+                                IsCastable = context => Location == PileLocation.Battlefield && !Token.IsExhausted && context.CastingPlayer == Token.Controller,
                                 MakeCastChoices = context => {
                                     return GenericPayManaChoice(new ManaSet(ManaColour.Colourless), context);
                                 },
@@ -1798,6 +1824,33 @@ namespace CardKartShared.GameState
                                 Resolve = context =>
                                 {
                                     context.GameState.GainTemporaryMana(context.CastingPlayer, ManaColour.Red, 1);
+                                }
+                            },
+
+                            new Ability {
+                                BreadText = $"Sacrifice {Name}: Deal 1 damage to target creature.",
+                                IsCastable = context => Location == PileLocation.Battlefield && context.CastingPlayer == Token.Controller,
+                                MakeCastChoices = context => {
+                                    Func<Token, bool> filter = token => token.IsValid && token.IsCreature;
+                                    if (context.GameState.AllTokens.Where(filter).Count() == 0) { return false; }
+
+                                    context.ChoiceHelper.Text = $"Choose a target for Fury.";
+                                    context.ChoiceHelper.ShowCancel = true;
+                                    var target = context.ChoiceHelper.ChooseToken(filter);
+                                    if (target == null) { return false; }
+
+                                    context.SetToken("!target", target);
+                                    return true;
+                                },
+                                EnactCastChoices = context => {
+                                    context.GameState.MoveCard(this, Owner.Graveyard);
+                                },
+                                Resolve = context =>
+                                {
+                                    var target = context.GetToken("!target");
+                                    if (!target.IsValid) { return; }
+
+                                    context.GameState.DealDamage(this, target, 1);
                                 }
                             }
                         };
@@ -1893,7 +1946,7 @@ namespace CardKartShared.GameState
 
                             new Ability {
                                 BreadText = "Exhaust, Pay 1 mana of any color: Gain 1 Purple mana until the start of your next turn.",
-                                IsCastable = context => Location == PileLocation.Battlefield && !Token.Exhausted && context.CastingPlayer == Token.Controller,
+                                IsCastable = context => Location == PileLocation.Battlefield && !Token.IsExhausted && context.CastingPlayer == Token.Controller,
                                 MakeCastChoices = context => {
                                     return GenericPayManaChoice(new ManaSet(ManaColour.Colourless), context);
                                 },
@@ -1905,7 +1958,40 @@ namespace CardKartShared.GameState
                                 {
                                     context.GameState.GainTemporaryMana(context.CastingPlayer, ManaColour.Purple, 1);
                                 }
+                            },
+
+                            new Ability {
+                                BreadText = $"Sacrifice {Name}: Give target creature Rampage.",
+                                IsCastable = context => Location == PileLocation.Battlefield && context.CastingPlayer == Token.Controller,
+                                MakeCastChoices = context => {
+                                    Func<Token, bool> filter = token => token.IsValid && token.IsCreature;
+                                    if (context.GameState.AllTokens.Where(filter).Count() == 0) { return false; }
+
+                                    context.ChoiceHelper.Text = $"Choose a target for Volatility.";
+                                    context.ChoiceHelper.ShowCancel = true;
+                                    var target = context.ChoiceHelper.ChooseToken(filter);
+                                    if (target == null) { return false; }
+
+                                    context.SetToken("!target", target);
+                                    return true;
+                                },
+                                EnactCastChoices = context => {
+                                    context.GameState.MoveCard(this, Owner.Graveyard);
+                                },
+                                Resolve = context =>
+                                {
+                                    var target = context.GetToken("!target");
+                                    if (!target.IsValid) { return; }
+
+                                    target.Auras.Add(new Aura{
+                                        ApplyAura = (token, gameState) => {
+                                            token.AuraModifiers.Keywords[KeywordAbilityNames.Rampage] = true;
+                                        }
+                                    });
+                                }
                             }
+
+
                         };
                     } break;
 
@@ -1922,7 +2008,7 @@ namespace CardKartShared.GameState
 
                             new Ability {
                                 BreadText = "Exhaust, Pay 1 mana of any color: Gain 1 Black mana until the start of your next turn.",
-                                IsCastable = context => Location == PileLocation.Battlefield && !Token.Exhausted && context.CastingPlayer == Token.Controller,
+                                IsCastable = context => Location == PileLocation.Battlefield && !Token.IsExhausted && context.CastingPlayer == Token.Controller,
                                 MakeCastChoices = context => {
                                     return GenericPayManaChoice(new ManaSet(ManaColour.Colourless), context);
                                 },
@@ -1933,6 +2019,38 @@ namespace CardKartShared.GameState
                                 Resolve = context =>
                                 {
                                     context.GameState.GainTemporaryMana(context.CastingPlayer, ManaColour.Black, 1);
+                                }
+                            },
+
+                            new Ability {
+                                BreadText = $"Sacrifice {Name}: Give target creature -1/-1.",
+                                IsCastable = context => Location == PileLocation.Battlefield && context.CastingPlayer == Token.Controller,
+                                MakeCastChoices = context => {
+                                    Func<Token, bool> filter = token => token.IsValid && token.IsCreature;
+                                    if (context.GameState.AllTokens.Where(filter).Count() == 0) { return false; }
+
+                                    context.ChoiceHelper.Text = $"Choose a target for Unsettle.";
+                                    context.ChoiceHelper.ShowCancel = true;
+                                    var target = context.ChoiceHelper.ChooseToken(filter);
+                                    if (target == null) { return false; }
+
+                                    context.SetToken("!target", target);
+                                    return true;
+                                },
+                                EnactCastChoices = context => {
+                                    context.GameState.MoveCard(this, Owner.Graveyard);
+                                },
+                                Resolve = context =>
+                                {
+                                    var target = context.GetToken("!target");
+                                    if (!target.IsValid) { return; }
+
+                                    target.Auras.Add(new Aura{
+                                        ApplyAura = (token, gameState) => {
+                                            token.AuraModifiers.Attack += -1;
+                                            token.AuraModifiers.Health += -1;
+                                        }
+                                    });
                                 }
                             }
                         };
@@ -1951,7 +2069,7 @@ namespace CardKartShared.GameState
 
                             new Ability {
                                 BreadText = "Exhaust, Pay 1 mana of any color: Gain 1 White mana until the start of your next turn.",
-                                IsCastable = context => Location == PileLocation.Battlefield && !Token.Exhausted && context.CastingPlayer == Token.Controller,
+                                IsCastable = context => Location == PileLocation.Battlefield && !Token.IsExhausted && context.CastingPlayer == Token.Controller,
                                 MakeCastChoices = context => {
                                     return GenericPayManaChoice(new ManaSet(ManaColour.Colourless), context);
                                 },
@@ -1962,6 +2080,38 @@ namespace CardKartShared.GameState
                                 Resolve = context =>
                                 {
                                     context.GameState.GainTemporaryMana(context.CastingPlayer, ManaColour.White, 1);
+                                }
+                            },
+
+                            new Ability {
+                                BreadText = $"Sacrifice {Name}: Give target creature +1/+1.",
+                                IsCastable = context => Location == PileLocation.Battlefield && context.CastingPlayer == Token.Controller,
+                                MakeCastChoices = context => {
+                                    Func<Token, bool> filter = token => token.IsValid && token.IsCreature;
+                                    if (context.GameState.AllTokens.Where(filter).Count() == 0) { return false; }
+
+                                    context.ChoiceHelper.Text = $"Choose a target for Radiance.";
+                                    context.ChoiceHelper.ShowCancel = true;
+                                    var target = context.ChoiceHelper.ChooseToken(filter);
+                                    if (target == null) { return false; }
+
+                                    context.SetToken("!target", target);
+                                    return true;
+                                },
+                                EnactCastChoices = context => {
+                                    context.GameState.MoveCard(this, Owner.Graveyard);
+                                },
+                                Resolve = context =>
+                                {
+                                    var target = context.GetToken("!target");
+                                    if (!target.IsValid) { return; }
+
+                                    target.Auras.Add(new Aura{
+                                        ApplyAura = (token, gameState) => {
+                                            token.AuraModifiers.Attack += 1;
+                                            token.AuraModifiers.Health += 1;
+                                        }
+                                    });
                                 }
                             }
                         };
@@ -1980,7 +2130,7 @@ namespace CardKartShared.GameState
 
                             new Ability {
                                 BreadText = "Exhaust, Pay 1 mana of any color: Gain 1 Green mana until the start of your next turn.",
-                                IsCastable = context => Location == PileLocation.Battlefield && !Token.Exhausted && context.CastingPlayer == Token.Controller,
+                                IsCastable = context => Location == PileLocation.Battlefield && !Token.IsExhausted && context.CastingPlayer == Token.Controller,
                                 MakeCastChoices = context => {
                                     return GenericPayManaChoice(new ManaSet(ManaColour.Colourless), context);
                                 },
@@ -1991,6 +2141,33 @@ namespace CardKartShared.GameState
                                 Resolve = context =>
                                 {
                                     context.GameState.GainTemporaryMana(context.CastingPlayer, ManaColour.Green, 1);
+                                }
+                            },
+
+                            new Ability {
+                                BreadText = $"Sacrifice {Name}: Restore 1 health to target creature.",
+                                IsCastable = context => Location == PileLocation.Battlefield && context.CastingPlayer == Token.Controller,
+                                MakeCastChoices = context => {
+                                    Func<Token, bool> filter = token => token.IsValid && token.IsCreature;
+                                    if (context.GameState.AllTokens.Where(filter).Count() == 0) { return false; }
+
+                                    context.ChoiceHelper.Text = $"Choose a target for Vibrate.";
+                                    context.ChoiceHelper.ShowCancel = true;
+                                    var target = context.ChoiceHelper.ChooseToken(filter);
+                                    if (target == null) { return false; }
+
+                                    context.SetToken("!target", target);
+                                    return true;
+                                },
+                                EnactCastChoices = context => {
+                                    context.GameState.MoveCard(this, Owner.Graveyard);
+                                },
+                                Resolve = context =>
+                                {
+                                    var target = context.GetToken("!target");
+                                    if (!target.IsValid) { return; }
+
+                                    context.GameState.RestoreHealth(this, target, 1);
                                 }
                             }
                         };
@@ -2008,8 +2185,8 @@ namespace CardKartShared.GameState
                             GenericCreatureOrRelicCast(),
 
                             new Ability {
-                                BreadText = "Exhaust, Pay 1 mana of any color: Gain 1 Blue mana until the start of your next turn.\n",
-                                IsCastable = context => Location == PileLocation.Battlefield && !Token.Exhausted && context.CastingPlayer == Token.Controller,
+                                BreadText = "Exhaust, Pay 1 mana of any color: Gain 1 Blue mana until the start of your next turn.",
+                                IsCastable = context => Location == PileLocation.Battlefield && !Token.IsExhausted && context.CastingPlayer == Token.Controller,
                                 MakeCastChoices = context => {
                                     return GenericPayManaChoice(new ManaSet(ManaColour.Colourless), context);
                                 },
@@ -2279,7 +2456,7 @@ namespace CardKartShared.GameState
                                 MoveToStackOnCast = true,
                                 BreadText = "Stun target creature.",
 
-                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost, context),
+                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost),
                                 MakeCastChoices = context => {
                                     var payment = MakePayManaChoice(CastingCost, context, context.CastingPlayer);
                                     if (payment == null) { return false; }
@@ -2303,6 +2480,608 @@ namespace CardKartShared.GameState
                             }
                         };
                     } break;
+
+                case CardTemplates.FrenziedVine:
+                    {
+                        Name = "Frenzied Vine";
+                        Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Plant;
+                        Rarity = CardRarities.Common;
+                        Colour = ManaColour.Green;
+                        CastingCost = new ManaSet(ManaColour.Green, ManaColour.Colourless);
+
+                        Attack = 2;
+                        Health = 1;
+
+                        Abilities = new[] {
+                            GenericCreatureOrRelicCast(),
+                            new TriggeredAbility {
+                                BreadText = $"When {Name} dies; draw a card.",
+                                IsTriggeredBy = ThisDiesTrigger,
+                                Resolve = context => {
+                                    context.GameState.DrawCards(context.CastingPlayer, 1);
+                                }
+                            }
+                        };
+                    } break;
+
+                case CardTemplates.WaterDown:
+                    {
+                        Name = "Water Down";
+                        Type = CardTypes.Scroll;
+                        Rarity = CardRarities.Common;
+                        Colour = ManaColour.Blue;
+                        CastingCost = new ManaSet(ManaColour.Blue);
+
+                        Abilities = new[] {
+                            new Ability{
+                                MoveToStackOnCast = true,
+                                BreadText = "Move the top 3 cards of target players deck into their graveyard.\nDraw a card.",
+                                IsCastable = context => InHandAndOwned(context) && ManaCostIsPayable(CastingCost),
+                                MakeCastChoices = context => {
+                                    var payment = MakePayManaChoice(CastingCost, context, context.CastingPlayer);
+                                    if (payment == null) { return false; }
+
+                                    context.ChoiceHelper.Text = $"Choose a target for {Name}.";
+                                    context.ChoiceHelper.ShowCancel = true;
+                                    var target = context.ChoiceHelper.ChoosePlayer();
+                                    if (target == null) { return false; }
+
+                                    context.SetManaSet("manacost", payment);
+                                    context.SetPlayer("!target", target);
+                                    return true;
+                                },
+                                EnactCastChoices = context => GenericPayManaEnact(context),
+                                Resolve = context =>
+                                {
+                                    var target = context.GetPlayer("!target");
+
+                                    for (int i = 0; i < 3; i++)
+                                    {
+                                        var card = target.Deck.TopCard();
+                                        if (card == null) { break; }
+                                        context.GameState.MoveCard(card, card.Owner.Graveyard);
+			                        }
+
+                                    context.GameState.DrawCards(context.CastingPlayer, 1);
+                                }
+                            }
+                        };
+                    } break;
+
+                case CardTemplates.TrollRider:
+                    {
+                        Name = "Troll Rider";
+                        Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Troll;
+                        Colour = ManaColour.Red;
+                        Rarity = CardRarities.Common;
+                        CastingCost = new ManaSet(ManaColour.Red, ManaColour.Colourless);
+
+                        Attack = 3;
+                        Health = 1;
+                        KeywordAbilities[KeywordAbilityNames.Rampage] = true;
+
+                        Abilities = new[] {
+                            GenericCreatureOrRelicCast(),
+                        };
+                    } break;
+
+                case CardTemplates.HunterOfTheNight:
+                    {
+                        Name = "Hunter of the Night";
+                        Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Vampire;
+                        Colour = ManaColour.Black;
+                        Rarity = CardRarities.Uncommon;
+                        CastingCost = new ManaSet(ManaColour.Black, ManaColour.Black, ManaColour.Colourless);
+
+                        Attack = 2;
+                        Health = 3;
+                        KeywordAbilities[KeywordAbilityNames.Lifesteal] = true;
+                        KeywordAbilities[KeywordAbilityNames.Flying] = true;
+
+                        Abilities = new[] {
+                            GenericCreatureOrRelicCast(),
+                        };
+                    } break;
+
+                case CardTemplates.JunkyardInnovator:
+                    {
+                        Name = "Junkyard Innovator";
+                        Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Human;
+                        Colour = ManaColour.Purple;
+                        Rarity = CardRarities.Common;
+                        CastingCost = new ManaSet(ManaColour.Purple, ManaColour.Purple, ManaColour.Colourless, ManaColour.Colourless);
+
+                        Attack = 2;
+                        Health = 4;
+
+                        Abilities = new[] {
+                            GenericCreatureOrRelicCast(),
+                            new Ability{
+                                BreadText = $"Discard a card: Give {Name} +3 attack and rampage until end of turn.",
+                                IsCastable = context => Location == PileLocation.Battlefield && Controller.Hand.Count > 0,
+                                MakeCastChoices = context => {
+                                    context.ChoiceHelper.ShowCancel = true;
+                                    context.ChoiceHelper.Text = "Choose a card to discard.";
+                                    var options = context.CastingPlayer.Hand;
+                                    var choice = context.ChoiceHelper.ChooseCardFromOptions(options, card => true);
+                                    if (choice == null) { return false; }
+
+                                    context.SetToken("token", Token);
+                                    context.SetCard("discard", choice);
+                                    return true;
+                                },
+                                EnactCastChoices = context => {
+                                    var discard = context.GetCard("discard");
+                                    context.GameState.MoveCard(discard, discard.Owner.Graveyard);
+                                },
+                                Resolve = context => {
+                                    var token = context.GetToken("token");
+                                    if (!token.IsValid) { return; }
+
+                                    token.Auras.Add(new Aura{
+                                        IsCancelledBy = EndOfTurnCancel,
+                                        ApplyAura = (token, gameState) => {
+                                            token.AuraModifiers.Attack += 3;
+                                            token.AuraModifiers.Keywords[KeywordAbilityNames.Rampage] = true;
+                                        }
+                                    });
+                                }
+                            }
+                        };
+                    } break;
+
+                case CardTemplates.Medusa:
+                    {
+                        Name = "Medusa";
+                        Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Demon;
+                        Colour = ManaColour.Green;
+                        Rarity = CardRarities.Legendary;
+                        CastingCost = new ManaSet(ManaColour.Green, ManaColour.Green, ManaColour.Green, ManaColour.Colourless);
+
+                        Attack = 3;
+                        Health = 4;
+
+                        KeywordAbilities[KeywordAbilityNames.Stoning] = true;
+                        KeywordAbilities[KeywordAbilityNames.Terrify] = true;
+
+                        Abilities = new[] {
+                            GenericCreatureOrRelicCast(),
+                        };
+                    } break;
+
+                case CardTemplates.Cockatrice:
+                    {
+                        Name = "Cockatrice";
+                        Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Beast;
+                        Colour = ManaColour.Purple;
+                        Rarity = CardRarities.Rare;
+                        CastingCost = new ManaSet(ManaColour.Purple, ManaColour.Colourless);
+
+                        Attack = 1;
+                        Health = 3;
+
+                        KeywordAbilities[KeywordAbilityNames.Stoning] = true;
+
+                        Abilities = new[] {
+                            GenericCreatureOrRelicCast(),
+                        };
+                    } break;
+
+                case CardTemplates.GardenAnt:
+                    {
+                        Name = "Garden Ant";
+                        Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Ant;
+                        Colour = ManaColour.Green;
+                        Rarity = CardRarities.Common;
+                        CastingCost = new ManaSet(ManaColour.Green);
+
+                        Attack = 1;
+                        Health = 1;
+
+
+                        Abilities = new[] {
+                            GenericCreatureOrRelicCast(),
+                        };
+
+                        Auras = new[] {
+                            new Aura{
+                                BreadText = $"Has +1/+1 as long as you control another Ant.",
+                                ApplyAura = (token, gameState) => {
+                                    foreach (var ally in token.Controller.Battlefield)
+                                    {
+                                        if (ally != token.TokenOf && ally.CreatureType == CreatureTypes.Ant)
+                                        {
+                                            token.AuraModifiers.Attack += 1;
+                                            token.AuraModifiers.Health += 1;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        };
+                    } break;
+
+                case CardTemplates.FireAnt:
+                    {
+                        Name = "Fire Ant";
+                        Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Ant;
+                        Colour = ManaColour.Mixed;
+                        Rarity = CardRarities.Common;
+                        CastingCost = new ManaSet(ManaColour.Green, ManaColour.Red);
+
+                        Attack = 2;
+                        Health = 2;
+
+                        var firebreathcost = new ManaSet(ManaColour.Red);
+
+                        Abilities = new[] {
+                            GenericCreatureOrRelicCast(),
+                            new Ability{
+                                BreadText = $"Pay 1 Red Mana: Give {Name} +1 Attack until end of turn.",
+                                IsCastable = context => Location == PileLocation.Battlefield && ManaCostIsPayable(firebreathcost),
+                                MakeCastChoices = context => {
+                                    if (Token == null) { return false; } // Paranoia.
+                                    context.SetToken("t", Token);
+                                    return GenericPayManaChoice(firebreathcost, context);
+                                },
+                                EnactCastChoices = context => GenericPayManaEnact(context),
+                                Resolve = context => {
+                                    var token = context.GetToken("t");
+                                    if (!token.IsValid) { return; }
+
+                                    token.Auras.Add(new Aura{
+                                        IsCancelledBy = EndOfTurnCancel,
+                                        ApplyAura = (token, gameState) => {
+                                            token.AuraModifiers.Attack += 1;
+                                        }
+                                    });
+                                }
+                            }
+                        };
+                    } break;
+
+                case CardTemplates.SoldierAnt:
+                    {
+                        Name = "Soldier Ant";
+                        Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Ant;
+                        Colour = ManaColour.Green;
+                        Rarity = CardRarities.Uncommon;
+                        CastingCost = new ManaSet(ManaColour.Green, ManaColour.Colourless);
+
+                        Attack = 3;
+                        Health = 1;
+                        KeywordAbilities[KeywordAbilityNames.Protected] = true;
+
+                        Abilities = new Ability[] {
+                            GenericCreatureOrRelicCast(),
+                        };
+                    } break;
+
+                case CardTemplates.AntQueen:
+                    {
+                        Name = "Ant Queen";
+                        Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Ant;
+                        Colour = ManaColour.Green;
+                        Rarity = CardRarities.Legendary;
+                        CastingCost = new ManaSet(ManaColour.Green, ManaColour.Green, ManaColour.Green);
+
+                        Attack = 1;
+                        Health = 4;
+
+                        Abilities = new Ability[] {
+                            GenericCreatureOrRelicCast(),
+                            new TriggeredAbility{
+                                BreadText = $"When {Name} deals damage; give all other Ants you control +1/+1.",
+                                IsTriggeredBy = ThisDealsDamageTrigger,
+                                Resolve = context => {
+                                    foreach (var allyCard in Controller.Battlefield)
+                                    {
+                                        if (allyCard.Token == null) { continue; } // Paranoia.
+                                        var allyToken = allyCard.Token;
+                                        if (allyCard != this && allyCard.CreatureType == CreatureTypes.Ant)
+                                        {
+                                            allyToken.Auras.Add(new Aura
+                                            {
+                                                ApplyAura = (token, gameState) =>{
+                                                    token.AuraModifiers.Attack += 1;
+                                                    token.AuraModifiers.Health += 1;
+                                                }
+                                            });
+                                        }
+                                    }
+                                }
+                            }
+                        };
+                    } break;
+
+                case CardTemplates.FleshEatingAnt:
+                    {
+                        Name = "Flesh Eating Ant";
+                        Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Ant;
+                        Colour = ManaColour.Green;
+                        Rarity = CardRarities.Common;
+                        CastingCost = new ManaSet(ManaColour.Green, ManaColour.Colourless, ManaColour.Colourless);
+
+                        Attack = 4;
+                        Health = 2;
+                        KeywordAbilities[KeywordAbilityNames.Lifesteal] = true;
+
+                        Abilities = new Ability[] {
+                            GenericCreatureOrRelicCast(),
+                        };
+                    }
+                    break;
+
+                case CardTemplates.AntToken1:
+                    {
+                        Name = "Ant";
+                        Type = CardTypes.Creature;
+                        CreatureType = CreatureTypes.Ant;
+                        Colour = ManaColour.Green;
+                        Rarity = CardRarities.Token;
+                        CastingCost = new ManaSet();
+
+                        Attack = 1;
+                        Health = 1;
+                    } break;
+
+                case CardTemplates.RedHero:
+                    {
+                        Name = "Fleshrender Nalthax";
+                        Type = CardTypes.Hero;
+                        Colour = ManaColour.Red;
+                        Rarity = CardRarities.Legendary;
+                        CastingCost = new ManaSet();
+
+                        Health = 20;
+
+                        var heropowercost = new ManaSet(Colour, Colour);
+
+                        Abilities = new Ability[] {
+                            new Ability{
+                                BreadText = "Exhaust, Pay 2 Red Mana: Deal 1 damage to target creature or player.",
+                                IsCastable = context => !Token.IsExhausted && ManaCostIsPayable(heropowercost),
+                                MakeCastChoices = context => {
+                                    var payment = MakePayManaChoice(heropowercost, context, context.CastingPlayer);
+                                    if (payment == null) { return false; }
+
+                                    context.ChoiceHelper.Text = $"Choose a target for Spit Fire.";
+                                    context.ChoiceHelper.ShowCancel = true;
+                                    var target = context.ChoiceHelper.ChooseToken(token => token.IsCreature || token.IsHero);
+                                    if (target == null) { return false; }
+
+                                    context.SetManaSet("manacost", payment);
+                                    context.SetToken("!target", target);
+                                    return true;
+                                },
+                                EnactCastChoices = context => GenericPayManaEnact(context),
+                                Resolve = context =>
+                                {
+                                    var target = context.GetToken("!target");
+                                    if (!target.IsValid) { return; }
+                                    context.GameState.DealDamage(this, target, 1);
+                                }
+                            }
+                        };
+                    } break;
+
+                case CardTemplates.WhiteHero:
+                    {
+                        Name = "Taldiel, Hand of Light";
+                        Type = CardTypes.Hero;
+                        Colour = ManaColour.White;
+                        Rarity = CardRarities.Legendary;
+                        CastingCost = new ManaSet();
+
+                        Health = 20;
+
+                        var heropowercost = new ManaSet(Colour, Colour);
+
+                        Abilities = new Ability[] {
+                            new Ability{
+                                BreadText = "Exhaust, Pay 2 White Mana: Give target Creature +1/+1.",
+                                IsCastable = context => !Token.IsExhausted && ManaCostIsPayable(heropowercost),
+                                MakeCastChoices = context => {
+                                    var payment = MakePayManaChoice(heropowercost, context, context.CastingPlayer);
+                                    if (payment == null) { return false; }
+
+                                    context.ChoiceHelper.Text = $"Choose a target for Bolster.";
+                                    context.ChoiceHelper.ShowCancel = true;
+                                    var target = context.ChoiceHelper.ChooseToken(token => token.IsCreature);
+                                    if (target == null) { return false; }
+
+                                    context.SetManaSet("manacost", payment);
+                                    context.SetToken("!target", target);
+                                    return true;
+                                },
+                                EnactCastChoices = context => GenericPayManaEnact(context),
+                                Resolve = context =>
+                                {
+                                    var target = context.GetToken("!target");
+                                    if (!target.IsValid) { return; }
+
+                                    target.Auras.Add(new Aura{
+                                        ApplyAura = (token, gameState) => {
+                                            token.AuraModifiers.Attack += 1;
+                                            token.AuraModifiers.Health += 1;
+                                        }
+                                    });
+                                }
+                            }
+                        };
+                    }
+                    break;
+
+                case CardTemplates.PurpleHero:
+                    {
+                        Name = "Dr Kelbans";
+                        Type = CardTypes.Hero;
+                        Colour = ManaColour.Purple;
+                        Rarity = CardRarities.Legendary;
+                        CastingCost = new ManaSet();
+
+                        Health = 20;
+
+                        var heropowercost = new ManaSet(Colour, Colour);
+
+                        Abilities = new Ability[] {
+                            new Ability{
+                                BreadText = "Exhaust, Pay 2 Purple Mana, Pay 2 Health: Draw a card.",
+                                IsCastable = context => !Token.IsExhausted && ManaCostIsPayable(heropowercost) && Token.CurrentHealth > 2,
+                                MakeCastChoices = context => GenericPayManaChoice(heropowercost, context),
+                                EnactCastChoices = context => {
+                                    context.GameState.DealDamage(this, Token, 2);
+                                    GenericPayManaEnact(context);
+                                },
+                                Resolve = context =>
+                                {
+                                    context.GameState.DrawCards(context.CastingPlayer, 1);
+                                }
+                            }
+                        };
+                    }
+                    break;
+
+                case CardTemplates.GreenHero:
+                    {
+                        Name = "Aelthys Tal'Aal";
+                        Type = CardTypes.Hero;
+                        Colour = ManaColour.Green;
+                        Rarity = CardRarities.Legendary;
+                        CastingCost = new ManaSet();
+
+                        Health = 20;
+
+                        var heropowercost = new ManaSet(Colour, Colour);
+
+                        Abilities = new Ability[] {
+                            new Ability{
+                                BreadText = "Exhaust, Pay 2 Green Mana: Restore 2 health to target creature or player.",
+                                IsCastable = context => !Token.IsExhausted && ManaCostIsPayable(heropowercost),
+                                MakeCastChoices = context => {
+                                    var payment = MakePayManaChoice(heropowercost, context, context.CastingPlayer);
+                                    if (payment == null) { return false; }
+
+                                    context.ChoiceHelper.Text = $"Choose a target for Rejuvenate.";
+                                    context.ChoiceHelper.ShowCancel = true;
+                                    var target = context.ChoiceHelper.ChooseToken(token => token.IsCreature || token.IsHero);
+                                    if (target == null) { return false; }
+
+                                    context.SetManaSet("manacost", payment);
+                                    context.SetToken("!target", target);
+                                    return true;
+                                },
+                                EnactCastChoices = context => GenericPayManaEnact(context),
+                                Resolve = context =>
+                                {
+                                    var target = context.GetToken("!target");
+                                    if (!target.IsValid) { return; }
+                                    context.GameState.RestoreHealth(this, target, 2);
+                                }
+                            }
+                        };
+                    }
+                    break;
+
+                case CardTemplates.BlackHero:
+                    {
+                        Name = "Arch Lich Eris";
+                        Type = CardTypes.Hero;
+                        Colour = ManaColour.Black;
+                        Rarity = CardRarities.Legendary;
+                        CastingCost = new ManaSet();
+
+                        Health = 20;
+
+                        var heropowercost = new ManaSet(Colour, Colour);
+
+                        Abilities = new Ability[] {
+                            new Ability{
+                                BreadText = "Exhaust, Pay 2 Black Mana: Give target Creature -2 Attack.",
+                                IsCastable = context => !Token.IsExhausted && ManaCostIsPayable(heropowercost),
+                                MakeCastChoices = context => {
+                                    var payment = MakePayManaChoice(heropowercost, context, context.CastingPlayer);
+                                    if (payment == null) { return false; }
+
+                                    context.ChoiceHelper.Text = $"Choose a target for Weaken.";
+                                    context.ChoiceHelper.ShowCancel = true;
+                                    var target = context.ChoiceHelper.ChooseToken(token => token.IsCreature);
+                                    if (target == null) { return false; }
+
+                                    context.SetManaSet("manacost", payment);
+                                    context.SetToken("!target", target);
+                                    return true;
+                                },
+                                EnactCastChoices = context => GenericPayManaEnact(context),
+                                Resolve = context =>
+                                {
+                                    var target = context.GetToken("!target");
+                                    if (!target.IsValid) { return; }
+
+                                    target.Auras.Add(new Aura{
+                                        ApplyAura = (token, gameState) => {
+                                            token.AuraModifiers.Attack += -2;
+                                        }
+                                    });
+                                }
+                            }
+                        };
+                    }
+                    break;
+
+                case CardTemplates.BlueHero:
+                    {
+                        Name = "Master Mage Haltram";
+                        Type = CardTypes.Hero;
+                        Colour = ManaColour.Blue;
+                        Rarity = CardRarities.Legendary;
+                        CastingCost = new ManaSet();
+
+                        Health = 20;
+
+                        var heropowercost = new ManaSet(Colour, Colour);
+
+                        Abilities = new Ability[] {
+                            new Ability{
+                                BreadText = "Exhaust, Pay 2 Blue Mana: Look at the top card of your deck. You may put that card at the bottom of your deck.",
+                                IsCastable = context => !Token.IsExhausted && ManaCostIsPayable(heropowercost),
+                                MakeCastChoices = context => GenericPayManaChoice(heropowercost, context),
+                                EnactCastChoices = context => GenericPayManaEnact(context),
+                                MakeResolveChoicesCastingPlayer = context => {
+                                    var topCard = context.CastingPlayer.Deck.TopCard();
+                                    context.ChoiceHelper.ShowCards(new Card[] { topCard });
+
+                                    context.ChoiceHelper.ShowYes = true;
+                                    context.ChoiceHelper.ShowNo = true;
+                                    context.ChoiceHelper.Text = "Move card to bottom?";
+                                    var choice = context.ChoiceHelper.ChooseOption();
+                                    if (choice == OptionChoice.Yes)
+                                    {
+                                        context.SetCard("move", topCard);
+                                    }
+                                },
+                                Resolve = context =>
+                                {
+                                    var moveCard = context.GetCard("move");
+                                    if (moveCard == null) { return; }
+                                    context.CastingPlayer.Deck.MoveToBottom(moveCard);
+                                }
+                            }
+                        };
+                    }
+                    break;
+
 
                 default:
                     {
@@ -2387,6 +3166,22 @@ namespace CardKartShared.GameState
 
         #region Helper Functions
 
+        private bool ThisDiesTrigger(Trigger trigger)
+        {
+            if (trigger is MoveTrigger)
+            {
+                var moveTrigger = trigger as MoveTrigger;
+
+                if (moveTrigger.Card == this && 
+                    moveTrigger.From.Location == PileLocation.Battlefield && 
+                    moveTrigger.To.Location == PileLocation.Graveyard)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private bool YouCastScrollOrSorceryTrigger(Trigger trigger)
         {
             // Only triggers from Battlefield.
@@ -2401,6 +3196,21 @@ namespace CardKartShared.GameState
                     return true;
                 }
             }
+            return false;
+        }
+
+        private bool ThisDealsDamageTrigger(Trigger trigger)
+        {
+            if (trigger is DamageDoneTrigger)
+            {
+                var damageDoneTrigger = trigger as DamageDoneTrigger;
+
+                if (damageDoneTrigger.Source == this && damageDoneTrigger.Target.IsHero)
+                {
+                    return true;
+                }
+            }
+
             return false;
         }
 
@@ -2539,9 +3349,12 @@ namespace CardKartShared.GameState
             return true;
         }
 
-        private bool ManaCostIsPayable(ManaSet cost, AbilityCastingContext context)
+        /// <summary>
+        /// Checks if Controllers current mana covers the given cost.
+        /// </summary>
+        private bool ManaCostIsPayable(ManaSet cost)
         {
-            return context.CastingPlayer.CurrentMana.Covers(cost);
+            return Controller.CurrentMana.Covers(cost);
 
         }
 
@@ -2553,7 +3366,7 @@ namespace CardKartShared.GameState
 
                 IsCastable = context =>
                 {
-                    return InHandAndOwned(context) && ManaCostIsPayable(CastingCost, context) && ChannelsAreCastable(context);
+                    return InHandAndOwned(context) && ManaCostIsPayable(CastingCost) && ChannelsAreCastable(context);
                 },
 
                 MakeCastChoices = context =>
@@ -2570,7 +3383,7 @@ namespace CardKartShared.GameState
 
         private bool GenericPayManaChoice(ManaSet cost, AbilityCastingContext context)
         {
-            var payment = MakePayManaChoice(cost, context, context.CastingPlayer);
+            var payment = MakePayManaChoice(cost, context, Controller);
             if (payment == null) { return false; }
 
             context.SetManaSet("manacost", payment);
@@ -2624,7 +3437,11 @@ namespace CardKartShared.GameState
         Demon,
         Guardian,
         Ant,
-        Centaur
+        Centaur,
+        Plant,
+        Troll,
+        Vampire,
+
     }
 
     public enum CardTemplates
@@ -2652,7 +3469,7 @@ namespace CardKartShared.GameState
         SquireToken1,
         CallToArms,
         ExiledScientist,
-        InsectToken1,
+        MechanicalToken1,
         SilvervenomSpider,
         Eliminate,
         Inspiration,
@@ -2700,8 +3517,25 @@ namespace CardKartShared.GameState
         KeeperOfCuriosities,
         BeaconKeeper,
         Knock,
-
-        HeroTest,
+        FrenziedVine,
+        WaterDown,
+        TrollRider,
+        HunterOfTheNight,
+        JunkyardInnovator,
+        Medusa,
+        Cockatrice,
+        GardenAnt,
+        FleshEatingAnt,
+        AntQueen,
+        FireAnt,
+        AntToken1,
+        SoldierAnt,
+        WhiteHero,
+        RedHero,
+        BlueHero,
+        BlackHero,
+        GreenHero,
+        PurpleHero,
     }
 
     public enum CardRarities

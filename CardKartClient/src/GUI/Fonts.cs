@@ -30,6 +30,16 @@ namespace CardKartClient.GUI
                 
             };
 
+        public static QFontRenderOptions RedRenderOptions { get; } =
+            new QFontRenderOptions
+            {
+                DropShadowActive = false,
+                Colour = Color.Red,
+                WordSpacing = 0.2f,
+                CharacterSpacing = 0.0f,
+
+            };
+
         public static QFontRenderOptions BigRenderOptions { get; } =
             new QFontRenderOptions
             {

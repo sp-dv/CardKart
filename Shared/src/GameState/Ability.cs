@@ -92,6 +92,7 @@ namespace CardKartShared.GameState
 
         public Card GetCard(string key)
         {
+            if (!Choices.Singletons.ContainsKey(key)) { return null; }
             return GameState.GetByID(Choices.Singletons[key]) as Card;
         }
 
@@ -102,6 +103,7 @@ namespace CardKartShared.GameState
 
         public Token GetToken(string key)
         {
+            if (!Choices.Singletons.ContainsKey(key)) { return null; }
             return GameState.GetByID(Choices.Singletons[key]) as Token;
         }
 
@@ -112,6 +114,7 @@ namespace CardKartShared.GameState
 
         public Player GetPlayer(string key)
         {
+            if (!Choices.Singletons.ContainsKey(key)) { return null; }
             return GameState.GetByID(Choices.Singletons[key]) as Player;
         }
 
@@ -120,16 +123,23 @@ namespace CardKartShared.GameState
             Choices.Arrays[key] = set.ToInts();
         }
 
-        public bool HasSingleton(string key)
-        {
-            return Choices.Singletons.ContainsKey(key);
-        }
-
         public ManaSet GetManaSet(string key)
         {
+            if (!Choices.Arrays.ContainsKey(key)) { return null; }
             var set = new ManaSet();
             set.FromInts(Choices.Arrays[key]);
             return set;
+        }
+
+        public void SetArray(string key, int[] values)
+        {
+            Choices.Arrays[key] = values;
+        }
+
+        public int[] GetArray(string key)
+        {
+            if (!Choices.Arrays.ContainsKey(key)) { return null; }
+            return Choices.Arrays[key];
         }
     }
 }

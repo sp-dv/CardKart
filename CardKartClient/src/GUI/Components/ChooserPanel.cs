@@ -14,6 +14,8 @@ namespace CardKartClient.GUI.Components
         public SmartTextPanel PassButton;
         public SmartTextPanel OkButton;
         public SmartTextPanel CancelButton;
+        public SmartTextPanel YesButton;
+        public SmartTextPanel NoButton;
 
         public SmartTextPanel MainText;
         public ManaButtonBar ManaChoices;
@@ -53,6 +55,20 @@ namespace CardKartClient.GUI.Components
             CancelButton.Clicked += () => OptionClicked?.Invoke(OptionChoice.Cancel);
             Components.Add(CancelButton);
 
+            YesButton = new SmartTextPanel();
+            YesButton.Text = "Yes";
+            YesButton.BackgroundImage = Textures.Button1;
+            YesButton.Alignment = QuickFont.QFontAlignment.Centre;
+            YesButton.Clicked += () => OptionClicked?.Invoke(OptionChoice.Yes);
+            Components.Add(YesButton);
+
+            NoButton = new SmartTextPanel();
+            NoButton.Text = "No";
+            NoButton.BackgroundImage = Textures.Button1;
+            NoButton.Alignment = QuickFont.QFontAlignment.Centre;
+            NoButton.Clicked += () => OptionClicked?.Invoke(OptionChoice.No);
+            Components.Add(NoButton);
+
             MainText = new SmartTextPanel();
             Components.Add(MainText);
 
@@ -77,6 +93,8 @@ namespace CardKartClient.GUI.Components
             PassButton.Visible = ChoiceHelper.ShowPass;
             OkButton.Visible = ChoiceHelper.ShowOk;
             CancelButton.Visible = ChoiceHelper.ShowCancel;
+            YesButton.Visible = ChoiceHelper.ShowYes;
+            NoButton.Visible = ChoiceHelper.ShowNo;
 
             ManaChoices.Visible = ChoiceHelper.ShowManaChoices;
 
@@ -106,6 +124,18 @@ namespace CardKartClient.GUI.Components
             CancelButton.Width = 0.12f;
             CancelButton.Height = 0.07f;
             CancelButton.Layout();
+
+            YesButton.X = X + 0.05f;
+            YesButton.Y = Y + 0.15f;
+            YesButton.Width = 0.12f;
+            YesButton.Height = 0.07f;
+            YesButton.Layout();
+
+            NoButton.X = X + 0.2f;
+            NoButton.Y = Y + 0.15f;
+            NoButton.Width = 0.12f;
+            NoButton.Height = 0.07f;
+            NoButton.Layout();
 
             MainText.X = X + 0.02f;
             MainText.Y = Y + Height - 0.1f;

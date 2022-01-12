@@ -100,7 +100,7 @@ namespace CardKartShared.GameState
             {
                 player1Deck = LoadDeckDelegate();
                 var choices = new GameChoice();
-                choices.Arrays["deck"] = player1Deck.CardTemplates.Select(template => (int)template).ToArray();
+                choices.Arrays["deck"] = player1Deck.AllTemplates.Select(template => (int)template).ToArray();
                 GameChoiceSynchronizer.SendChoice(choices);
             }
             else
@@ -114,7 +114,7 @@ namespace CardKartShared.GameState
             {
                 player2Deck = LoadDeckDelegate();
                 var choices = new GameChoice();
-                choices.Arrays["deck"] = player2Deck.CardTemplates.Select(template => (int)template).ToArray();
+                choices.Arrays["deck"] = player2Deck.AllTemplates.Select(template => (int)template).ToArray();
                 GameChoiceSynchronizer.SendChoice(choices);
             }
             else
@@ -133,6 +133,9 @@ namespace CardKartShared.GameState
 
             GameState.DrawCards(GameState.Player1, 4);
             GameState.DrawCards(GameState.Player2, 4);
+
+            Mulligan(GameState.Player1);
+            Mulligan(GameState.Player2);
         }
 
         private void GameLoop()
@@ -170,33 +173,43 @@ namespace CardKartShared.GameState
                 }
                 else
                 {
-                    token.Exhausted = false;
+                    token.IsExhausted = false;
                 }
             }
+            GameState.Player1.HeroToken.IsExhausted = false;
+            GameState.Player2.HeroToken.IsExhausted = false;
+
             EnforceGameRules(true);
 
-            if (GameState.End != 0)
+            if (GameState.End != 1)
             {
                 GameState.DrawCards(ActivePlayer, 1);
                 EnforceGameRules(true);
             }
 
             ManaColour colour;
-            if (ActivePlayer == Hero)
+            if (GameState.Turn == 1)
             {
-                ChoiceHelper.Text = "Choose a mana colour to gain.";
-                colour = ChoiceHelper.ChooseColour(c => true);
-                var choice = new GameChoice();
-                choice.Singletons["_colour"] = (int)colour;
-                GameChoiceSynchronizer.SendChoice(choice);
+                colour = ActivePlayer.HeroCard.Colour;
             }
             else
             {
-                ChoiceHelper.ShowText("Opponent is choosing mana to gain.");
-                var choice = GameChoiceSynchronizer.ReceiveChoice();
-                ChoiceHelper.ResetGUIOptions();
+                if (ActivePlayer == Hero)
+                {
+                    ChoiceHelper.Text = "Choose a mana colour to gain.";
+                    colour = ChoiceHelper.ChooseColour(c => true);
+                    var choice = new GameChoice();
+                    choice.Singletons["_colour"] = (int)colour;
+                    GameChoiceSynchronizer.SendChoice(choice);
+                }
+                else
+                {
+                    ChoiceHelper.ShowText("Opponent is choosing mana to gain.");
+                    var choice = GameChoiceSynchronizer.ReceiveChoice();
+                    ChoiceHelper.ResetGUIOptions();
 
-                colour = (ManaColour)choice.Singletons["_colour"];
+                    colour = (ManaColour)choice.Singletons["_colour"];
+                }
             }
 
             GameState.GainPermanentMana(ActivePlayer, colour);
@@ -359,6 +372,19 @@ namespace CardKartShared.GameState
 
             var unblockedAttackers = attackers.ToList();
 
+            var rampageDamageDict = new Dictionary<Token, int>();
+            foreach (var attacker in attackers)
+            {
+                if (attacker.HasKeywordAbility(KeywordAbilityNames.Rampage))
+                {
+                    rampageDamageDict[attacker] = attacker.Attack;
+                }
+                else
+                {
+                    rampageDamageDict[attacker] = 0;
+                }
+            }
+
             foreach (var pair in defenders)
             {
                 var blocker = pair.Item1;
@@ -369,8 +395,11 @@ namespace CardKartShared.GameState
                     unblockedAttackers.Remove(blocked);
                 }
 
+                rampageDamageDict[blocked] -= blocker.CurrentHealth;
+
                 GameState.DealDamage(blocker.TokenOf, blocked, blocker.Attack);
                 GameState.DealDamage(blocked.TokenOf, blocker, blocked.Attack);
+
             }
 
             foreach (var unblocked in unblockedAttackers)
@@ -383,6 +412,8 @@ namespace CardKartShared.GameState
 
             foreach (var attacker in attackers)
             {
+                var rampageDamage = rampageDamageDict[attacker];
+                if (rampageDamage > 0) { GameState.DealDamage(attacker.TokenOf, InactivePlayer.HeroToken, rampageDamage); }
                 if (!attacker.HasKeywordAbility(KeywordAbilityNames.Vigilance))
                 {
                     GameState.ExhaustToken(attacker);
@@ -634,6 +665,52 @@ namespace CardKartShared.GameState
                 ResolveStack();
             }
         }
+
+        private void Mulligan(Player player)
+        {
+            bool grace = true;
+            while (player.Hand.Count > 1)
+            {
+                int newHandSize = player.Hand.Count - 1;
+
+                if (grace)
+                {
+                    newHandSize++;
+                    grace = false;
+                }
+
+                bool mulligan;
+                if (Hero == player)
+                {
+                    ChoiceHelper.ShowYes = true;
+                    ChoiceHelper.ShowNo = true;
+                    ChoiceHelper.Text = $"Mulligan to {newHandSize} cards?";
+                    var optionChoice = ChoiceHelper.ChooseOption();
+                    
+                    var choice = new GameChoice();
+                    mulligan = optionChoice == OptionChoice.Yes;
+                    choice.Singletons["_c"] = mulligan ? 1 : 0;
+                    GameChoiceSynchronizer.SendChoice(choice);
+                }
+                else
+                {
+                    ChoiceHelper.ShowText("Opponent is choosing whether to mulligan or not.");
+                    var choice = GameChoiceSynchronizer.ReceiveChoice();
+                    mulligan = choice.Singletons["_c"] == 1;
+                }
+
+                if (mulligan)
+                {
+                    while (player.Hand.Count > 0)
+                    {
+                        GameState.MoveCard(player.Hand.TopCard(), player.Deck);
+                    }
+                    GameState.ShuffleDeck(player);
+                    GameState.DrawCards(player, newHandSize);
+                }
+                else { return; }
+            }
+        }
     }
 
     public interface GameChoiceSynchronizer
@@ -708,6 +785,8 @@ namespace CardKartShared.GameState
         public bool ShowPass;
         public bool ShowOk;
         public bool ShowCancel;
+        public bool ShowYes;
+        public bool ShowNo;
         public bool ShowManaChoices;
 
         public IEnumerable<Card> CardChoices { get; private set; }
@@ -738,6 +817,10 @@ namespace CardKartShared.GameState
                 {
                     return filter((pcs.GameObject as Token).TokenOf);
                 }
+                if (pcs.GameObject is Player)
+                {
+                    return filter((pcs.GameObject as Player).HeroCard);
+                }
                 return false;
             });
             ResetGUIOptions();
@@ -745,6 +828,7 @@ namespace CardKartShared.GameState
             if (choice.IsOptionChoice) { return null; }
             else if (choice.GameObject is Card) { return choice.GameObject as Card; }
             else if (choice.GameObject is Token) { return (choice.GameObject as Token).TokenOf; }
+            else if (choice.GameObject is Player) { return (choice.GameObject as Player).HeroCard; }
             throw new NotImplementedException();
         }
 
@@ -862,6 +946,19 @@ namespace CardKartShared.GameState
             else { return choice.GameObject as Player; }
         }
 
+        public OptionChoice ChooseOption()
+        {
+            RequestGUIUpdate?.Invoke();
+            var choice = PlayerChoiceSaxophone.Listen(pcs =>
+            {
+                if (pcs.IsOptionChoice) { return true; }
+                return false;
+            });
+            ResetGUIOptions();
+
+            return choice.OptionChoice;
+        }
+
         public AbilityCastingContext ChooseCastingContext(Func<AbilityCastingContext, bool> filter)
         {
             RequestGUIUpdate?.Invoke();
@@ -893,6 +990,8 @@ namespace CardKartShared.GameState
             ShowPass = false;
             ShowOk = false;
             ShowCancel = false;
+            ShowYes = false;
+            ShowNo = false;
             ShowManaChoices = false;
 
             CardChoices = null;

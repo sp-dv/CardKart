@@ -22,9 +22,9 @@ namespace CardKartShared.GameState
 
         private Random RNG;
 
-        public int End { get; private set; }
+        public int End { get; private set; } // 1, 2, 3, 4, 5...
 
-        public int Turn => (End / 2) + 1;
+        public int Turn => ((End - 1) / 2) + 1; // 1, 1, 2, 2, 3...
 
         public IEnumerable<Token> AllTokens =>
             Player1.Battlefield
@@ -64,20 +64,20 @@ namespace CardKartShared.GameState
 
         public void LoadDecks(Deck deckPlayer1, Deck deckPlayer2)
         {
-            var heroCard1 = CreateCard(CardTemplates.HeroTest, Player1);
+            var heroCard1 = CreateCard(deckPlayer1.HeroCardTemplate, Player1);
             var heroToken1 = CreateToken(heroCard1);
             Player1.HeroCard = heroCard1;
 
             Player1.Deck.Add(
-                deckPlayer1.CardTemplates.Select(template => CreateCard(template, Player1)).ToArray());
+                deckPlayer1.DeckTemplates.Select(template => CreateCard(template, Player1)).ToArray());
 
-            var heroCard2 = CreateCard(CardTemplates.HeroTest, Player2);
+            var heroCard2 = CreateCard(deckPlayer2.HeroCardTemplate, Player2);
             heroCard2.Owner = Player2;
             var heroToken2 = CreateToken(heroCard2);
             Player2.HeroCard = heroCard2;
 
             Player2.Deck.Add(
-                deckPlayer2.CardTemplates.Select(template => CreateCard(template, Player2)).ToArray());
+                deckPlayer2.DeckTemplates.Select(template => CreateCard(template, Player2)).ToArray());
         }
 
         public GameObject GetByID(int gameID)
@@ -268,6 +268,16 @@ namespace CardKartShared.GameState
                 return;
             }
 
+            if (source.Token != null && source.Token.HasKeywordAbility(KeywordAbilityNames.Lifesteal))
+            {
+                RestoreHealth(source, source.Controller.HeroToken, amount);
+            }
+
+            if (source.Token != null && source.Token.HasKeywordAbility(KeywordAbilityNames.Stoning))
+            {
+                StunToken(target);
+            }
+
             target.DamageTaken += amount;
 
             if (target.TokenOf.IsHero)
@@ -314,12 +324,12 @@ namespace CardKartShared.GameState
 
         public void ExhaustToken(Token exhaustee)
         {
-            exhaustee.Exhausted = true;
+            exhaustee.IsExhausted = true;
         }
 
         public void StunToken(Token stunee)
         {
-            stunee.Exhausted = true;
+            stunee.IsExhausted = true;
             stunee.Stunned = true;
         }
 

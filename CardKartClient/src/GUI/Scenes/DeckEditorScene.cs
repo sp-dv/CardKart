@@ -82,7 +82,7 @@ namespace CardKartClient.GUI.Scenes
                 .OrderBy(card => card.Colour)
                 .ThenBy(card => card.CastingCost.Size)
                 .ThenBy(card => card.Name)
-                //.Where(card => !card.IsTokenCard)
+                .Where(card => !card.IsTokenCard)
                 .ToArray();
 
             DeckPanel = new DeckPanel();

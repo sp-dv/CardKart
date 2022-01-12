@@ -8,11 +8,24 @@ namespace CardKartShared.GameState
 {
     public class Deck
     {
-        public CardTemplates[] CardTemplates;
+        public CardTemplates HeroCardTemplate;
+        public CardTemplates[] DeckTemplates;
+        public CardTemplates[] AllTemplates => (new CardTemplates[] { HeroCardTemplate }).Concat(DeckTemplates).ToArray();
 
-        public Deck(CardTemplates[] cardTemplates)
+        public Deck(CardTemplates heroTemplate, CardTemplates[] deckTemplates)
         {
-            CardTemplates = cardTemplates;
+            HeroCardTemplate = heroTemplate;
+            DeckTemplates = deckTemplates;
+        }
+
+        public Deck(CardTemplates[] allTemplates)
+        {
+            HeroCardTemplate = allTemplates[0];
+            DeckTemplates = allTemplates.Skip(1).ToArray();
+        }
+
+        public Deck()
+        {
         }
     }
 }

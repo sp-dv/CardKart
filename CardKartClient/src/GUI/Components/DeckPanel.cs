@@ -14,6 +14,10 @@ namespace CardKartClient.GUI.Components
     {
         public event RequestInfoDisplayHandler RequestInfoDisplay;
 
+        private SmartTextPanel CardCountPanel;
+        private SmartTextPanel HeroNamePanel;
+
+        private Card HeroCard;
         private IEnumerable<DeckSubComponent> SubComponents => 
             Components.Where(component => component is DeckSubComponent).Cast<DeckSubComponent>();
 
@@ -21,33 +25,48 @@ namespace CardKartClient.GUI.Components
         {
             Width = Constants.GUI.DeckPanelWidth;
             Height = Constants.GUI.DeckPanelHeight;
+
+            CardCountPanel = new SmartTextPanel();
+            CardCountPanel.Font = Fonts.MainFont14;
+            Components.Add(CardCountPanel);
+
+            HeroNamePanel = new SmartTextPanel();
+            HeroNamePanel.MouseEnteredEvent += () => RequestInfoDisplay?.Invoke(HeroCard);
+            HeroNamePanel.MouseExitedEvent += () => RequestInfoDisplay?.Invoke(null);
+            Components.Add(HeroNamePanel);
         }
 
         public void AddCard(Card card)
         {
-            var existingSubComponent = SubComponents.FirstOrDefault(sc => sc.Card.Template == card.Template);
-            
-            if (existingSubComponent == null)
+            if (card.Type == CardTypes.Hero)
             {
-                var newSubComponent = new DeckSubComponent(card.Template, 1);
-                if (newSubComponent.Count == 0) { return; }
-                
-                newSubComponent.Clicked += () => RemoveCard(card);
-                newSubComponent.MouseEnteredEvent += () => RequestInfoDisplay?.Invoke(card);
-                newSubComponent.MouseExitedEvent += () => RequestInfoDisplay?.Invoke(null);
-
-                lock (Components)
-                {
-                    Components.Add(newSubComponent);
-                }
-
-                // This must be outside lock or we deadlock.
-                LayoutComponents();
+                HeroCard = card;
             }
             else
             {
-                existingSubComponent.AdjustCount(1);
+                var existingSubComponent = SubComponents.FirstOrDefault(sc => sc.Card.Template == card.Template);
+
+                if (existingSubComponent == null)
+                {
+                    var newSubComponent = new DeckSubComponent(card.Template, 1);
+                    if (newSubComponent.Count == 0) { return; }
+
+                    newSubComponent.Clicked += () => RemoveCard(card);
+                    newSubComponent.MouseEnteredEvent += () => RequestInfoDisplay?.Invoke(card);
+                    newSubComponent.MouseExitedEvent += () => RequestInfoDisplay?.Invoke(null);
+
+                    lock (Components)
+                    {
+                        Components.Add(newSubComponent);
+                    }
+
+                }
+                else
+                {
+                    existingSubComponent.AdjustCount(1);
+                }
             }
+            LayoutComponents();
         }
 
         public void RemoveCard(Card card)
@@ -64,15 +83,14 @@ namespace CardKartClient.GUI.Components
                     {
                         Components.Remove(existingSubComponent);
                     }
-
-                    // This must be outside lock or we deadlock.
-                    LayoutComponents();
                 }
             }
             else 
             {
                 Logging.Log(LogLevel.Warning, "Tried to remove a card from deck when deck doesn't contain such a card.");
             }
+
+            LayoutComponents();
         }
 
         public Deck GetDeck()
@@ -88,7 +106,8 @@ namespace CardKartClient.GUI.Components
                     }
                 }
             }
-            return new Deck(templates.ToArray());
+
+            return new Deck(HeroCard.Template, templates.ToArray());
         }
 
         public void LoadDeck(Deck deck)
@@ -97,7 +116,9 @@ namespace CardKartClient.GUI.Components
             {
                 Components.Clear();
 
-                var templates = deck.CardTemplates;
+                HeroCard = new Card(deck.HeroCardTemplate);
+                var templates = deck.DeckTemplates;
+
                 var templateCounts = new Dictionary<CardTemplates, int>();
                 foreach (var template in templates)
                 {
@@ -119,6 +140,8 @@ namespace CardKartClient.GUI.Components
                     .Where(sc => sc.Count > 0).ToArray();
 
                 Components.AddRange(subComponents);
+                Components.Add(CardCountPanel);
+                Components.Add(HeroNamePanel);
             }
 
             LayoutComponents();
@@ -126,21 +149,42 @@ namespace CardKartClient.GUI.Components
 
         public void LayoutComponents()
         {
+            int deckSize = 0;
             lock (Components)
             {
                 var sortedSubComponents = 
                     SubComponents.OrderBy(sc => sc.Card.Name).ToArray();
 
-                float X0 = X + Constants.GUI.C;
-                float Y0 = Y + Constants.GUI.D;
+                float X0 = X + Constants.GUI.DeckPanelSubcomponentX0;
+                float Y0 = Y + Constants.GUI.DeckPanelSubcomponentY0;
 
                 for (int i = 0; i < sortedSubComponents.Length; i++)
                 {
                     var sc = sortedSubComponents[i];
                     sc.X = X0;
-                    sc.Y = Y0 - i * Constants.GUI.E;
+                    sc.Y = Y0 - i * Constants.GUI.DeckPanelSubcomponentYOffset;
+                    deckSize += sc.Count;
                 }
             }
+
+            CardCountPanel.Text = $"{deckSize}/30";
+            CardCountPanel.X = X + 0.02f;
+            CardCountPanel.Y = Y + 1.46f;
+            CardCountPanel.Width = 0.07f;
+            CardCountPanel.Height = 0.06f;
+            CardCountPanel.BackgroundColor = null;
+            CardCountPanel.RenderOptions = deckSize == 30 ? Fonts.MainRenderOptions : Fonts.RedRenderOptions;
+            CardCountPanel.Layout();
+
+            if (HeroCard != null) { HeroNamePanel.Text = $"Hero: {HeroCard.Name}"; }
+            HeroNamePanel.X = X + 0.09f;
+            HeroNamePanel.Y = Y + 1.44f;
+            HeroNamePanel.Font = Fonts.MainFont10;
+            HeroNamePanel.Width = 0.25f;
+            HeroNamePanel.Height = 0.06f;
+            HeroNamePanel.BackgroundColor = null;
+            HeroNamePanel.Alignment = QuickFont.QFontAlignment.Centre;
+            HeroNamePanel.Layout();
         }
 
         protected override void DrawInternal(DrawAdapter drawAdapter)
@@ -159,8 +203,8 @@ namespace CardKartClient.GUI.Components
 
         public DeckSubComponent(CardTemplates template, int initialCount)
         {
-            Width = Constants.GUI.H;
-            Height = Constants.GUI.I;
+            Width = Constants.GUI.DeckSubcomponentWidth;
+            Height = Constants.GUI.DeckSubcomponentHeight;
 
             Card = new Card(template);
             CardName = Card.Name;
@@ -182,16 +226,16 @@ namespace CardKartClient.GUI.Components
 
             drawAdapter.DrawText(
                 Count.ToString(),
-                X + Constants.GUI.A, 
-                Y + Constants.GUI.B,
+                X + Constants.GUI.DeckPanelCountOffsetX, 
+                Y + Constants.GUI.DeckPanelCountOffsetY,
                 Fonts.MainFont14,
                 Fonts.BigRenderOptions,
                 QuickFont.QFontAlignment.Left);
 
             drawAdapter.DrawText(
                 CardName,
-                X + Constants.GUI.F,
-                Y + Constants.GUI.G,
+                X + Constants.GUI.DeckPanelCardNameOffsetX,
+                Y + Constants.GUI.DeckPanelCardNameOffsetY,
                 Fonts.MainFont10,
                 Fonts.BigRenderOptions,
                 QuickFont.QFontAlignment.Centre);

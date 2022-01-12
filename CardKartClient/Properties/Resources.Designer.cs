@@ -83,6 +83,26 @@ namespace CardKartClient.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap antqueen1 {
+            get {
+                object obj = ResourceManager.GetObject("antqueen1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap anttoken1 {
+            get {
+                object obj = ResourceManager.GetObject("anttoken1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap arctichunter1 {
             get {
                 object obj = ResourceManager.GetObject("arctichunter1", resourceCulture);
@@ -106,6 +126,26 @@ namespace CardKartClient.Properties {
         internal static System.Drawing.Bitmap beaconkeeper1 {
             get {
                 object obj = ResourceManager.GetObject("beaconkeeper1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap blackhero1 {
+            get {
+                object obj = ResourceManager.GetObject("blackhero1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap bluehero1 {
+            get {
+                object obj = ResourceManager.GetObject("bluehero1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -186,6 +226,16 @@ namespace CardKartClient.Properties {
         internal static System.Drawing.Bitmap clericswordmaster1 {
             get {
                 object obj = ResourceManager.GetObject("clericswordmaster1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap cockatrice1 {
+            get {
+                object obj = ResourceManager.GetObject("cockatrice1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -303,6 +353,26 @@ namespace CardKartClient.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap fireant1 {
+            get {
+                object obj = ResourceManager.GetObject("fireant1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap flesheatingant1 {
+            get {
+                object obj = ResourceManager.GetObject("flesheatingant1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap frame1_monster {
             get {
                 object obj = ResourceManager.GetObject("frame1_monster", resourceCulture);
@@ -323,9 +393,29 @@ namespace CardKartClient.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap frenziedvine1 {
+            get {
+                object obj = ResourceManager.GetObject("frenziedvine1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap furiousruby1 {
             get {
                 object obj = ResourceManager.GetObject("furiousruby1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap gardenant1 {
+            get {
+                object obj = ResourceManager.GetObject("gardenant1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -376,6 +466,26 @@ namespace CardKartClient.Properties {
         internal static System.Drawing.Bitmap graveyard1 {
             get {
                 object obj = ResourceManager.GetObject("graveyard1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap greenhero1 {
+            get {
+                object obj = ResourceManager.GetObject("greenhero1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap hand1 {
+            get {
+                object obj = ResourceManager.GetObject("hand1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -483,6 +593,16 @@ namespace CardKartClient.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap hunterofthenight1 {
+            get {
+                object obj = ResourceManager.GetObject("hunterofthenight1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap insect1 {
             get {
                 object obj = ResourceManager.GetObject("insect1", resourceCulture);
@@ -496,6 +616,16 @@ namespace CardKartClient.Properties {
         internal static System.Drawing.Bitmap inspiration1 {
             get {
                 object obj = ResourceManager.GetObject("inspiration1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap junkyardinnovator1 {
+            get {
+                object obj = ResourceManager.GetObject("junkyardinnovator1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -526,6 +656,16 @@ namespace CardKartClient.Properties {
         internal static System.Drawing.Bitmap mechamancer1 {
             get {
                 object obj = ResourceManager.GetObject("mechamancer1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap medusa1 {
+            get {
+                object obj = ResourceManager.GetObject("medusa1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -633,6 +773,16 @@ namespace CardKartClient.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap purplehero1 {
+            get {
+                object obj = ResourceManager.GetObject("purplehero1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap radiantdiamond1 {
             get {
                 object obj = ResourceManager.GetObject("radiantdiamond1", resourceCulture);
@@ -646,6 +796,16 @@ namespace CardKartClient.Properties {
         internal static System.Drawing.Bitmap rapture1 {
             get {
                 object obj = ResourceManager.GetObject("rapture1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap redhero1 {
+            get {
+                object obj = ResourceManager.GetObject("redhero1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -733,6 +893,16 @@ namespace CardKartClient.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap soldierant1 {
+            get {
+                object obj = ResourceManager.GetObject("soldierant1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap squiretoken1 {
             get {
                 object obj = ResourceManager.GetObject("squiretoken1", resourceCulture);
@@ -803,6 +973,16 @@ namespace CardKartClient.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap trollrider1 {
+            get {
+                object obj = ResourceManager.GetObject("trollrider1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap unmake1 {
             get {
                 object obj = ResourceManager.GetObject("unmake1", resourceCulture);
@@ -856,6 +1036,26 @@ namespace CardKartClient.Properties {
         internal static System.Drawing.Bitmap volcanichatchling1 {
             get {
                 object obj = ResourceManager.GetObject("volcanichatchling1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap waterdown1 {
+            get {
+                object obj = ResourceManager.GetObject("waterdown1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap whitehero1 {
+            get {
+                object obj = ResourceManager.GetObject("whitehero1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

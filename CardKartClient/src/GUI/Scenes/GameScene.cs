@@ -105,14 +105,18 @@ namespace CardKartClient.GUI.Scenes
             HeroPanel = new PlayerPanel(hero);
             HeroPanel.X = 0.05f;
             HeroPanel.Y = -0.3f;
-            HeroPanel.PlayerPortraitClicked += player => GameObjectClicked(player);
+            HeroPanel.PlayerPortrait.Clicked += () => GameObjectClicked(hero);
+            HeroPanel.PlayerPortrait.MouseEnteredEvent += () => CardInfoPanel.SetCard(hero.HeroCard);
+            HeroPanel.PlayerPortrait.MouseExitedEvent += () => CardInfoPanel.SetCard(null);
             HeroPanel.Layout();
             Components.Add(HeroPanel);
 
             VillainPanel = new PlayerPanel(villain);
             VillainPanel.X = 0.05f;
             VillainPanel.Y = 0.7f;
-            VillainPanel.PlayerPortraitClicked += player => GameObjectClicked(player);
+            VillainPanel.PlayerPortrait.Clicked += () => GameObjectClicked(villain);
+            VillainPanel.PlayerPortrait.MouseEnteredEvent += () => CardInfoPanel.SetCard(villain.HeroCard);
+            VillainPanel.PlayerPortrait.MouseExitedEvent += () => CardInfoPanel.SetCard(null);
             VillainPanel.Layout();
             Components.Add(VillainPanel);
 

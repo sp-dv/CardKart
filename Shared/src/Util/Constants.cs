@@ -69,6 +69,9 @@ namespace CardKartShared.Util
                 case KeywordAbilityNames.Reinforcement: { return "Can be cast whenever you can cast a scroll"; }
                 case KeywordAbilityNames.Protected: { return "The next time this creature takes damage; prevent it"; }
                 case KeywordAbilityNames.Terrify: { return "Can only be blocked by creatures with a higher mana cost"; }
+                case KeywordAbilityNames.Rampage: { return "When this creature attacks any unblocked damage is dealt to the defending player"; }
+                case KeywordAbilityNames.Lifesteal: { return "When this creature deals damage restore health to you equal to the damage dealt"; }
+                case KeywordAbilityNames.Stoning: { return "When this creature deals damage to another creature; stun that creature"; }
                 default: return "";
             }
         }
@@ -109,21 +112,20 @@ namespace CardKartShared.Util
         public float DeckPanelHeight => 1.5f;
 
 
-        public float A => 0.02f;
-        public float B => 0.079f;
+        public float DeckPanelCountOffsetX => 0.02f;
+        public float DeckPanelCountOffsetY => 0.079f;
 
 
-        public float C => 0.02f;
-        public float D => 1.39f;
+        public float DeckPanelSubcomponentX0 => 0.02f;
+        public float DeckPanelSubcomponentY0 => 1.39f;
 
-        public float E => 0.06f;
+        public float DeckPanelSubcomponentYOffset => 0.06f;
 
-        public float F => 0.17f;
-        public float G => 0.060f;
+        public float DeckPanelCardNameOffsetX => 0.17f;
+        public float DeckPanelCardNameOffsetY => 0.060f;
         
-        public float H => 0.31f;
-        public float I => 0.05f;
-        public float J => 0.0f;
+        public float DeckSubcomponentWidth => 0.31f;
+        public float DeckSubcomponentHeight => 0.05f;
 
     }
 }

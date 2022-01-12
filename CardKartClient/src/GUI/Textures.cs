@@ -90,6 +90,26 @@ namespace CardKartClient.GUI
         public static Texture BeaconKeeper1;
         public static Texture CCC1;
         public static Texture Knock1;
+        public static Texture FrenziedVine1;
+        public static Texture WaterDown1;
+        public static Texture TrollRider1;
+        public static Texture HunterOfTheNight1;
+        public static Texture JunkyardInnovator1;
+        public static Texture Medusa1;
+        public static Texture Cockatrice1;
+        public static Texture GardenAnt1;
+        public static Texture FleshEatingAnt1;
+        public static Texture AntToken1;
+        public static Texture FireAnt1;
+        public static Texture AntQueen1;
+        public static Texture SoldierAnt1;
+        public static Texture BlueHero1;
+        public static Texture BlackHero1;
+        public static Texture WhiteHero1;
+        public static Texture GreenHero1;
+        public static Texture RedHero1;
+        public static Texture PurpleHero1;
+        public static Texture Hand1;
 
 
         public static void LoadTextures()
@@ -178,6 +198,26 @@ namespace CardKartClient.GUI
             BeaconKeeper1 = TextureLoader.CreateTexture(Properties.Resources.beaconkeeper1);
             CCC1 = TextureLoader.CreateTexture(Properties.Resources.ccc1);
             Knock1 = TextureLoader.CreateTexture(Properties.Resources.telekenist1);
+            FrenziedVine1 = TextureLoader.CreateTexture(Properties.Resources.frenziedvine1);
+            WaterDown1 = TextureLoader.CreateTexture(Properties.Resources.waterdown1);
+            TrollRider1 = TextureLoader.CreateTexture(Properties.Resources.trollrider1);
+            HunterOfTheNight1 = TextureLoader.CreateTexture(Properties.Resources.hunterofthenight1);
+            JunkyardInnovator1 = TextureLoader.CreateTexture(Properties.Resources.junkyardinnovator1);
+            Medusa1 = TextureLoader.CreateTexture(Properties.Resources.medusa1);
+            Cockatrice1 = TextureLoader.CreateTexture(Properties.Resources.cockatrice1);
+            GardenAnt1 = TextureLoader.CreateTexture(Properties.Resources.gardenant1);
+            FleshEatingAnt1 = TextureLoader.CreateTexture(Properties.Resources.flesheatingant1);
+            AntQueen1 = TextureLoader.CreateTexture(Properties.Resources.antqueen1);
+            AntToken1 = TextureLoader.CreateTexture(Properties.Resources.anttoken1);
+            SoldierAnt1 = TextureLoader.CreateTexture(Properties.Resources.soldierant1);
+            FireAnt1 = TextureLoader.CreateTexture(Properties.Resources.fireant1);
+            WhiteHero1 = TextureLoader.CreateTexture(Properties.Resources.whitehero1);
+            BlackHero1 = TextureLoader.CreateTexture(Properties.Resources.blackhero1);
+            GreenHero1 = TextureLoader.CreateTexture(Properties.Resources.greenhero1);
+            BlueHero1 = TextureLoader.CreateTexture(Properties.Resources.bluehero1);
+            PurpleHero1 = TextureLoader.CreateTexture(Properties.Resources.purplehero1);
+            RedHero1 = TextureLoader.CreateTexture(Properties.Resources.redhero1);
+            Hand1 = TextureLoader.CreateTexture(Properties.Resources.hand1);
 
             // = TextureLoader.CreateTexture(Properties.Resources.);
         }
@@ -190,7 +230,6 @@ namespace CardKartClient.GUI
                 case CardTemplates.ArmoredZombie: { return Zombie1; }
                 case CardTemplates.Zap: { return Zap1; }
                 case CardTemplates.DepravedBloodhound: { return Hound1; }
-                case CardTemplates.HeroTest: { return Hero1; }
                 case CardTemplates.AlterFate: { return AlterFate1; }
                 case CardTemplates.Enlarge: { return Enlarge1; }
                 case CardTemplates.GolbinBombsmith: { return GoblinBombsmith1; }
@@ -208,7 +247,7 @@ namespace CardKartClient.GUI
                 case CardTemplates.CallToArms: { return CallToArms1; }
                 case CardTemplates.SquireToken1: { return SquireToken1; }
                 case CardTemplates.ExiledScientist: { return ExiledScientist1; }
-                case CardTemplates.InsectToken1: { return InsectToken1; }
+                case CardTemplates.MechanicalToken1: { return InsectToken1; }
                 case CardTemplates.Eliminate: { return Eliminate1; }
                 case CardTemplates.SilvervenomSpider: { return SilvervenomSpider1; }
                 case CardTemplates.Inspiration: { return Inspiration1; }
@@ -256,6 +295,25 @@ namespace CardKartClient.GUI
                 case CardTemplates.KeeperOfCuriosities: { return KeeperOfCuriosities1; }
                 case CardTemplates.BeaconKeeper: { return BeaconKeeper1; }
                 case CardTemplates.Knock: { return Knock1; }
+                case CardTemplates.FrenziedVine: { return FrenziedVine1; }
+                case CardTemplates.WaterDown: { return WaterDown1; }
+                case CardTemplates.TrollRider: { return TrollRider1; }
+                case CardTemplates.HunterOfTheNight: { return HunterOfTheNight1; }
+                case CardTemplates.JunkyardInnovator: { return JunkyardInnovator1; }
+                case CardTemplates.Medusa: { return Medusa1; }
+                case CardTemplates.Cockatrice: { return Cockatrice1; }
+                case CardTemplates.GardenAnt: { return GardenAnt1; }
+                case CardTemplates.FleshEatingAnt: { return FleshEatingAnt1; }
+                case CardTemplates.AntQueen: { return AntQueen1; }
+                case CardTemplates.SoldierAnt: { return SoldierAnt1; }
+                case CardTemplates.FireAnt: { return FireAnt1; }
+                case CardTemplates.AntToken1: { return AntToken1; }
+                case CardTemplates.BlueHero: { return BlueHero1; }
+                case CardTemplates.GreenHero: { return GreenHero1; }
+                case CardTemplates.BlackHero: { return BlackHero1; }
+                case CardTemplates.WhiteHero: { return WhiteHero1; }
+                case CardTemplates.PurpleHero: { return PurpleHero1; }
+                case CardTemplates.RedHero: { return RedHero1; }
                 default: { return NoPortait; }
             }
         }

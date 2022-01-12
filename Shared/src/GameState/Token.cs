@@ -13,7 +13,7 @@ namespace CardKartShared.GameState
         public Player Controller;
 
         private bool ExhaustedInternal;
-        public bool Exhausted
+        public bool IsExhausted
         {
             get { return 
                     ExhaustedInternal || 
@@ -34,8 +34,8 @@ namespace CardKartShared.GameState
         public bool IsHero => TokenOf.IsHero;
         public bool IsCreature => TokenOf.Type == CardTypes.Creature;
         public bool IsRelic => TokenOf.Type == CardTypes.Relic;
-        public bool CanAttack => !Exhausted;
-        public bool CanBlock => !Exhausted;
+        public bool CanAttack => !IsExhausted;
+        public bool CanBlock => !IsExhausted;
         public bool IsValid => TokenOf != null;
         public bool IsDead => IsCreature && CurrentHealth <= 0;
 
@@ -59,7 +59,8 @@ namespace CardKartShared.GameState
         public bool CanBlockToken(Token other) 
         {
             if (other.HasKeywordAbility(KeywordAbilityNames.Terrify) && this.TokenOf.CastingCost.Size <= other.TokenOf.CastingCost.Size) { return false; }
-            if (other.HasKeywordAbility(KeywordAbilityNames.Flying) && !this.HasKeywordAbility(KeywordAbilityNames.Range)) { return false; }
+            if (other.HasKeywordAbility(KeywordAbilityNames.Flying) && 
+                !(this.HasKeywordAbility(KeywordAbilityNames.Range) || this.HasKeywordAbility(KeywordAbilityNames.Flying))) { return false; }
             return true;
         }
 
@@ -74,8 +75,15 @@ namespace CardKartShared.GameState
 
             var breadTextBuilder = new StringBuilder();
 
-            foreach (var keywordAbility in KeywordAbilities.GetAbilities())
+            var allKeywordAbilities = new HashSet<KeywordAbilityNames>();
+
+            foreach (var keywordAbility in KeywordAbilities.GetAbilities().Concat(AuraModifiers.Keywords.GetAbilities()))
             {
+                allKeywordAbilities.Add(keywordAbility);
+            }
+
+            foreach (var keywordAbility in allKeywordAbilities)
+            { 
                 breadTextBuilder.Append(keywordAbility.ToString());
                 breadTextBuilder.Append(" (");
                 breadTextBuilder.Append(Constants.KeywordExplanation(keywordAbility));
@@ -99,7 +107,7 @@ namespace CardKartShared.GameState
 
             if (Stunned)
             {
-                breadTextBuilder.AppendLine("\nStunned (Doesn't exhaust at the start of its controllers turn)");
+                breadTextBuilder.AppendLine("\nStunned (Doesn't unexhaust at the start of its controllers turn)");
             }
 
             return breadTextBuilder.ToString();
