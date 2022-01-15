@@ -12,6 +12,8 @@ namespace CardKartClient.GUI.Components
         private float TextX0;
         private float TextY0;
 
+        public float TextOffsetY { get; set; }
+
         public QFont Font { get; set; }
         public QFontRenderOptions RenderOptions { get; set; }
 
@@ -57,7 +59,7 @@ namespace CardKartClient.GUI.Components
                 var sw = (Width / 2) * CardKartClient.GUI.WindowWidth; // Width in terms of pixels.
                 var sh = (Height / 2) * CardKartClient.GUI.WindowHeight; // Height in terms of pixels
                 TextX0 = (X / 2 + 0.5f) * CardKartClient.GUI.WindowWidth;
-                TextY0 = (Y / 2 + 0.5f) * CardKartClient.GUI.WindowHeight + sh + 2f;
+                TextY0 = (Y / 2 + 0.5f) * CardKartClient.GUI.WindowHeight + sh + TextOffsetY;
 
                 if (Alignment == QFontAlignment.Centre)
                 {

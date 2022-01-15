@@ -16,7 +16,7 @@ namespace CardKartClient.GUI.Scenes
     {
         private DeckPanel DeckPanel;
 
-        private ModifiableCardComponent[] CardComponents;
+        private DeckCardComponent[] CardComponents;
         private Card[] AllCards;
 
         private SmartTextPanel BackButton;
@@ -33,11 +33,14 @@ namespace CardKartClient.GUI.Scenes
 
         private const int CardsPerRow = 4;
         private const int CardsPerColumn = 2;
-        private const int CardsPerPage = CardsPerRow * CardsPerColumn;  
+        private const int CardsPerPage = CardsPerRow * CardsPerColumn;
 
+        private Dictionary<CardTemplates, int> OwnedCards;
 
-        public DeckEditorScene()
+        public DeckEditorScene(Dictionary<CardTemplates, int> ownedCards)
         {
+            OwnedCards = ownedCards;
+
             CardInfoPanel = new CardInfoPanel();
             CardInfoPanel.X = 0.5f;
             CardInfoPanel.Y = -0.5f;
@@ -85,22 +88,22 @@ namespace CardKartClient.GUI.Scenes
                 .Where(card => !card.IsTokenCard)
                 .ToArray();
 
-            DeckPanel = new DeckPanel();
+            DeckPanel = new DeckPanel(ownedCards);
             DeckPanel.X = Constants.GUI.DeckPanelX;
             DeckPanel.Y = Constants.GUI.DeckPanelY;
             DeckPanel.RequestInfoDisplay += card => CardInfoPanel.SetCard(card);
             Components.Add(DeckPanel);
 
-            var cardComponentList = new List<ModifiableCardComponent>();
+            var cardComponentList = new List<DeckCardComponent>();
 
             for (int j = 0; j < CardsPerColumn; j++)
             {
                 for (int i = 0; i < CardsPerRow; i++)
                 {
                     var ix = i + (j * CardsPerRow);
-                    var mc = new ModifiableCardComponent();
+                    var mc = new DeckCardComponent();
                     mc.X = -0.485f + (i * 0.23f);
-                    mc.Y = -0.58f + ((CardsPerColumn - j - 1) * 0.55f); // Hack to get them to draw top to bottom...
+                    mc.Y = -0.62f + ((CardsPerColumn - j - 1) * 0.60f); // Hack to get them to draw top to bottom...
                     mc.Clicked += () => AddCardToDeck(AllCards[ix + CurrentPage * CardsPerPage].Template);
                     mc.MouseEnteredEvent += () =>
                     {
@@ -174,7 +177,11 @@ namespace CardKartClient.GUI.Scenes
                 }
                 else
                 {
-                    cc.SetCard(AllCards[i]);
+                    var card = AllCards[i];
+                    var template = card.Template;
+                    var ownedCount = OwnedCards.ContainsKey(template) ? OwnedCards[template] : 0;
+                    
+                    cc.SetCard(AllCards[i], ownedCount);
                     cc.Visible = true;
                 }
                 i++;
@@ -192,24 +199,37 @@ namespace CardKartClient.GUI.Scenes
         }
     }
 
-    internal class ModifiableCardComponent : GuiComponent
+    internal class DeckCardComponent : GuiComponent
     {
         private CardComponent Inner;
+        private string OwnedCountString;
 
-        public void SetCard(Card card)
+
+        public void SetCard(Card card, int ownedCount)
         {
             Inner = new CardComponent(card);
             Inner.X = X;
             Inner.Y = Y;
             Width = Inner.Width;
             Height = Inner.Height;
+
+            if (ownedCount == 0)
+            {
+                OwnedCountString = "";
+            }
+            else
+            {
+                OwnedCountString = $"x {ownedCount}";
+            }
         }
 
         protected override void DrawInternal(DrawAdapter drawAdapter)
         {
             if (Inner != null)
             {
-                Inner.Draw(drawAdapter);    
+                Inner.Draw(drawAdapter);
+
+                drawAdapter.DrawText(OwnedCountString, X + 0.1f, Y + 0.61f, Fonts.MainFont14, Fonts.MainRenderOptions, QuickFont.QFontAlignment.Centre);
             }    
         }
     }

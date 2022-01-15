@@ -214,6 +214,7 @@ namespace CardKartShared.GameState
         public void GainPermanentMana(Player player, ManaColour colour)
         {
             player.MaxMana.IncrementColour(colour);
+            player.NotifyOfChange();
         }
 
         public void GainTemporaryMana(Player player, ManaColour colour, int count = 1)

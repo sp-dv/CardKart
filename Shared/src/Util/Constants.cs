@@ -10,7 +10,7 @@ namespace CardKartShared.Util
     public static class Constants
     {
         // Last release: 0.0.5
-        public const string Version = "0.0.4";
+        public const string Version = "0.0.0";
         public static bool IsReleaseVersion = false;
 
         private static RSAParameters DebugPublicKey => 
@@ -92,7 +92,6 @@ namespace CardKartShared.Util
     public class GUIConstants
     {
         /*  Reuse me daddy
-        
         public float A => 0.0f;
         public float B => 0.0f;
         public float C => 0.0f;
@@ -103,12 +102,12 @@ namespace CardKartShared.Util
         public float H => 0.0f;
         public float I => 0.0f;
         public float J => 0.0f;
-
          */
 
+        #region Deck Panel
         public float DeckPanelX => -0.95f;
         public float DeckPanelY => -0.65f;
-        public float DeckPanelWidth => 0.35f;
+        public float DeckPanelWidth => 0.38f;
         public float DeckPanelHeight => 1.5f;
 
 
@@ -126,6 +125,51 @@ namespace CardKartShared.Util
         
         public float DeckSubcomponentWidth => 0.31f;
         public float DeckSubcomponentHeight => 0.05f;
+        #endregion
 
+        #region Login Screen
+        public float LoginUsernameInputWidth => 0.4f;
+        public float LoginUsernameInputHeight => 0.1f;
+        public float LoginUsernameInputX => -0.2f;
+        public float LoginUsernameInputY => 0.3f;
+        public float LoginPasswordInputX => LoginUsernameInputX;
+        public float LoginPasswordInputY => 0.08f;
+        public float LoginUserNameLabelX => LoginUsernameInputX + 0.15f;
+        public float LoginUserNameLabelY => LoginUsernameInputY + 0.1f;
+        public float LoginPasswordLabelX => LoginPasswordInputX + 0.152f;
+        public float LoginPasswordLabelY => LoginPasswordInputY + 0.11f;
+        public float LoginMessagePanelX => -0.2f;
+        public float LoginMessagePanelY => 0f;
+        public float LoginButtonX => -0.18f;
+        public float LoginButtonY => -0.08f;
+        public float LoginButtonWidth => 0.15f;
+        public float LoginButtonHeight => 0.08f;
+        public float LoginButtonTextOffset => -3f;
+        public float LoginUsernameLabelHeight => 0.06f;
+        public float LoginUsernameLabelWidth => 0.12f;
+        public float LoginMessageH => 0.08f;
+        public float LoginMessageW => 0.40f;
+        public float LoginRegisterButtonX => 0.030f;
+        #endregion
+
+        #region Rip Pack Scene
+        public float A => -0.7f;
+        public float B => 0.3f;
+        public float C => -0.2f;
+        public float D => -0.2f;
+        public float E => -25.0f;
+        public float F => 0.0f;
+        public float G => 0.0f;
+        public float H => 0.0f;
+        public float I => 0.0f;
+        public float J => 0.0f;
+        #endregion
+    }
+
+    public enum Packs
+    {
+        None, 
+
+        FirstEdition_12Pack,
     }
 }

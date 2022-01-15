@@ -308,12 +308,12 @@ namespace CardKartClient.GUI
                 case CardTemplates.SoldierAnt: { return SoldierAnt1; }
                 case CardTemplates.FireAnt: { return FireAnt1; }
                 case CardTemplates.AntToken1: { return AntToken1; }
-                case CardTemplates.BlueHero: { return BlueHero1; }
-                case CardTemplates.GreenHero: { return GreenHero1; }
-                case CardTemplates.BlackHero: { return BlackHero1; }
-                case CardTemplates.WhiteHero: { return WhiteHero1; }
-                case CardTemplates.PurpleHero: { return PurpleHero1; }
-                case CardTemplates.RedHero: { return RedHero1; }
+                case CardTemplates.Haltram: { return BlueHero1; }
+                case CardTemplates.Aelthys: { return GreenHero1; }
+                case CardTemplates.Eris: { return BlackHero1; }
+                case CardTemplates.Taldiel: { return WhiteHero1; }
+                case CardTemplates.Kelbans: { return PurpleHero1; }
+                case CardTemplates.Nalthax: { return RedHero1; }
                 default: { return NoPortait; }
             }
         }

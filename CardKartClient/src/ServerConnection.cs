@@ -11,7 +11,9 @@ namespace CardKartClient
     internal class ServerConnection
     {
         private Connection Connection;
-        private PrivateSaxophone<RawMessage> RequestResponseSaxophone 
+        private PrivateSaxophone<RawMessage> GenericRequestResponseSaxophone 
+            = new PrivateSaxophone<RawMessage>();
+        private PrivateSaxophone<RawMessage> EverythingElseSaxophone
             = new PrivateSaxophone<RawMessage>();
         private PrivateSaxophone<GameChoiceMessage> GameChoiceMessageSaxophone
             = new PrivateSaxophone<GameChoiceMessage>();
@@ -89,6 +91,19 @@ namespace CardKartClient
             return WaitForGenericResponse();
         }
 
+        public GenericResponseMessage Register(string username, string password)
+        {
+            var request = new RegisterUserRequest
+            {
+                Username = username,
+                Password = password
+            };
+
+            Connection.SendMessage(request);
+
+            return WaitForGenericResponse();
+        }
+
         public void SurrenderGame(int gameID)
         {
             var message = new SurrenderGameMessage();
@@ -96,8 +111,47 @@ namespace CardKartClient
             Connection.SendMessage(message);
         }
 
-        #region Ugly game synch hack functions
-        public ClientSideGameSynchronizer CreateGameChoiceSynchronizer(int gameID)
+        public GetCollectionResponse GetCollection()
+        {
+            Connection.SendMessage(new GetCollectionRequest {
+            });
+
+            var rawMessage = EverythingElseSaxophone.Listen();
+            var response = new GetCollectionResponse();
+            response.Decode(rawMessage);
+
+            if (response.OwnedCards == null) { response.OwnedCards = new System.Collections.Generic.Dictionary<CardTemplates, int>(); }
+            if (response.OwnedPacks == null) { response.OwnedPacks = new System.Collections.Generic.Dictionary<Packs, int>(); }
+
+            return response;
+        }
+
+        public RipPackResponse RipPack()
+        {
+            Connection.SendMessage(new RipPackRequest {
+                Pack = Packs.FirstEdition_12Pack,
+            });
+
+            var rawMessage = EverythingElseSaxophone.Listen();
+            var response = new RipPackResponse();
+            response.Decode(rawMessage);
+            return response;
+        }
+
+        public GetQuoteResponse GetQuote(CardTemplates template)
+        {
+            Connection.SendMessage(new GetQuoteRequest {
+                Template = template
+            });
+
+            var rawMessage = EverythingElseSaxophone.Listen();
+            var response = new GetQuoteResponse();
+            response.Decode(rawMessage);
+            return response;
+        }
+
+            #region Ugly game synch hack functions
+            public ClientSideGameSynchronizer CreateGameChoiceSynchronizer(int gameID)
         {
             return new ClientSideGameSynchronizer(gameID, GameChoiceMessageSaxophone);
         }
@@ -113,7 +167,7 @@ namespace CardKartClient
 
         private GenericResponseMessage WaitForGenericResponse()
         {
-            var rawResponse = RequestResponseSaxophone.Listen();
+            var rawResponse = GenericRequestResponseSaxophone.Listen();
             if (rawResponse.MessageType != MessageTypes.GenericResponse)
             {
                 throw new NotImplementedException();
@@ -140,7 +194,7 @@ namespace CardKartClient
 
                 case MessageTypes.GenericResponse:
                     {
-                        RequestResponseSaxophone.Play(rawMessage);
+                        GenericRequestResponseSaxophone.Play(rawMessage);
                     } break;
 
                 case MessageTypes.GameChoiceMessage:
@@ -162,9 +216,7 @@ namespace CardKartClient
 
                 default:
                     {
-                        Logging.Log(
-                            LogLevel.Warning, 
-                            $"Unhandled message type {rawMessage.MessageType}");
+                        EverythingElseSaxophone.Play(rawMessage);
                     } break;
             }
         }

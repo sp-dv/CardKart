@@ -25,6 +25,8 @@ namespace CardKartServer
 
             Users.Load(LiteDB.GetCollection<UserEntry>("users"));
             LoginInfo.Load(LiteDB.GetCollection<LoginInfoEntry>("loginInfo"));
+            Collections.Load(LiteDB.GetCollection<UserCollectionEntry>("collections"));
+            Bids.Load(LiteDB.GetCollection<BidEntry>("bids_sell"), LiteDB.GetCollection<BidEntry>("bids_buy"));
 
             Logging.Log(LogLevel.Info, "Database loaded successfully.");
         }

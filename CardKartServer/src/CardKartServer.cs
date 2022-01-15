@@ -17,6 +17,7 @@ namespace CardKartServer
         public static GameCoordinator GameCoordinator { get; private set; }
         public static RSAParameters ServerKey { get; private set; }
         public static ServerConfiguration Config { get; private set; }
+        public static AuctionHouse AuctionHouse { get; private set; }
 
         static void Main(string[] args)
         {
@@ -33,13 +34,12 @@ namespace CardKartServer
                 return;
             }
 
-
+            AuctionHouse = new AuctionHouse();
             ServerKey = JsonConvert.DeserializeObject<RSAParameters>(File.ReadAllText(Config.RSAKeyPath));
-
             ClientHandler = new ClientHandler();
-            
             GameCoordinator = new GameCoordinator();
-            
+            PackGenerator.Load();
+
             ConnectionHandler = new ConnectionHandler();
             ConnectionHandler.Start();
         }

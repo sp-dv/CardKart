@@ -1,4 +1,5 @@
-﻿using SGL;
+﻿using OpenTK.Input;
+using SGL;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,7 @@ namespace CardKartClient.GUI
         public GLCoordinate GuiLocation1 => new GLCoordinate(X + Width / 2, Y + Height / 2);
 
         public bool Visible { get; set; } = true;
+        public bool IsFocused { get; set; }
 
         protected List<GuiComponent> Components = new List<GuiComponent>();
 
@@ -102,8 +104,8 @@ namespace CardKartClient.GUI
             {
                 child.HandleMouseMove(hit == null ? location : null, false);
 
-                
-                if (hit == null && child.ComponentRectangleContains(location)) 
+
+                if (hit == null && child.ComponentRectangleContains(location))
                 {
                     hit = child;
                 }
@@ -127,6 +129,16 @@ namespace CardKartClient.GUI
                 }
                 hit.MouseMovedEvent?.Invoke();
             }
+        }
+
+        public virtual void HandleKeyboardEvent(KeyboardKeyEventArgs args)
+        {
+
+        }
+
+        protected void RequestFocus()
+        {
+            CardKartClient.GUI.CurrentScene.RequestFocus(this);
         }
     }
 }

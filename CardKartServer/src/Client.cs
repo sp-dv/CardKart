@@ -1,4 +1,5 @@
 ﻿using CardKartServer.Schemas;
+using CardKartShared.GameState;
 using CardKartShared.Network;
 using CardKartShared.Network.Messages;
 using CardKartShared.Util;
@@ -72,6 +73,8 @@ namespace CardKartServer
 
                 case MessageTypes.LoginRequest:
                     {
+                        if (client.IsLoggedIn) { ErrorOutAndSendClientGenericError(client, "You are logged in sir."); }
+
                         var loginRequest = new LoginRequest();
                         loginRequest.Decode(rawMessage);
 
@@ -84,6 +87,7 @@ namespace CardKartServer
                             client.LogIn(info);
                             LoggedInClients[client.UserID] = client;
                             client.Connection.SendMessage(new GenericResponseMessage(GenericResponseMessage.Codes.OK, ""));
+                            Logging.Log(LogLevel.Info, $"{client.Username} logged in.");
                         }).Err(err => { 
                             client.Connection.SendMessage(new GenericResponseMessage(GenericResponseMessage.Codes.Error, err.ErrorMessage));
                         });
@@ -97,7 +101,104 @@ namespace CardKartServer
 
                         CardKartServer.GameCoordinator.SurrenderGame(client, surrenderMessage.GameID);
                     } break;
+
+                case MessageTypes.RegisterRequestMessage:
+                    {
+                        if (client.IsLoggedIn) { ErrorOutAndSendClientGenericError(client, "You are logged in sir."); }
+
+                        var registerRequest = new RegisterUserRequest();
+                        registerRequest.Decode(rawMessage);
+
+                        var response = new GenericResponseMessage();
+                        LoginInfo.RegisterUser(registerRequest.Username, registerRequest.Password).Then(info => {
+                            response.Code = GenericResponseMessage.Codes.OK;
+                        }).Err(err => {
+                            response.Code = GenericResponseMessage.Codes.Error;
+                            response.Info = err.ErrorMessage;
+                        });
+                        client.Connection.SendMessage(response);
+                    } break;
+
+                case MessageTypes.RipPackRequest:
+                    {
+                        var request = new RipPackRequest();
+                        request.Decode(rawMessage);
+
+                        var response = new RipPackResponse();
+                        
+                        Collections.RipPack(client.UserID, request.Pack).Then(res => { 
+                            response.Templates = res.ToArray();
+                        }).Err(err => {
+                            response.Templates = new CardTemplates[0];
+                        });
+                        
+                        client.Connection.SendMessage(response);
+                    } break;
+
+                case MessageTypes.GetCollectionRequest:
+                    {
+                        var request = new GetCollectionRequest();
+                        request.Decode(rawMessage);
+
+                        var response = new GetCollectionResponse();
+
+                        var collection = Collections.GetCollectionByUserID(client.UserID).Then(res => {
+                            response.Galds = res.Galds;
+                            response.OwnedCards = res.OwnedCards;
+                            response.OwnedPacks = res.OwnedPacks;
+                        }).Err(err => {
+                            response.Galds = -1;
+                            response.OwnedCards = new Dictionary<CardTemplates, int>();
+                            response.OwnedPacks = new Dictionary<Packs, int>();
+                        });
+
+                        client.Connection.SendMessage(response);
+                    } break;
+
+                case MessageTypes.CardQuoteRequest:
+                    {
+                        var request = new GetQuoteRequest();
+                        request.Decode(rawMessage);
+
+                        var response = new GetQuoteResponse
+                        {
+                            Quote = CardKartServer.AuctionHouse.GetQuote(request.Template)
+                        };
+                        client.Connection.SendMessage(response);
+                    } break;
+
+                case MessageTypes.SellCardRequest:
+                    {
+                        var request = new SellCardRequest();
+                        request.Decode(rawMessage);
+
+                        if (!request.IsQuickSellOrder)
+                        {
+                            client.Connection.SendMessage(new SellCardResponse { 
+                                Success = false,
+                                Error  = "Not supported",
+                            });
+                            return;
+                        }
+
+                        var newBalance = CardKartServer.AuctionHouse.QuickSell(client.UserID, request.CardTemplate);
+
+                        var response = new SellCardResponse
+                        {
+                            Quote = CardKartServer.AuctionHouse.GetQuote(request.Template)
+                        };
+                        client.Connection.SendMessage(response);
+                    } break;
             }
+        }
+
+        private void ErrorOutAndSendClientGenericError(Client client, string errorMessage)
+        {
+            client.Connection.SendMessage(new GenericResponseMessage
+            {
+                Code = GenericResponseMessage.Codes.Error,
+                Info = errorMessage,
+            });
         }
     }
 

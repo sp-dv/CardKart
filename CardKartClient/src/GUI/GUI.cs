@@ -18,6 +18,8 @@ namespace CardKartClient.GUI
         public int WindowHeight => Window.Height;
         public int WindowWidth => Window.Width;
 
+        public Scene CurrentScene => Window.CurrentScene;
+
         public void OpenWindow()
         {
             Textures.LoadTextures();

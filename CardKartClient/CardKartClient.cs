@@ -2,6 +2,7 @@
 using CardKartShared.Util;
 using System.Threading;
 using System;
+using CardKartClient.GUI.Scenes;
 
 namespace CardKartClient
 {

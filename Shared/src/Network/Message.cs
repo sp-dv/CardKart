@@ -24,12 +24,12 @@ namespace CardKartShared.Network
             MessageType = messageType;
             Bytes = bytes;
 
-            AllowUnverified = 
+            AllowUnverified =
                 MessageType == MessageTypes.HandshakeMessage ||
                 MessageType == MessageTypes.HandshakeResponseMessage ||
                 MessageType == MessageTypes.LoginRequest ||
-                MessageType == MessageTypes.GenericResponse;
-
+                MessageType == MessageTypes.GenericResponse ||
+                MessageType == MessageTypes.RegisterRequestMessage;
         }
     }
 
@@ -41,6 +41,7 @@ namespace CardKartShared.Network
         HandshakeResponseMessage,
 
         LoginRequest,
+        RegisterRequestMessage,
 
         StartGameMessage,
         GameChoiceMessage,
@@ -50,6 +51,18 @@ namespace CardKartShared.Network
         GenericResponse,
 
         JoinQueueRequest,
+
+        RipPackRequest,
+        RipPackResponse,
+
+        GetCollectionRequest,
+        GetCollectionResponse,
+
+        CardQuoteRequest,
+        CardQuoteResponse,
+
+        SellCardRequest,
+        SellCardResponse,
     }
 
     public class ByteEncoder

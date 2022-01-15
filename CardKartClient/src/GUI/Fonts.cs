@@ -18,6 +18,7 @@ namespace CardKartClient.GUI
         public static QFont BreadTextFont8 { get; private set; }
         public static QFont MainFont14 { get; private set; }
         public static QFont MainFont10 { get; private set; }
+        public static QFont MainFont8 { get; private set; }
         public static QFont MainFont6 { get; private set; }
 
         public static QFontRenderOptions MainRenderOptions { get; } =
@@ -71,6 +72,7 @@ namespace CardKartClient.GUI
 
             MainFont14 = new QFont("./gamefonts/ep1.ttf", 14, builderConfig);
             MainFont10 = new QFont("./gamefonts/ep1.ttf", 10, builderConfig);
+            MainFont8 = new QFont("./gamefonts/ep1.ttf", 8, builderConfig);
             MainFont6 = new QFont("./gamefonts/ep1.ttf", 6, builderConfig);
         }
     }

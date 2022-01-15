@@ -49,6 +49,7 @@ namespace CardKartClient
 
         public void HandleWindowClosed()
         {
+            User.SaveConfig();
             Environment.Exit(0);
         }
 
@@ -59,19 +60,20 @@ namespace CardKartClient
 
         public void ToDeckEditor()
         {
-            CardKartClient.GUI.TransitionToScene(new DeckEditorScene());
+            // Surely this never takes more than like a second right. No need to maybe stop if
+            // the server shits the bed because we believe in trust.
+            var collection = CardKartClient.Server.GetCollection();
+
+            CardKartClient.GUI.TransitionToScene(new DeckEditorScene(collection.OwnedCards));
+        }
+        public void ToRipPacks()
+        {
+            CardKartClient.GUI.TransitionToScene(new RipPacksScene());
         }
 
-        public string Login(string username, string password)
+        public void ToAuctionHouse()
         {
-            var response = CardKartClient.Server.LogIn(username, password);
-            if (response.Code == GenericResponseMessage.Codes.OK)
-            {
-                User.Username = username;
-                ToMainMenu();
-            }
-
-            return response.Info;
+            CardKartClient.GUI.TransitionToScene(new AuctionHouseScene());
         }
     }
 }

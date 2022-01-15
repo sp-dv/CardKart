@@ -8,6 +8,8 @@ namespace SGL
     {
         public List<GuiComponent> Components { get; } = new List<GuiComponent>();
 
+        private GuiComponent Focused { get; set; }
+
         public void Draw(DrawAdapter drawAdapter)
         {
             lock (Components)
@@ -33,6 +35,10 @@ namespace SGL
 
         public virtual void HandleKeyDown(KeyboardKeyEventArgs e)
         {
+            if (Focused != null)
+            {
+                Focused.HandleKeyboardEvent(e);
+            }    
         }
 
         public virtual void HandleKeyUp(KeyboardKeyEventArgs e)
@@ -41,6 +47,9 @@ namespace SGL
 
         public void HandleMouseButtonDown(MouseButton button, GLCoordinate location)
         {
+            if (Focused != null) { Focused.IsFocused = false; }
+            Focused = null;
+
             for (int i = Components.Count - 1; i >= 0; i--)
             {
                 GuiComponent component = Components[i];
@@ -59,6 +68,14 @@ namespace SGL
             {
                 Components[i].HandleMouseMove(location, true);
             }
+        }
+
+        public void RequestFocus(GuiComponent focusMe)
+        {
+            if (focusMe == null) { return; }
+            
+            Focused = focusMe;
+            Focused.IsFocused = true;
         }
     }
 }

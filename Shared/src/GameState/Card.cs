@@ -8,6 +8,12 @@ namespace CardKartShared.GameState
 {
     public class Card : GameObject
     {
+        public static IEnumerable<Card> AllRealCards = 
+            Enum.GetValues(typeof(CardTemplates))
+            .Cast<CardTemplates>()
+            .Where(template => template != CardTemplates.None)
+            .Select(template => new Card(template));
+
         public string Name;
 
         public bool IsHero => Type == CardTypes.Hero;
@@ -41,6 +47,11 @@ namespace CardKartShared.GameState
 
         public string BreadText { get; }
         public string BreadTextLong { get; }
+
+        public CardSets CardSet;
+
+        private bool IsUncollectible;
+        public bool IsInPacks => !IsUncollectible && Rarity != CardRarities.Token;
 
         public Card(CardTemplates template)
         {
@@ -2836,8 +2847,9 @@ namespace CardKartShared.GameState
                         Health = 1;
                     } break;
 
-                case CardTemplates.RedHero:
+                case CardTemplates.Nalthax:
                     {
+                        IsUncollectible = true;
                         Name = "Fleshrender Nalthax";
                         Type = CardTypes.Hero;
                         Colour = ManaColour.Red;
@@ -2876,8 +2888,9 @@ namespace CardKartShared.GameState
                         };
                     } break;
 
-                case CardTemplates.WhiteHero:
+                case CardTemplates.Taldiel:
                     {
+                        IsUncollectible = true;
                         Name = "Taldiel, Hand of Light";
                         Type = CardTypes.Hero;
                         Colour = ManaColour.White;
@@ -2923,8 +2936,9 @@ namespace CardKartShared.GameState
                     }
                     break;
 
-                case CardTemplates.PurpleHero:
+                case CardTemplates.Kelbans:
                     {
+                        IsUncollectible = true;
                         Name = "Dr Kelbans";
                         Type = CardTypes.Hero;
                         Colour = ManaColour.Purple;
@@ -2953,8 +2967,9 @@ namespace CardKartShared.GameState
                     }
                     break;
 
-                case CardTemplates.GreenHero:
+                case CardTemplates.Aelthys:
                     {
+                        IsUncollectible = true;
                         Name = "Aelthys Tal'Aal";
                         Type = CardTypes.Hero;
                         Colour = ManaColour.Green;
@@ -2994,8 +3009,9 @@ namespace CardKartShared.GameState
                     }
                     break;
 
-                case CardTemplates.BlackHero:
+                case CardTemplates.Eris:
                     {
+                        IsUncollectible = true;
                         Name = "Arch Lich Eris";
                         Type = CardTypes.Hero;
                         Colour = ManaColour.Black;
@@ -3040,8 +3056,9 @@ namespace CardKartShared.GameState
                     }
                     break;
 
-                case CardTemplates.BlueHero:
+                case CardTemplates.Haltram:
                     {
+                        IsUncollectible = true;
                         Name = "Master Mage Haltram";
                         Type = CardTypes.Hero;
                         Colour = ManaColour.Blue;
@@ -3079,9 +3096,31 @@ namespace CardKartShared.GameState
                                 }
                             }
                         };
-                    }
-                    break;
+                    } break;
 
+                case CardTemplates.Overgrowth:
+                    {
+                        Name = "Overgrowth";
+                        Type = CardTypes.Channel;
+                        Rarity = CardRarities.Common;
+                        Colour = ManaColour.Green;
+                        CastingCost = new ManaSet(ManaColour.Green);
+
+                        Abilities = new Ability[] {
+                            new Ability {
+                                MoveToStackOnCast = true,
+                                BreadText = "Permanently gain 1 Green Mana",
+                                IsCastable = context => InHandAndOwned(context) && ChannelsAreCastable(context) && ManaCostIsPayable(CastingCost),
+                                MakeCastChoices = context => GenericPayManaChoice(CastingCost, context),
+                                EnactCastChoices = GenericPayManaEnact,
+                                Resolve = context => {
+                                    context.GameState.GainPermanentMana(context.CastingPlayer, ManaColour.Green);
+                                }
+                            }
+                        };
+                    } break;
+
+                case CardTemplates.None: { return; }
 
                 default:
                     {
@@ -3146,6 +3185,10 @@ namespace CardKartShared.GameState
 
             BreadText = breadTextBuilderShort.ToString();
             BreadTextLong = breadTextBuilderLong.ToString();
+
+            if (Template >= CardTemplates.AngryGoblin && Template <= CardTemplates.Overgrowth) { CardSet = CardSets.FirstEdition; }
+            // else if (Template >= CardTemplates. && Template <= CardTemplates.) { CardSet = CardSets.; }
+            else { throw new Exception(); }
         }
 
         public Ability[] GetUsableAbilities(AbilityCastingContext context)
@@ -3530,12 +3573,20 @@ namespace CardKartShared.GameState
         FireAnt,
         AntToken1,
         SoldierAnt,
-        WhiteHero,
-        RedHero,
-        BlueHero,
-        BlackHero,
-        GreenHero,
-        PurpleHero,
+        Taldiel,
+        Nalthax,
+        Haltram,
+        Eris,
+        Aelthys,
+        Kelbans,
+        Overgrowth,
+    }
+
+    public enum CardSets
+    {
+        None, 
+
+        FirstEdition,
     }
 
     public enum CardRarities

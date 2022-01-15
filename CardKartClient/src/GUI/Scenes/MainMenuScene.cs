@@ -10,6 +10,8 @@ namespace CardKartClient.GUI.Scenes
         SmartTextPanel StartGameButton;
         SmartTextPanel JoinQueueButton;
         SmartTextPanel ToDeckEditorButton;
+        SmartTextPanel ToRipPacksButton;
+        SmartTextPanel ToAuctionHouseButton;
 
 
         public MainMenuScene()
@@ -67,6 +69,36 @@ namespace CardKartClient.GUI.Scenes
                 CardKartClient.Controller.ToDeckEditor();
             };
             Components.Add(ToDeckEditorButton);
+
+            ToRipPacksButton = new SmartTextPanel();
+            ToRipPacksButton.X = 0.1f;
+            ToRipPacksButton.Y = -0.5f;
+            ToRipPacksButton.Width = 0.15f;
+            ToRipPacksButton.Height = 0.1f;
+            ToRipPacksButton.Text = "Rip Packs";
+            ToRipPacksButton.Layout();
+            ToRipPacksButton.BackgroundColor = Color.DarkOrange;
+            ToRipPacksButton.Clicked += () =>
+            {
+                CardKartClient.Controller.ToRipPacks();
+            };
+            Components.Add(ToRipPacksButton);
+
+
+            ToAuctionHouseButton = new SmartTextPanel();
+            ToAuctionHouseButton.X = 0.1f;
+            ToAuctionHouseButton.Y = -0.8f;
+            ToAuctionHouseButton.Width = 0.15f;
+            ToAuctionHouseButton.Height = 0.1f;
+            ToAuctionHouseButton.Text = "Speculate";
+            ToAuctionHouseButton.Layout();
+            ToAuctionHouseButton.BackgroundColor = Color.DarkOrange;
+            ToAuctionHouseButton.Clicked += () =>
+            {
+                CardKartClient.Controller.ToAuctionHouse();
+            };
+            Components.Add(ToAuctionHouseButton);
+
         }
     }
 }

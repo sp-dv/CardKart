@@ -21,18 +21,33 @@ namespace CardKartClient.GUI.Components
         private IEnumerable<DeckSubComponent> SubComponents => 
             Components.Where(component => component is DeckSubComponent).Cast<DeckSubComponent>();
 
-        public DeckPanel()
+        private Dictionary<CardTemplates, int> OwnedCards;
+
+        private Func<CardTemplates, int> OwnedLookup { get; }
+
+        public DeckPanel(Dictionary<CardTemplates, int> ownedCards)
         {
+            OwnedLookup = template => { 
+                if (!ownedCards.ContainsKey(template)) { return 0; }
+                return ownedCards[template];
+            };
+
             Width = Constants.GUI.DeckPanelWidth;
             Height = Constants.GUI.DeckPanelHeight;
 
             CardCountPanel = new SmartTextPanel();
             CardCountPanel.Font = Fonts.MainFont14;
+            CardCountPanel.Width = 0.09f;
+            CardCountPanel.Height = 0.06f;
             Components.Add(CardCountPanel);
 
             HeroNamePanel = new SmartTextPanel();
             HeroNamePanel.MouseEnteredEvent += () => RequestInfoDisplay?.Invoke(HeroCard);
             HeroNamePanel.MouseExitedEvent += () => RequestInfoDisplay?.Invoke(null);
+            HeroNamePanel.Font = Fonts.MainFont8;
+            HeroNamePanel.Width = 0.25f;
+            HeroNamePanel.Height = 0.06f;
+            HeroNamePanel.Alignment = QuickFont.QFontAlignment.Centre;
             Components.Add(HeroNamePanel);
         }
 
@@ -95,6 +110,9 @@ namespace CardKartClient.GUI.Components
 
         public Deck GetDeck()
         {
+            // todo: Inform user of this failure.
+            if (HeroCard == null) { return null; }
+
             var templates = new List<CardTemplates>();
             lock (Components) 
             { 
@@ -164,26 +182,21 @@ namespace CardKartClient.GUI.Components
                     sc.X = X0;
                     sc.Y = Y0 - i * Constants.GUI.DeckPanelSubcomponentYOffset;
                     deckSize += sc.Count;
+
+                    sc.MoreThanOwned = sc.Count > OwnedLookup(sc.Card.Template);
                 }
             }
 
-            CardCountPanel.Text = $"{deckSize}/30";
+
             CardCountPanel.X = X + 0.02f;
             CardCountPanel.Y = Y + 1.46f;
-            CardCountPanel.Width = 0.07f;
-            CardCountPanel.Height = 0.06f;
-            CardCountPanel.BackgroundColor = null;
+            CardCountPanel.Text = $"{deckSize}/30";
             CardCountPanel.RenderOptions = deckSize == 30 ? Fonts.MainRenderOptions : Fonts.RedRenderOptions;
             CardCountPanel.Layout();
 
             if (HeroCard != null) { HeroNamePanel.Text = $"Hero: {HeroCard.Name}"; }
             HeroNamePanel.X = X + 0.09f;
             HeroNamePanel.Y = Y + 1.44f;
-            HeroNamePanel.Font = Fonts.MainFont10;
-            HeroNamePanel.Width = 0.25f;
-            HeroNamePanel.Height = 0.06f;
-            HeroNamePanel.BackgroundColor = null;
-            HeroNamePanel.Alignment = QuickFont.QFontAlignment.Centre;
             HeroNamePanel.Layout();
         }
 
@@ -200,6 +213,8 @@ namespace CardKartClient.GUI.Components
         private int MaxCount { get; }
 
         public Card Card { get; }
+
+        public bool MoreThanOwned { get; set; }
 
         public DeckSubComponent(CardTemplates template, int initialCount)
         {
@@ -229,7 +244,7 @@ namespace CardKartClient.GUI.Components
                 X + Constants.GUI.DeckPanelCountOffsetX, 
                 Y + Constants.GUI.DeckPanelCountOffsetY,
                 Fonts.MainFont14,
-                Fonts.BigRenderOptions,
+                MoreThanOwned ? Fonts.RedRenderOptions : Fonts.BigRenderOptions,
                 QuickFont.QFontAlignment.Left);
 
             drawAdapter.DrawText(

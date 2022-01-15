@@ -21,7 +21,6 @@ namespace CardKartShared.Network
 
         public EncryptionSuite EncryptionSuite { get; set; }
 
-
         public Connection(NetworkStream stream)
         {
             Stream = stream;
@@ -35,30 +34,44 @@ namespace CardKartShared.Network
                 {
                     var bodyLengthBuffer = new byte[sizeof(int)];
                     var bodyLengthReadCount = Stream.Read(bodyLengthBuffer, 0, bodyLengthBuffer.Length);
-                    if (bodyLengthReadCount != bodyLengthBuffer.Length) { throw new Exception(); }
+                    if (bodyLengthReadCount != bodyLengthBuffer.Length) { throw new Exception("Incorrect bodyLengthBuffer size."); }
                     var bodyLength = BitConverter.ToInt32(bodyLengthBuffer);
+                    if (LogMessages) { Logging.Log(LogLevel.Debug, $"bodyLengthBuffer: {atos(bodyLengthBuffer)}."); }
+
 
                     var messageTypeBuffer = new byte[sizeof(int)];
                     var messageTypeReadCount = Stream.Read(messageTypeBuffer, 0, messageTypeBuffer.Length);
-                    if (bodyLengthReadCount != messageTypeBuffer.Length) { throw new Exception(); }
+                    if (bodyLengthReadCount != messageTypeBuffer.Length) { throw new Exception("Incorrect messageTypeBuffer size."); }
                     var messageType = BitConverter.ToInt32(messageTypeBuffer);
+                    if (LogMessages) { Logging.Log(LogLevel.Debug, $"messageTypeBuffer: {atos(messageTypeBuffer)}."); }
+
 
                     var bodyBuffer = new byte[bodyLength];
                     var bodyReadCount = Stream.Read(bodyBuffer, 0, bodyBuffer.Length);
-                    if (bodyReadCount != bodyBuffer.Length) { throw new Exception(); }
-                    if (EncryptionSuite != null) { bodyBuffer = EncryptionSuite.Decrypt(bodyBuffer);}
+                    if (bodyReadCount != bodyBuffer.Length) { throw new Exception("Incorrect bodyBuffer size."); }
+                    if (EncryptionSuite != null) { bodyBuffer = EncryptionSuite.Decrypt(bodyBuffer); }
                     var bodyString = RawEncoding.GetString(bodyBuffer);
+                    if (LogMessages) { Logging.Log(LogLevel.Debug, $"bodyBuffer: {atos(bodyBuffer)}."); }
 
-                    if (LogMessages) { Logging.Log(LogLevel.Debug, $"Received message of type <{(MessageTypes)messageType}>."); }
+                    if (LogMessages)
+                    {
+                        Logging.Log(LogLevel.Debug, $"Received message of type <{(MessageTypes)messageType}>.");
+                    }
 
                     return new RawMessage((MessageTypes)messageType, bodyBuffer);
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
+                    //Logging.Log(LogLevel.Error, $"{e}");
                     IsClosed = true;
                     Closed?.Invoke();
                 }
             }
+            else
+            {
+                Logging.Log(LogLevel.Warning, "Trying to receive message from closed connection.");
+            }
+            
             return new RawMessage(MessageTypes.None, null);
         }
 
@@ -88,7 +101,13 @@ namespace CardKartShared.Network
                     Stream.Write(messageTypeBytes, 0, messageTypeBytes.Length);
                     Stream.Write(messageBodyBytes, 0, messageBodyBytes.Length);
 
-                    if (LogMessages) { Logging.Log(LogLevel.Debug, $"Sent message of type <{message.MessageType}>."); }
+                    if (LogMessages)
+                    { 
+                        Logging.Log(LogLevel.Debug, $"Sent message of type <{message.MessageType}>.");
+                        Logging.Log(LogLevel.Debug, $"bodyLengthBytes: {atos(bodyLengthBytes)}.");
+                        Logging.Log(LogLevel.Debug, $"messageTypeBytes: {atos(messageTypeBytes)}.");
+                        Logging.Log(LogLevel.Debug, $"messageBodyBytes: {atos(messageBodyBytes)}.");
+                    }
                 }
                 catch (Exception)
                 {
@@ -102,6 +121,22 @@ namespace CardKartShared.Network
         {
             SendMessage(message.Encode());
         }
+
+        #region don't look pls
+
+        private string atos(byte[] bs) 
+        {
+            var sb = new StringBuilder();
+            sb.Append("[");
+            foreach (var b in bs)
+            {
+                sb.Append(b);
+                sb.Append(", ");
+            }
+            return sb.ToString();
+        }
+
+        #endregion
     }
 
 
