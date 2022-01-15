@@ -33,7 +33,8 @@ namespace CardKartServer.Schemas
 
         public static double? FillSell(double ask)
         {
-
+            //lock (DealInProgress())
+            throw new NotImplementedException();
         }
 
         public static void Load(ILiteCollection<BidEntry> sellOrders, ILiteCollection<BidEntry> buyOrders)

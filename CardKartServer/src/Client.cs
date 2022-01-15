@@ -185,8 +185,10 @@ namespace CardKartServer
 
                         var response = new SellCardResponse
                         {
-                            Quote = CardKartServer.AuctionHouse.GetQuote(request.Template)
+                            
+                            //Quote = CardKartServer.AuctionHouse.GetQuote(request.Template)
                         };
+                        throw new NotImplementedException();
                         client.Connection.SendMessage(response);
                     } break;
             }
