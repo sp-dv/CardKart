@@ -13,7 +13,7 @@ namespace CardKartServer.Vitaliks
         public static void XD()
         {
             var hl = new HttpListener();
-            hl.Prefixes.Add("http://localhost:8081/");
+            hl.Prefixes.Add("http://localhost:6666/");
             if (!HttpListener.IsSupported) { Logging.Log(LogLevel.Error, "HttpListener is not supported."); }
             hl.Start();
 
@@ -30,7 +30,7 @@ namespace CardKartServer.Vitaliks
                 var rpbuf = new byte[1024];
                 var read = s.Read(rpbuf, 0, rpbuf.Length);
                 var str = Encoding.UTF8.GetString(rpbuf.Take(read).ToArray());
-                var rcon = new TcpClient("localhost", 8081);
+                var rcon = new TcpClient("localhost", 6666);
                 var rcons = rcon.GetStream();
                 var rbuf = Encoding.UTF8.GetBytes(str);
                 rcons.Write(rbuf, 0, rbuf.Length);
