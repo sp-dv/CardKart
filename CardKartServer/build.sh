@@ -5,7 +5,7 @@ rm -rf rls
 dotnet restore
 dotnet msbuild
 
-cp -r bin/Debug/netcoreapp3.1 rls
+cp -r bin/Debug/net5.0 rls
 
 rm -rf bin
 rm -rf obj
