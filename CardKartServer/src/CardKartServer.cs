@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using CardKartServer.Vitaliks;
 
 namespace CardKartServer
 {
@@ -23,6 +24,8 @@ namespace CardKartServer
         {
             Logging.AddConsoleLogger();
             Logging.Log(LogLevel.Info, $"Running CardKart server version {Constants.Version}");
+
+            TokenMetadataEndpoint.XD();
 
             Config = ServerConfiguration.Load();
 
