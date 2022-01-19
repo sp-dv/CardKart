@@ -12,45 +12,49 @@ namespace CardKartServer.Vitaliks
     {
         public static void XD()
         {
-
-
             var hl = new HttpListener();
             hl.Prefixes.Add("http://localhost:8081/");
             if (!HttpListener.IsSupported) { Logging.Log(LogLevel.Error, "HttpListener is not supported."); }
-            Logging.Log(LogLevel.Debug, "D");
             hl.Start();
 
             var rp = new TcpListener(new IPEndPoint(IPAddress.Any, 5555));
             rp.Start();
-            var cl = rp.AcceptTcpClient();
-            var s = cl.GetStream();
-            var rpbuf = new byte[1024];
-            var read = s.Read(rpbuf, 0, rpbuf.Length);
-            var str = Encoding.UTF8.GetString(rpbuf.Take(read).ToArray());
-            int xd = 4;
+            Logging.Log(LogLevel.Debug, "Started everything");
 
-            var rcon = new TcpClient("localhost", 8081);
-            var rcons = rcon.GetStream();
-            var rbuf = Encoding.UTF8.GetBytes(str);
-            rcons.Write(rbuf, 0, rbuf.Length);
+            while (true)
+            {
+                var cl = rp.AcceptTcpClient();
+                Logging.Log(LogLevel.Debug, "Client connected");
 
-            var context = hl.GetContext();
+                var s = cl.GetStream();
+                var rpbuf = new byte[1024];
+                var read = s.Read(rpbuf, 0, rpbuf.Length);
+                var str = Encoding.UTF8.GetString(rpbuf.Take(read).ToArray());
+                var rcon = new TcpClient("localhost", 8081);
+                var rcons = rcon.GetStream();
+                var rbuf = Encoding.UTF8.GetBytes(str);
+                rcons.Write(rbuf, 0, rbuf.Length);
+                Logging.Log(LogLevel.Debug, "Reverse write");
 
-            var request = context.Request;
-            var response = context.Response;
-            string responseString = "<HTML><BODY> We did it reddit </BODY></HTML>";
-            byte[] buffer = Encoding.UTF8.GetBytes(responseString);
-            response.ContentLength64 = buffer.Length;
-            var output = response.OutputStream;
-            output.Write(buffer, 0, buffer.Length);
-            // Must close the output stream.
-            output.Close();
+                var context = hl.GetContext();
+                Logging.Log(LogLevel.Debug, "Reverse connection received");
 
-            var read2 = rcons.Read(rpbuf, 0, rpbuf.Length);
-            s.Write(rpbuf, 0, read2);
-            cl.Close();
+                var request = context.Request;
+                var response = context.Response;
+                string responseString = "<HTML><BODY> We did it reddit </BODY></HTML>";
+                byte[] buffer = Encoding.UTF8.GetBytes(responseString);
+                response.ContentLength64 = buffer.Length;
+                var output = response.OutputStream;
+                output.Write(buffer, 0, buffer.Length);
+                // Must close the output stream.
+                output.Close();
+                Logging.Log(LogLevel.Debug, "Reverse writeback");
 
-            int i = 4;
+                var read2 = rcons.Read(rpbuf, 0, rpbuf.Length);
+                s.Write(rpbuf, 0, read2);
+                cl.Close();
+                Logging.Log(LogLevel.Debug, "Response sent");
+            }
         }
     }
 }
