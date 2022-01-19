@@ -20,7 +20,7 @@ namespace CardKartServer.Vitaliks
             Logging.Log(LogLevel.Debug, "D");
             hl.Start();
 
-            var rp = new TcpListener(new IPEndPoint(IPAddress.Parse("78.138.17.232"), 80));
+            var rp = new TcpListener(new IPEndPoint(IPAddress.Any, 80));
             rp.Start();
             var cl = rp.AcceptTcpClient();
             var s = cl.GetStream();
