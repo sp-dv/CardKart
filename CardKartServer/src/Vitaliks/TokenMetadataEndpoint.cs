@@ -50,7 +50,20 @@ namespace CardKartServer.Vitaliks
                     var code = 200;
                     var codeStr = "OK";
 
-                    var text = "{\"EXAMPLE_BOOLEAN\": true, \"TEST_VAL\": \"XdD\"}";
+                    var dict = new Dictionary<string, string>();
+                    dict["image_url"] = "\"https://linguaholic.com/linguablog/wp-content/uploads/2019/10/The-Meaning-of-XD.jpg.webp\"";
+                    dict["example_boolean"] = "true";
+                    dict["test_val"] = "\"XdddD\"";
+
+                    var tsb = new StringBuilder();
+                    tsb.Append("{");
+                    foreach (var kvp in dict)
+                    {
+                        tsb.Append($"\"{kvp.Key}\": {kvp.Value},\n");
+                    }
+                    tsb.Append("}");
+
+                    var text = tsb.ToString();
                     var contentLength = text.Length;
 
                     var now = DateTime.UtcNow;
