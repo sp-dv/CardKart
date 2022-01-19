@@ -12,48 +12,111 @@ namespace CardKartServer.Vitaliks
     {
         public static void XD()
         {
-            var hl = new HttpListener();
-            hl.Prefixes.Add("http://localhost:6666/");
-            if (!HttpListener.IsSupported) { Logging.Log(LogLevel.Error, "HttpListener is not supported."); }
-            hl.Start();
-
-            var rp = new TcpListener(new IPEndPoint(IPAddress.Any, 5555));
-            rp.Start();
-            Logging.Log(LogLevel.Debug, "Started everything");
-
-            while (true)
+            if (true)
             {
-                var cl = rp.AcceptTcpClient();
-                Logging.Log(LogLevel.Debug, "Client connected");
+                var rp = new TcpListener(new IPEndPoint(IPAddress.Any, 80));
+                rp.Start();
 
-                var s = cl.GetStream();
-                var rpbuf = new byte[1024];
-                var read = s.Read(rpbuf, 0, rpbuf.Length);
-                var str = Encoding.UTF8.GetString(rpbuf.Take(read).ToArray());
-                var rcon = new TcpClient("localhost", 6666);
-                var rcons = rcon.GetStream();
-                var rbuf = Encoding.UTF8.GetBytes(str);
-                rcons.Write(rbuf, 0, rbuf.Length);
-                Logging.Log(LogLevel.Debug, "Reverse write");
+                while (true)
+                {
+                    var cl = rp.AcceptTcpClient();
 
-                var context = hl.GetContext();
-                Logging.Log(LogLevel.Debug, "Reverse connection received");
+                    var s = cl.GetStream();
+                    var rpbuf = new byte[1024];
+                    var read = s.Read(rpbuf, 0, rpbuf.Length);
+                    var str1 = Encoding.UTF8.GetString(rpbuf.Take(read).ToArray());
 
-                var request = context.Request;
-                var response = context.Response;
-                string responseString = "<HTML><BODY> We did it reddit </BODY></HTML>";
-                byte[] buffer = Encoding.UTF8.GetBytes(responseString);
-                response.ContentLength64 = buffer.Length;
-                var output = response.OutputStream;
-                output.Write(buffer, 0, buffer.Length);
-                // Must close the output stream.
-                output.Close();
-                Logging.Log(LogLevel.Debug, "Reverse writeback");
+                    var ss = str1.Split('\n').Select(sx => sx.Trim()).ToArray();
 
-                var read2 = rcons.Read(rpbuf, 0, rpbuf.Length);
-                s.Write(rpbuf, 0, read2);
-                cl.Close();
-                Logging.Log(LogLevel.Debug, "Response sent");
+                    var s1 = ss[0];
+                    var s1split = s1.Split(' ');
+                    if (s1split.Length != 3) { throw new NotImplementedException(); }
+
+                    var method = s1split[0];
+                    var page = s1split[1];
+                    var httpVersion = s1split[2];
+
+                    var args = new Dictionary<string, string>();
+
+                    foreach (var sx in ss.Skip(1))
+                    {
+                        var split = sx.Split(':');
+                        if (split.Length == 2)
+                        {
+                            args[split[0]] = split[1];
+                        }
+                    }
+
+                    var code = 200;
+                    var codeStr = "OK";
+
+                    var text = "{\"EXAMPLE_BOOLEAN\": true, \"TEST_VAL\": \"XdD\"}";
+                    var contentLength = text.Length;
+
+                    var now = DateTime.UtcNow;
+                    var dateString = $"{now.ToLongDateString()} {now.ToShortTimeString()} GMT";
+
+                    var sb = new StringBuilder();
+                    sb.Append($"{httpVersion} {code} {codeStr}\r\n");
+                    sb.Append($"Content-Length: {contentLength}\r\n");
+                    sb.Append($"Server: yerdad\r\n");
+                    sb.Append($"Date: {dateString}\r\n");
+                    sb.Append("\r\n");
+                    sb.Append(text);
+
+                    var rsx = sb.ToString();
+                    rpbuf = Encoding.UTF8.GetBytes(rsx);
+
+                    s.Write(rpbuf, 0, rpbuf.Length);
+                    var str2 = Encoding.UTF8.GetString(rpbuf.Take(read).ToArray());
+                    cl.Close();
+
+                }
+            }
+            else
+            {
+                var hl = new HttpListener();
+                hl.Prefixes.Add("http://localhost:8081/");
+                if (!HttpListener.IsSupported) { Logging.Log(LogLevel.Error, "HttpListener is not supported."); }
+                hl.Start();
+
+                var rp = new TcpListener(new IPEndPoint(IPAddress.Any, 80));
+                rp.Start();
+
+                while (true)
+                {
+                    var cl = rp.AcceptTcpClient();
+
+                    var s = cl.GetStream();
+                    var rpbuf = new byte[1024];
+                    var read = s.Read(rpbuf, 0, rpbuf.Length);
+                    var str1 = Encoding.UTF8.GetString(rpbuf.Take(read).ToArray());
+                    var rcon = new TcpClient("localhost", 8081);
+                    var rcons = rcon.GetStream();
+                    var rbuf = Encoding.UTF8.GetBytes(str1);
+                    rcons.Write(rbuf, 0, rbuf.Length);
+
+                    var context = hl.GetContext();
+
+                    var request = context.Request;
+                    var response = context.Response;
+                    string responseString = "<HTML><BODY> We did it reddit </BODY></HTML>";
+                    byte[] buffer = Encoding.UTF8.GetBytes(responseString);
+                    response.ContentLength64 = buffer.Length;
+                    var output = response.OutputStream;
+                    output.Write(buffer, 0, buffer.Length);
+                    output.Close();
+
+                    read = rcons.Read(rpbuf, 0, rpbuf.Length);
+                    s.Write(rpbuf, 0, read);
+                    var str2 = Encoding.UTF8.GetString(rpbuf.Take(read).ToArray());
+                    cl.Close();
+
+
+                    
+                    Logging.Log(LogLevel.Debug, str1);
+                    Logging.Log(LogLevel.Debug, str2);
+                }
             }
         }
     }
