@@ -40,11 +40,13 @@ namespace CardKartServer.Vitaliks
                 .AddRoute("/timeofday", new TimeOfDayHandler())
                 .AddRoute(new FileHandler("."));
 
-            //config.SSLCertificate = new X509Certificate("./asd.pfx", "sebapw");
-            config.SSLCertificate = new X509Certificate("../../../../etc/ssl/certs/https.pem");
-
+            var certPem = File.ReadAllText("/etc/letsencrypt/live/78-138-17-232.cloud-xip.io/cert.pem");
+            var eccPem = File.ReadAllText("/etc/letsencrypt/live/78-138-17-232.cloud-xip.io/privkey.pem");
+            var cert = X509Certificate2.CreateFromPem(certPem, eccPem);
+            config.SSLCertificate = cert;
+            
             var task = HttpServer.ListenAsync(
-                new IPEndPoint(IPAddress.Any, 8080),
+                new IPEndPoint(IPAddress.Any, 443),
                 true,
                 config,
                 tcs.Token
