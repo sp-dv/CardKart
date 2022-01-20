@@ -34,13 +34,6 @@ namespace CardKartServer.Vitaliks
     {
         public static void XD()
         {
-            var files = Directory.EnumerateFiles("../../../../etc/ssl/certs/");
-            foreach (var f in files)
-            {
-                var cert = new X509Certificate(f);
-                Logging.Log(CardKartShared.Util.LogLevel.Debug, $"Issuer: '{cert.Issuer}', Subject: '{cert.Subject}'");
-            }
-
             Environment.Exit(0);
             return;
 
@@ -50,11 +43,11 @@ namespace CardKartServer.Vitaliks
                 .AddRoute("/timeofday", new TimeOfDayHandler())
                 .AddRoute(new FileHandler("."));
 
-            config.SSLCertificate = new X509Certificate("../../../../etc/ssl/certs/ca-certificates.crt");
+            //config.SSLCertificate = new X509Certificate("../../../../etc/ssl/certs/ca-certificates.crt");
 
             var task = HttpServer.ListenAsync(
                 new IPEndPoint(IPAddress.Any, 8080),
-                true,
+                false,
                 config,
                 tcs.Token
             );
