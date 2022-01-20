@@ -40,11 +40,11 @@ namespace CardKartServer.Vitaliks
                 .AddRoute("/timeofday", new TimeOfDayHandler())
                 .AddRoute(new FileHandler("."));
 
-            //config.SSLCertificate = new X509Certificate("../../../../etc/ssl/certs/ca-certificates.crt");
+            config.SSLCertificate = new X509Certificate("./cert.pem", "sebapw");
 
             var task = HttpServer.ListenAsync(
                 new IPEndPoint(IPAddress.Any, 8080),
-                false,
+                true,
                 config,
                 tcs.Token
             );
