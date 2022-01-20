@@ -34,9 +34,6 @@ namespace CardKartServer.Vitaliks
     {
         public static void XD()
         {
-            Environment.Exit(0);
-            return;
-
             var tcs = new CancellationTokenSource();
             var config = new ServerConfig()
                 .AddLogger(new CLFStdOut())
