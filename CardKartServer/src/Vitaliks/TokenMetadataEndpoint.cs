@@ -40,7 +40,8 @@ namespace CardKartServer.Vitaliks
                 .AddRoute("/timeofday", new TimeOfDayHandler())
                 .AddRoute(new FileHandler("."));
 
-            config.SSLCertificate = new X509Certificate("./asd.pfx", "sebapw");
+            //config.SSLCertificate = new X509Certificate("./asd.pfx", "sebapw");
+            config.SSLCertificate = new X509Certificate("../../../../etc/ssl/certs/https.pem");
 
             var task = HttpServer.ListenAsync(
                 new IPEndPoint(IPAddress.Any, 8080),
