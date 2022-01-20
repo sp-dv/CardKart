@@ -6,6 +6,7 @@ using Ceen.Httpd.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -33,6 +34,16 @@ namespace CardKartServer.Vitaliks
     {
         public static void XD()
         {
+            var files = Directory.EnumerateFiles("../../../../etc/ssl/certs/");
+            foreach (var f in files)
+            {
+                var cert = new X509Certificate(f);
+                Logging.Log(CardKartShared.Util.LogLevel.Debug, $"Issuer: '{cert.Issuer}', Subject: '{cert.Subject}'");
+            }
+
+            Environment.Exit(0);
+            return;
+
             var tcs = new CancellationTokenSource();
             var config = new ServerConfig()
                 .AddLogger(new CLFStdOut())
