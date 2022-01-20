@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -38,9 +39,11 @@ namespace CardKartServer.Vitaliks
                 .AddRoute("/timeofday", new TimeOfDayHandler())
                 .AddRoute(new FileHandler("."));
 
+            config.SSLCertificate = new X509Certificate("../../../../etc/ssl/certs/ca-certificates.crt");
+
             var task = HttpServer.ListenAsync(
                 new IPEndPoint(IPAddress.Any, 8080),
-                false,
+                true,
                 config,
                 tcs.Token
             );
