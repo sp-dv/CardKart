@@ -26,30 +26,29 @@ namespace CardKartServer.Vitaliks
             var request = context.Request;
             var response = context.Response;
 
+            var ss = request.Path.Split("/");
+            if (ss.Length < 3)
+            {
+                response.StatusCode = Ceen.HttpStatusCode.BadRequest;
+                response.StatusMessage = "1";
+                return false;
+            }
+
+            int index;
+            if (!Int32.TryParse(ss[2], out index))
+            {
+                response.StatusCode = Ceen.HttpStatusCode.BadRequest;
+                response.StatusMessage = "2";
+                return false;
+            }
+
             response.SetNonCacheable();
-            await response.WriteAllJsonAsync(JsonConvert.SerializeObject(new { time = DateTime.Now.TimeOfDay }));
+            await response.WriteAllJsonAsync(JsonConvert.SerializeObject(new { 
+                image_url = "https://linguaholic.com/linguablog/wp-content/uploads/2019/10/The-Meaning-of-XD.jpg",
+                EXAMPLE_BOOLEAN = true,
+                TEST_VAL = $"Token #{index}"
+            }));;
             return true;
-        }
-    }
-
-    [Name("api")]
-    public interface IAPI : IControllerPrefix { }
-
-    [Name("v1")]
-    public interface IApiV1 : IAPI { }
-
-    [Name("entry")]
-    public class ApiExampleController : Controller, IApiV1
-    {
-        [HttpGet]
-        public IResult Index(IHttpContext context)
-        {
-            return OK;
-        }
-
-        public IResult Index(int id)
-        {
-            return Json(new { name = "asdo", tokenID = id, image_url = "https://i.kym-cdn.com/photos/images/newsfeed/000/782/935/ce2.png"});
         }
     }
 
@@ -60,12 +59,7 @@ namespace CardKartServer.Vitaliks
             var tcs = new CancellationTokenSource();
             var config = new ServerConfig()
                 .AddLogger(new CLFStdOut())
-                .AddRoute(
-                    typeof(ApiExampleController)
-                    .Assembly
-                    .ToRoute(new ControllerRouterConfig(typeof(ApiExampleController))
-                )
-            );
+                .AddRoute("/tokendata/*", new TimeOfDayHandler());
 
             var certPem = File.ReadAllText("/etc/letsencrypt/live/78-138-17-232.cloud-xip.io/cert.pem");
             var eccPem = File.ReadAllText("/etc/letsencrypt/live/78-138-17-232.cloud-xip.io/privkey.pem");
